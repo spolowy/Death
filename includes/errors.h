@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/07 01:53:00 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/02/22 22:45:59 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/03/01 19:03:11 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,8 @@
 #  define _ERR_CLOSE_FAILED            PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','l','o','s','e',' ','f','a','i','l','e','d','\n','\033','[','0','m',0)
 #  define _ERR_METAMORPH_SELF          PD_ARRAY(char,_err_text,'\033','[','3','3','m','m','e','t','a','m','o','r','p','h','_','s','e','l','f','\n','\033','[','0','m',0)
 #  define _ERR_INSTRUCTION_LENGTH      PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','s','t','r','u','c','t','i','o','n',' ','l','e','n','g','t','h','\n','\033','[','0','m',0)
-#  define _ERR_PERMUTATE_REGISTERS     PD_ARRAY(char,_err_text,'\033','[','3','3','m','P','e','r','m','u','t','a','t','e',' ','r','e','g','i','s','t','e','r','s','\n','\033','[','0','m',0)
+#  define _ERR_PERMUTATE_REGISTERS     PD_ARRAY(char,_err_text,'\033','[','3','3','m','p','e','r','m','u','t','a','t','e','_','r','e','g','i','s','t','e','r','s','\n','\033','[','0','m',0)
+#  define _ERR_PERMUTATE_BLOCKS        PD_ARRAY(char,_err_text,'\033','[','3','3','m','p','e','r','m','u','t','a','t','e','_','b','l','o','c','k','s','\n','\033','[','0','m',0)
 #  define _ERR_FOREACH_SHDR            PD_ARRAY(char,_err_text,'\033','[','3','3','m','f','o','r','e','a','c','h','_','s','h','d','r','\n','\033','[','0','m',0)
 #  define _ERR_FOREACH_PHDR            PD_ARRAY(char,_err_text,'\033','[','3','3','m','f','o','r','e','a','c','h','_','p','h','d','r','\n','\033','[','0','m',0)
 #  define _ERR_NOT_A_FILE              PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o','t',' ','a',' ','f','i','l','e','\n','\033','[','0','m',0)

