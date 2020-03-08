@@ -63,10 +63,25 @@ struct operands
 };
 
 /*
+** structure of a disassembled control flow instruction
+*/
+struct control_flow
+{
+	void            *addr;        /* instruction address             */
+	size_t          length;       /* instruction length              */
+	void            *value_addr;  /* value address in instruction    */
+	int8_t          value_length; /* value size in byte              */
+	int32_t         value;        /* immediate value in instruction  */
+	void            *label_addr;  /* label address                   */
+};
+
+/*
 ** disassembly functions
 */
 size_t		disasm_length(const void *code, size_t codelen);
 size_t		disasm_operands(const void *code, size_t codelen,
 			struct operands *buf, size_t buflen);
+size_t		disasm_control_flow(struct control_flow *buf, size_t buflen,
+			const void *code, size_t codelen);
 
 #endif

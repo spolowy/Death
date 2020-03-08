@@ -32,6 +32,7 @@
 #  define _ERR_MMAP_FAILED             PD_ARRAY(char,_err_text,'\033','[','3','3','m','m','m','a','p',' ','f','a','i','l','e','d','\n','\033','[','0','m',0)
 #  define _ERR_CLOSE_FAILED            PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','l','o','s','e',' ','f','a','i','l','e','d','\n','\033','[','0','m',0)
 #  define _ERR_METAMORPH_SELF          PD_ARRAY(char,_err_text,'\033','[','3','3','m','m','e','t','a','m','o','r','p','h','_','s','e','l','f','\n','\033','[','0','m',0)
+#  define _ERR_DISASM_BLOCK            PD_ARRAY(char,_err_text,'\033','[','3','3','m','d','i','s','a','s','m','_','b','l','o','c','k','\n','\033','[','0','m',0)
 #  define _ERR_INSTRUCTION_LENGTH      PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','s','t','r','u','c','t','i','o','n',' ','l','e','n','g','t','h','\n','\033','[','0','m',0)
 #  define _ERR_PERMUTATE_REGISTERS     PD_ARRAY(char,_err_text,'\033','[','3','3','m','p','e','r','m','u','t','a','t','e','_','r','e','g','i','s','t','e','r','s','\n','\033','[','0','m',0)
 #  define _ERR_PERMUTATE_BLOCKS        PD_ARRAY(char,_err_text,'\033','[','3','3','m','p','e','r','m','u','t','a','t','e','_','b','l','o','c','k','s','\n','\033','[','0','m',0)

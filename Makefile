@@ -29,6 +29,7 @@ SRC =	loader.s                       \
 	virus/disasm_block.c           \
 	virus/disasm_length.c          \
 	virus/disasm_operands.c        \
+	virus/disasm_control_flow.c    \
 	virus/elf64_iterators.c        \
 	virus/file_iterator.c          \
 	virus/find_entry.c             \
