@@ -81,7 +81,7 @@ struct control_flow
 size_t		disasm_length(const void *code, size_t codelen);
 size_t		disasm_operands(const void *code, size_t codelen,
 			struct operands *buf, size_t buflen);
-size_t		disasm_control_flow(struct control_flow *buf, size_t buflen,
+size_t		disasm_jumps(struct control_flow *buf, size_t buflen,
 			const void *code, size_t codelen);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: ichkamo <ichkamo@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/01 18:31:15 by ichkamo           #+#    #+#             */
-/*   Updated: 2020/03/01 18:44:28 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/03/08 20:24:01 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,87 +17,89 @@
 #include "visual.h"
 #include "utils.h"
 
+/*
+** sort_by_label_addr
+** - sorts array inline
+** - orders sidecar like array as a side effect
+*/
+
+static void	sort_by_label_addr(struct jump *sidecar[MAX_JUMPS], \
+			struct control_flow array[MAX_JUMPS], size_t len)
+{
+	if (len < 2) return;
+
+	void	*pivot = array[len / 2].label_addr;
+	int	i, j;
+
+	for (i = 0, j = len - 1; ; i++, j--)
+	{
+		while (array[i].label_addr < pivot) i++;
+		while (array[j].label_addr > pivot) j--;
+
+		if (i >= j) break;
+
+		// swap array inline
+		struct control_flow	temp = array[i];
+		array[i] = array[j];
+		array[j] = temp;
+		// swap sidecar in the same manner
+		struct jump		*side_temp = sidecar[i];
+		sidecar[i] = sidecar[j];
+		sidecar[j] = side_temp;
+	}
+
+	sort_by_label_addr(sidecar, array, i);
+	sort_by_label_addr(sidecar + i, array + i, len - i);
+}
+
+static void	assign_labels(struct label labels[MAX_JUMPS],
+			struct jump *label_origins[MAX_JUMPS],
+			struct code_block *block,
+			struct control_flow jumps_info[MAX_JUMPS], size_t njumps)
+{
+	sort_by_label_addr(label_origins, jumps_info, njumps);
+	struct label	*current_label = labels;
+
+	label_origins[0]->location = jumps_info[0].addr;
+
+	current_label->location = jumps_info[0].label_addr;
+	current_label->jumps    = &label_origins[0];
+	current_label->njumps   = 1;
+
+	block->nlabels++;
+
+	for (size_t i = 0; i < njumps; i++)
+	{
+		label_origins[i]->location = jumps_info[i].addr;
+
+		if (jumps_info[i].label_addr != current_label->location)
+		{
+			current_label->njumps++;
+			continue;
+		}
+
+		current_label++;
+		block->nlabels++;
+
+		current_label->location   = jumps_info[i].label_addr;
+		current_label->jumps      = &label_origins[i];
+		current_label->njumps     = 1;
+	}
+}
+
 static void	assign_jumps(struct jump jumps[MAX_JUMPS], struct code_block *block,
 			const struct control_flow jumps_info[MAX_JUMPS], size_t njumps)
 {
 	for (size_t i = 0; i < njumps; i++)
 	{
-		jumps[i].location = jump_infos[i].addr;
+		jumps[i].location = jumps_info[i].addr;
 	}
 
 	block->jumps  = jumps;
 	block->njumps = njumps;
 }
 
-static bool	assign_labels(struct label labels[MAX_JUMPS],
-			struct jump *label_origins[MAX_JUMPS],
-			struct code_block *block,
-			const struct control_flow jumps_info[MAX_JUMPS], size_t njumps)
-{
-	size_t		off_label_origins = 0;
-
-	blocks->labels  = labels;
-	blocks->nlabels = 0;
-	for (size_t i = 0; i < MAX_JUMPS; i++)
-	{
-		void		*location = NULL;
-		size_t		njumps    = 0;
-
-		for (size_t j = 0; j < njumps; j++)
-		{
-			// get label to iterate on
-			if (control_flow[j].label_addr)
-			{
-				location = control_flow[j].label_addr;
-				break ;
-			}
-		}
-
-jump c
-jump b
-jump c
-jump a
-jump b
-
-
-a
-2b
-2c
-
-a:
-b:
-c:
-		if (location == NULL)
-		{
-			labels[i].location = NULL;
-			labels[i].jumps = NULL;
-			labels[i].njumps = 0;
-			break;
-		}
-
-		for (size_t j = 0; j < njumps; j++)
-		{
-			// match all jumps for same locations
-			if (control_flow[j].label_addr == location)
-			{
-				if (!safe(ref_label_origins, off_label_origins * sizeof(*label_origins), sizeof(*label_origins)))
-					return errors(ERR_VIRUS, _ERR_DISASM_BLOCK_LABELS);
-
-				label_origins[off_label_origins++] = control_flow[j].addr; // assign jump address
-				control_flow[j].label_addr = NULL;                         // discard address
-				njumps++;
-			}
-		}
-
-		labels[i].location = location;
-		labels[i].jumps    = &label_origins[off_label_origins];
-		labels[i].njumps   = njumps;
-		blocks->nlabels++;
-	}
-	return true;
-}
-
-bool	disasm_block(struct block_allocation *blocks, void *code, size_t size)
+bool	disasm_block(struct block_allocation *block_alloc, void *code, size_t size)
 {
 	struct control_flow	jumps_info[MAX_JUMPS];
 
@@ -108,17 +110,18 @@ bool	disasm_block(struct block_allocation *blocks, void *code, size_t size)
 		return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
 #endif
 
-	bzero(blocks, sizeof(*blocks));
-	blocks[0].ref.ptr  = code;
-	blocks[0].ref.size = size;
+	bzero(block_alloc, sizeof(*block_alloc));
+	block_alloc->blocks[0].ref.ptr  = code;
+	block_alloc->blocks[0].ref.size = size;
 
-	assign_jumps(blocks->jumps, &blocks->blocks[0], jumps_info, njumps);
+	assign_jumps(block_alloc->jumps, &block_alloc->blocks[0], jumps_info, njumps);
 
-	if (!assign_labels(blocks->labels, blocks->label_origins,
-		&blocks->blocks[0], jumps_info, njumps))
-		return errors(ERR_THROW, _ERR_DISASM_BLOCK);
+	for (size_t i = 0; i < njumps; i++)
+		block_alloc->label_origins[i] = &block_alloc->jumps[i];
 
-	print_code_blocks(blocks->blocks, MAX_BLOCKS);
+	assign_labels(block_alloc->labels, block_alloc->label_origins, &block_alloc->blocks[0], jumps_info, njumps);
+
+	print_code_blocks(block_alloc->blocks, MAX_BLOCKS);
 
 	return true;
 }

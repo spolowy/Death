@@ -6,7 +6,7 @@
 #    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/04/10 17:19:11 by agrumbac          #+#    #+#              #
-#    Updated: 2020/03/01 19:04:40 by ichkamo          ###   ########.fr        #
+#    Updated: 2020/03/08 19:55:18 by ichkamo          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,9 +27,9 @@ SRC =	loader.s                       \
 	virus/copy_loader_to_clone.c   \
 	virus/copy_to_clone.c          \
 	virus/disasm_block.c           \
+	virus/disasm_jumps.c           \
 	virus/disasm_length.c          \
 	virus/disasm_operands.c        \
-	virus/disasm_control_flow.c    \
 	virus/elf64_iterators.c        \
 	virus/file_iterator.c          \
 	virus/find_entry.c             \
