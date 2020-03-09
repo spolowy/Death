@@ -134,4 +134,24 @@ void   		putu64(uint64_t n)
 	}
 }
 
+void   		dput32(int32_t n)
+{
+	PD_ARRAY(char, letter, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+
+	if (n < 0)
+	{
+		putchar('-');
+		n = n * -1;
+	}
+	if (n > 9)
+	{
+		dput32(n / 10);
+		dput32(n % 10);
+	}
+	else
+	{
+		putchar(letter[n]);
+	}
+}
+
 #endif

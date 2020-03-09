@@ -34,6 +34,7 @@ uint64_t	random_exrange(uint64_t *seed, uint64_t lower, uint64_t upper);
 
 int		putstr(const char *str);
 void   		putu64(uint64_t n);
+void   		dput32(int32_t n);
 int             putchar(char c);
 
 # else /* kind hack for the launcher */

@@ -57,6 +57,8 @@ static void	assign_labels(struct label labels[MAX_JUMPS],
 			struct code_block *block,
 			struct control_flow jumps_info[MAX_JUMPS], size_t njumps)
 {
+	block->labels = labels;
+
 	sort_by_label_addr(label_origins, jumps_info, njumps);
 	struct label	*current_label = labels;
 
@@ -72,7 +74,7 @@ static void	assign_labels(struct label labels[MAX_JUMPS],
 	{
 		label_origins[i]->location = jumps_info[i].addr;
 
-		if (jumps_info[i].label_addr != current_label->location)
+		if (jumps_info[i].label_addr == current_label->location)
 		{
 			current_label->njumps++;
 			continue;
