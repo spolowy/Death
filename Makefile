@@ -6,7 +6,7 @@
 #    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/04/10 17:19:11 by agrumbac          #+#    #+#              #
-#    Updated: 2020/03/08 19:55:18 by ichkamo          ###   ########.fr        #
+#    Updated: 2020/06/20 17:07:20 by ichkamo          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,6 @@ NAME = death
 # [LAUNCHER]  _start       -> EOF
 
 SRC =	loader.s                       \
-	detect_spy.s                   \
 	virus/virus.c                  \
 	virus/accessors.c              \
 	virus/adjust_references.c      \
@@ -120,6 +119,12 @@ ${OBJDIR}/%.o: ${SRCDIR}/%.c
 
 debug: fclean
 	${MAKE} all CFLAGS:="-DDEBUG -g" ASFLAGS:="-dDEBUG -g"
+
+test:
+	cd tests/ && bash test.bash
+
+testdebug:
+	cd tests/ && bash test.bash debug
 
 ############################## GENERAL #########################################
 
