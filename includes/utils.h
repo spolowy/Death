@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/06 03:51:06 by agrumbac          #+#    #+#             */
-/*   Updated: 2019/12/27 01:07:57 by anselme          ###   ########.fr       */
+/*   Updated: 2020/06/20 14:53:09 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,6 @@ void   		putu64(uint64_t n);
 void   		dput32(int32_t n);
 int             putchar(char c);
 
-# else /* kind hack for the launcher */
-#  define	putstr(...)	(-1)
 # endif
 
 #endif

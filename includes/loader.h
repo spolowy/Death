@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 03:38:38 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/02/22 21:49:58 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/06/20 14:52:03 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,13 +28,6 @@ struct			virus_header
 }__attribute__((packed));
 
 void		virus_header_struct(void);
-
-/*
-** anti debug
-*/
-
-bool		detect_spy(void);
-void		detect_spy_end(void);
 
 /*
 ** loader
