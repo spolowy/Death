@@ -6,7 +6,7 @@
 #    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/04/10 17:19:11 by agrumbac          #+#    #+#              #
-#    Updated: 2020/06/20 17:07:20 by ichkamo          ###   ########.fr        #
+#    Updated: 2020/06/20 21:32:03 by ichkamo          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,8 +23,8 @@ SRC =	loader.s                       \
 	virus/virus.c                  \
 	virus/accessors.c              \
 	virus/adjust_references.c      \
-	virus/copy_loader_to_clone.c   \
-	virus/copy_to_clone.c          \
+	virus/copy_virus_to_clone.c    \
+	virus/copy_client_to_clone.c   \
 	virus/disasm_block.c           \
 	virus/disasm_jumps.c           \
 	virus/disasm_length.c          \

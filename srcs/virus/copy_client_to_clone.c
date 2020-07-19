@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   copy_to_clone.c                                    :+:      :+:    :+:   */
+/*   copy_client_to_clone.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/13 14:58:36 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/02/22 21:28:58 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/06/20 21:31:55 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ static bool	copy_after_payload(struct safe_ptr clone_ref, struct safe_ptr origin
 	return true;
 }
 
-bool		copy_to_clone(struct safe_ptr clone_ref, struct safe_ptr original_ref, \
+bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr original_ref, \
 			size_t end_last_sect, size_t shift_amount, size_t original_size)
 {
 	if (!copy_until_end_of_last_sect(clone_ref, original_ref, end_last_sect)
