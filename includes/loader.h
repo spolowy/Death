@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 03:38:38 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/06/20 14:52:03 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/07/19 18:55:44 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ void		virus_header_struct(void);
 */
 
 void		loader_entry(void);
+void		call_virus(void);
 void		jump_back_to_client(void);
 void		loader_exit(void);
 
