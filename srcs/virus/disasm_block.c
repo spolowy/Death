@@ -6,7 +6,7 @@
 /*   By: ichkamo <ichkamo@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/01 18:31:15 by ichkamo           #+#    #+#             */
-/*   Updated: 2020/03/08 20:24:01 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/12/01 20:08:19 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ bool	disasm_block(struct block_allocation *block_alloc, void *code, size_t size)
 
 	assign_labels(block_alloc->labels, block_alloc->label_origins, &block_alloc->blocks[0], jumps_info, njumps);
 
-	print_code_blocks(block_alloc->blocks, MAX_BLOCKS);
+	// print_code_blocks(block_alloc->blocks, MAX_BLOCKS);
 
 	return true;
 }

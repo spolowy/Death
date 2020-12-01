@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/07 01:53:00 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/03/01 19:03:11 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/12/01 13:23:36 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #  define ERR_FILE	PD_ARRAY(char,_err_type,'f','i','l','e',':',' ',0)
 #  define ERR_VIRUS	PD_ARRAY(char,_err_type,'v','i','r','u','s',':',' ',0)
 
+#  define _ERR_GENERATE_SEED           PD_ARRAY(char,_err_text,'\033','[','3','3','m','g','e','n','e','r','a','t','e',' ','s','e','e','d','\n','\033','[','0','m',0)
 #  define _ERR_INFECTION_ENGINE        PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','f','e','c','t','i','o','n','_','e','n','g','i','n','e','\n','\033','[','0','m',0)
 #  define _ERR_NOT_ENOUGH_PADDING      PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o','t',' ','e','n','o','u','g','h',' ','p','a','d','d','i','n','g','\n','\033','[','0','m',0)
 #  define _ERR_MUNMAP_FAILED           PD_ARRAY(char,_err_text,'\033','[','3','3','m','m','u','n','m','a','p',' ','f','a','i','l','e','d','\n','\033','[','0','m',0)

