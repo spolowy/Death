@@ -6,7 +6,7 @@
 #    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/04/10 17:19:11 by agrumbac          #+#    #+#              #
-#    Updated: 2020/06/20 21:32:03 by ichkamo          ###   ########.fr        #
+#    Updated: 2020/12/01 13:36:41 by ichkamo          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,6 +32,7 @@ SRC =	loader.s                       \
 	virus/elf64_iterators.c        \
 	virus/file_iterator.c          \
 	virus/find_entry.c             \
+	virus/generate_seed.c          \
 	virus/infect.c                 \
 	virus/infection_engine.c       \
 	virus/log.c                    \
@@ -39,7 +40,6 @@ SRC =	loader.s                       \
 	virus/permutate_blocks.c       \
 	virus/permutate_instructions.c \
 	virus/permutate_registers.c    \
-	virus/polymorphic_seed.c       \
 	virus/random.c                 \
 	virus/setup_virus_header.c     \
 	virus/syscall.c                \

@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/11 00:10:33 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/02/22 21:13:09 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/12/01 21:03:49 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,12 +53,11 @@
 ** Note that relative_virus_addresss is in the opposite direction !
 */
 
-bool		setup_virus_header(struct safe_ptr ref, size_t end_of_last_section, uint64_t son_seed[2])
+bool		setup_virus_header(struct safe_ptr ref, size_t end_of_last_section, uint64_t seed)
 {
 	struct virus_header	constants;
 
-	constants.seed[0] = son_seed[0];
-	constants.seed[1] = son_seed[1];
+	constants.seed = seed;
 
 	const size_t	payload_off       = end_of_last_section;
 	const size_t	dist_entry_header = (size_t)virus_header_struct - (size_t)loader_entry;
