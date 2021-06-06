@@ -1,13 +1,7 @@
 
 #include "disasm_utils.h"
+#include "bytes.h"
 
-/* sizes in byte */
-# define BYTE		1
-# define WORD		2
-# define DWORD		4
-# define PWORD		6
-# define QWORD		8
-# define TWORD		10
 /* opcode flags  */
 # define MODRM		(1 << 0)            /* MODRM byte       */
 # define TEST_F6	(1 << 1)            /* <test> exception */
@@ -20,7 +14,7 @@
 ** It HAVE to return a value between 1 and 15 included.
 ** Returns 0 if failed.
 */
-size_t		disasm_length(const void *code, size_t codelen)
+uint8_t		disasm_length(const void *code, size_t codelen)
 {
 	uint32_t	table_opcode_modrm_ext[TABLESIZE];
 					          /* 0 1 2 3 4 5 6 7  8 9 a b c d e f */
