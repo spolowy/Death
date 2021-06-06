@@ -19,7 +19,9 @@
 
 bool		permutate_instructions(void *buffer, uint64_t seed, size_t size);
 bool		permutate_registers(void *buffer, uint64_t seed, size_t size);
-bool		permutate_blocks(void *code, uint64_t seed, size_t size);
-
+bool		permutate_blocks(struct safe_ptr input_code, \
+			struct safe_ptr output_buffer, \
+			size_t *output_size, size_t *entry_point, \
+			uint64_t seed);
 
 #endif

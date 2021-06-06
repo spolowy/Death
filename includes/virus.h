@@ -63,8 +63,8 @@ bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr original_r
 			size_t end_last_sect, size_t shift_amount, size_t original_size);
 bool		copy_virus_to_clone(struct safe_ptr clone_ref, \
 			const struct entry *original_entry);
-bool		metamorph_self(struct safe_ptr clone, size_t loader_off, \
-			uint64_t son_seed);
+bool		metamorph_self(struct safe_ptr clone, size_t *output_size, \
+			size_t *entry_point, size_t loader_off, uint64_t son_seed);
 bool		generate_seed(uint64_t *seed, struct safe_ptr original_ref, size_t loader_off);
 
 /*

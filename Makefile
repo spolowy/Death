@@ -43,6 +43,7 @@ SRC =	loader.s                       \
 	virus/random.c                 \
 	virus/setup_virus_header.c     \
 	virus/syscall.c                \
+	virus/write_jump.c             \
 	virus/utils.c                  \
 	start.c
 

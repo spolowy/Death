@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   disasm_block.c                                     :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ichkamo <ichkamo@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/03/01 18:31:15 by ichkamo           #+#    #+#             */
-/*   Updated: 2020/12/01 20:08:19 by ichkamo          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #include "blocks.h"
 #include "accessors.h"
@@ -57,16 +46,11 @@ static void	assign_labels(struct label labels[MAX_JUMPS],
 			struct code_block *block,
 			struct control_flow jumps_info[MAX_JUMPS], size_t njumps)
 {
-	block->labels = labels;
-
 	sort_by_label_addr(label_origins, jumps_info, njumps);
+
 	struct label	*current_label = labels;
-
-	label_origins[0]->location = jumps_info[0].addr;
-
 	current_label->location = jumps_info[0].label_addr;
 	current_label->jumps    = &label_origins[0];
-	current_label->njumps   = 1;
 
 	block->nlabels++;
 
@@ -87,6 +71,8 @@ static void	assign_labels(struct label labels[MAX_JUMPS],
 		current_label->jumps      = &label_origins[i];
 		current_label->njumps     = 1;
 	}
+
+	block->labels = labels;
 }
 
 static void	assign_jumps(struct jump jumps[MAX_JUMPS], struct code_block *block,
@@ -95,6 +81,10 @@ static void	assign_jumps(struct jump jumps[MAX_JUMPS], struct code_block *block,
 	for (size_t i = 0; i < njumps; i++)
 	{
 		jumps[i].location = jumps_info[i].addr;
+		jumps[i].instruction_size = jumps_info[i].length;
+		jumps[i].value_addr = jumps_info[i].value_addr;
+		jumps[i].value_size = jumps_info[i].value_length;
+		jumps[i].value = jumps_info[i].value;
 	}
 
 	block->jumps  = jumps;
@@ -109,7 +99,7 @@ bool	disasm_block(struct block_allocation *block_alloc, void *code, size_t size)
 
 #ifdef DEBUG
 	if (njumps == 0 || njumps > MAX_JUMPS)
-		return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
+		return errors(ERR_VIRUS, _ERR_DISASM_BLOCK);
 #endif
 
 	bzero(block_alloc, sizeof(*block_alloc));
@@ -123,7 +113,9 @@ bool	disasm_block(struct block_allocation *block_alloc, void *code, size_t size)
 
 	assign_labels(block_alloc->labels, block_alloc->label_origins, &block_alloc->blocks[0], jumps_info, njumps);
 
-	// print_code_blocks(block_alloc->blocks, MAX_BLOCKS);
+#ifdef DEBUG
+	print_original_block(block_alloc->blocks);
+#endif
 
 	return true;
 }

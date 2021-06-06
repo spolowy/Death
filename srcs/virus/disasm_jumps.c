@@ -1,15 +1,8 @@
 
 #include <unistd.h>
-#include <stdio.h>
 #include "disasm_utils.h"
-
-/* sizes in byte */
-# define BYTE		1
-# define WORD		2
-# define DWORD		4
-# define PWORD		6
-# define QWORD		8
-# define TWORD		10
+#include "bytes.h"
+#include "utils.h"
 
 /*
 Jc(onditionnal)c(ode) notes:
@@ -23,11 +16,12 @@ Jc(onditionnal)c(ode) notes:
 ** return false if failed to disassembled a control flow instruction
 */
 
-static bool	disasm_instruction(void **value_addr, int32_t *value, int8_t *value_length,
+static bool	disasm_instruction(void **value_addr, \
+			int32_t *value, uint8_t *value_length, \
 			const void *code, size_t codelen)
 {
 	uint8_t		*p = (uint8_t*)code;
-	int8_t		prefix = 0;          /* prefix(es) */
+	uint8_t		prefix = 0;              /* prefix(es) */
 	uint8_t		opcode;
 
 	*value_addr = NULL;
@@ -44,34 +38,45 @@ static bool	disasm_instruction(void **value_addr, int32_t *value, int8_t *value_
 
 	/* check if has prefix */
 	if (opcode == 0x0f) {prefix |= OP_PREFIX_0F; goto next_opcode;}
-
-	// jmp
-
-	// jcc
-	// call
-	// loopcc
-	// loop
+	/* check if has REX    */
+	if (opcode >= 0x40 && opcode <= 0x4f) {goto next_opcode;}
 
 	/* rel8 */
-	if ((opcode >= 0x70 && opcode <= 0x7f) /* JMPcc             */
-	|| (opcode >= 0xe0 && opcode <= 0xe3)  /* LOOP/LOOPcc/JMPcc */
-	|| (opcode == 0xeb))                   /* JMP               */
+	if ((opcode >= 0x70 && opcode <= 0x7f)           /* JMPcc             */
+	|| (opcode >= 0xe0 && opcode <= 0xe3)            /* LOOP/LOOPcc/JMPcc */
+	|| (opcode == 0xeb))                             /* JMP               */
 	{
 		*value_addr = p;
 		*value = *((int8_t*)p);
 		*value_length = BYTE;
 	}
 	/* rel16/32 */
-	else if ((opcode == 0xe8)                          /* CALL  */
-	|| (opcode == 0xe9)                                /* JMP   */
-	|| (prefix && (opcode >= 0x80 && opcode <= 0x8f))) /* JMPcc */
+	else if ((opcode == 0xe8)                          /* CALL            */
+	|| (opcode == 0xe9)                                /* JMP             */
+	|| (prefix && (opcode >= 0x80 && opcode <= 0x8f))) /* JMPcc           */
 	{
 		*value_addr = p;
 		*value = *((int32_t*)p);
 		*value_length = DWORD;
 	}
+	/* [rip + displacement] */
+	else if (opcode == 0x8d)                           /* LEA             */
+	{
+		if (!codelen--) return false;
+		opcode = *p++;
 
-	return (*value_addr && *value && *value_length);
+		uint8_t	mod = (opcode & 0b11000000) >> 6;
+		uint8_t	rm  = opcode & 0b00000111;
+
+		// 48 8d 35 42 00 00 00
+		if (mod == 0b00 && rm == 0b101)  /* RIP-relative addressing */
+		{
+			*value_addr = p;
+			*value = *((int32_t*)p);
+			*value_length = DWORD;
+		}
+	}
+	return (*value_addr && *value_length);
 }
 
 size_t		disasm_jumps(struct control_flow *buf, size_t buflen,
@@ -79,7 +84,7 @@ size_t		disasm_jumps(struct control_flow *buf, size_t buflen,
 {
 	void			*p_code = (void*)code;
 	struct control_flow	*p_buf  = buf;
-	size_t			instruction_length = 0;
+	uint8_t			instruction_length = 0;
 
 	while (codelen && buflen)
 	{
@@ -98,7 +103,6 @@ size_t		disasm_jumps(struct control_flow *buf, size_t buflen,
 		p_code  += instruction_length;
 		codelen -= instruction_length;
 	}
-
 	/* number of control flow instructions successfully disassembled */
 	return p_buf - buf;
 }
