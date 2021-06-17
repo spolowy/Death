@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 04:47:10 by agrumbac          #+#    #+#             */
-/*   Updated: 2019/12/27 00:02:56 by anselme          ###   ########.fr       */
+/*   Updated: 2021/06/15 16:25:03 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ bool	write_file(struct safe_ptr ref, const char *filename);
 */
 
 bool	init_original_safe(struct safe_ptr *ref, const char *filename);
-bool	init_clone_safe(struct safe_ptr *ref, size_t original_filesize);
+bool	init_clone_safe(struct safe_ptr *accessor, size_t original_filesize, \
+		size_t virus_size);
 
 #endif

