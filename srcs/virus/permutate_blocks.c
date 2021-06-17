@@ -396,7 +396,7 @@ bool		permutate_blocks(struct safe_ptr input_code, \
 			struct safe_ptr output_buffer, \
 			size_t *output_size, size_t *entry_point, \
 			uint64_t seed)
-{
+{ // TODO adapt proto
 	struct block_allocation		block_memory;
 	struct code_block		*blocks[NBLOCKS];
 
@@ -404,7 +404,7 @@ bool		permutate_blocks(struct safe_ptr input_code, \
 	|| !shard_block(blocks, block_memory.blocks, &seed)
 	|| !shuffle_blocks(blocks, seed)
 	|| !shift_blocks(blocks)
-	|| !shift_entry_point(entry_point, input_code, output_buffer, blocks)
+	|| !shift_entry_point(entry_point, input_code, output_buffer, blocks)// impossible if we don't know where virus is!
 	|| !write_permutated_code(input_code, output_buffer, blocks, output_size))
 		return errors(ERR_THROW, _ERR_PERMUTATE_BLOCKS);
 
