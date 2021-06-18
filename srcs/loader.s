@@ -38,6 +38,16 @@ loader_entry:
 
 ;----------------------------------; launch infection routines
 
+; [DEBUG]
+	mov r8, 3
+	mov r9, 3
+	mov r10, 3
+	mov r11, 3
+	mov r12, 3
+	mov r13, 3
+	mov r14, 3
+	mov r15, 3
+
 ; space for structure fields
 	sub rsp, end_virus_header - virus_header_struct
 ; loader_entry
@@ -88,3 +98,6 @@ virus_header_struct:
 	; dq loader_entry                                   ; loader entry (placeholder)
 end_virus_header:
 	db "Warning : Copyrighted Virus by __UNICORNS_OF_THE_APOCALYPSE__ <3"
+
+
+; 127905555555555

@@ -11,7 +11,8 @@
 ** define what registers can be swapped by permutator
 ** R12 and R13 are not managed yet because their code corresponds to RSP and RBP
 */
-# define SWAPPABLE_REGISTERS	(RCX|RDX|RBX|RSI|RDI|R8|R9|R10|R11|R14|R15)
+// # define SWAPPABLE_REGISTERS	(RCX|RDX|RBX|RSI|RDI|R8|R9|R10|R11|R14|R15)
+# define SWAPPABLE_REGISTERS	(RCX|RDX|RBX|RSI|R8|R9|R10|R11|R14)
 
 /*
 ** Flags used to specify how the intruction should be interpreted
@@ -21,6 +22,7 @@
 # define EXT		(1 << 1) /* MODRM byte with opcode extension     */
 # define IMPLICIT_SRC	(1 << 2) /* source register is implicit          */
 # define IMPLICIT_DST	(1 << 3) /* destination register is implicit     */
+# define RIP_REL	(1 << 4) /* rip-relative addressing              */
 
 static void	swap_register(uint32_t *a, uint32_t *b)
 {
@@ -104,7 +106,7 @@ static bool	apply_match(void *code, size_t codelen, uint32_t *match)
 					      1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1); /* 5 */
 	table_supported_opcode[3] = BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 6 */
 					      0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0); /* 7 */
-	table_supported_opcode[4] = BITMASK32(0,1,0,1,0,1,0,1, 0,1,0,1,0,0,0,0,  /* 8 */
+	table_supported_opcode[4] = BITMASK32(0,1,0,1,0,1,0,1, 0,1,0,1,0,1,0,0,  /* 8 */
 					      0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0); /* 9 */
 	table_supported_opcode[5] = BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* a */
 					      0,0,0,0,0,0,0,0, 1,1,1,1,1,1,1,1); /* b */
@@ -153,6 +155,7 @@ static bool	apply_match(void *code, size_t codelen, uint32_t *match)
 	instructions[0x87] = (struct x86_set){MODRM       ,    0}; /* xchg reg16/32/64 r/m16/32/64 */
 	instructions[0x89] = (struct x86_set){MODRM       ,    0}; /* mov r/m16/32/64 reg16/32/64  */
 	instructions[0x8b] = (struct x86_set){MODRM       ,    0}; /* mov reg16/32/64 r/m16/32/64  */
+	instructions[0x8d] = (struct x86_set){MODRM       ,    0}; /* lea reg16/32/64 r/m16/32/64  */
 	instructions[0xb8] = (struct x86_set){IMPLICIT_DST, 0xb8}; /* mov reAX imm16/32/64         */
 	instructions[0xb9] = (struct x86_set){IMPLICIT_DST, 0xb8}; /* mov reCX imm16/32/64         */
 	instructions[0xba] = (struct x86_set){IMPLICIT_DST, 0xb8}; /* mov reDX imm16/32/64         */
