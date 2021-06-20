@@ -38,16 +38,6 @@ loader_entry:
 
 ;----------------------------------; launch infection routines
 
-; [DEBUG]
-	mov r8, 3
-	mov r9, 3
-	mov r10, 3
-	mov r11, 3
-	mov r12, 3
-	mov r13, 3
-	mov r14, 3
-	mov r15, 3
-
 ; space for structure fields
 	sub rsp, end_virus_header - virus_header_struct
 ; loader_entry

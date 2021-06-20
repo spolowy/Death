@@ -137,6 +137,7 @@ fclean: clean
 	@echo ${R}Cleaning"  "[${NAME}]...${X}
 	@/bin/rm -f ${NAME}
 	@/bin/rm -Rf ${NAME}.dSYM
+	@/bin/rm -f /tmp/test/* /tmp/test2/*
 
 re: fclean all
 

