@@ -66,8 +66,9 @@
 #  define _ERR_INFECT                  PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','f','e','c','t','\n','\033','[','0','m',0)
 #  define _ERR_IMPOSSIBLE              PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','m','p','o','s','s','i','b','l','e','\n','\033','[','0','m',0)
 #  define _ERR_ALREADY_INFECTED        PD_ARRAY(char,_err_text,'\033','[','3','2','m','a','l','r','e','a','d','y',' ','i','n','f','e','c','t','e','d',' ','<','3','\n','\033','[','0','m',0)
-#  define _ERR_NO_ENTRY_PHDR           PD_ARRAY(char,_err_text,'\033','[','3','3','m','C','o','u','l','d','n','\'','t',' ','f','i','n','d',' ','e','n','t','r','y',' ','p','h','d','r','\n','\033','[','0','m',0)
-#  define _ERR_NO_ENTRY_SHDR           PD_ARRAY(char,_err_text,'\033','[','3','3','m','C','o','u','l','d','n','\'','t',' ','f','i','n','d',' ','e','n','t','r','y',' ','s','h','d','r','\n','\033','[','0','m',0)
+#  define _ERR_NO_ENTRY_PHDR           PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','o','u','l','d','n','\'','t',' ','f','i','n','d',' ','e','n','t','r','y',' ','p','h','d','r','\n','\033','[','0','m',0)
+#  define _ERR_NO_ENTRY_SHDR           PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','o','u','l','d','n','\'','t',' ','f','i','n','d',' ','e','n','t','r','y',' ','s','h','d','r','\n','\033','[','0','m',0)
+#  define _ERR_NO_ENTRY_POINT          PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','o','u','l','d','n','\'','t',' ','f','i','n','d',' ','e','n','t','r','y',' ','p','o','i','n','t','\n','\033','[','0','m',0)
 
 #  define errors(err_type, err_text)		({ \
 	err_type;                                  \

@@ -70,7 +70,7 @@ __warn_unused_result
 bool	init_clone_safe(struct safe_ptr *accessor, size_t original_filesize, \
 			size_t virus_size)
 {
-	accessor->size = original_filesize + ALIGN(virus_size, PAGE_ALIGNMENT);
+	accessor->size = original_filesize + ALIGN(virus_size, PAGE_ALIGNMENT) * 2; // TODO
 	accessor->ptr  = sys_mmap(0, accessor->size, \
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 

@@ -114,7 +114,7 @@ bool	disasm_block(struct block_allocation *block_alloc, void *code, size_t size)
 	assign_labels(block_alloc->labels, block_alloc->label_origins, &block_alloc->blocks[0], jumps_info, njumps);
 
 #ifdef DEBUG
-	print_original_block(block_alloc->blocks);
+	// print_original_block(block_alloc->blocks);
 #endif
 
 	return true;
