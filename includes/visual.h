@@ -288,27 +288,29 @@
 /* --------------------------- Print General Info --------------------------- */
 /* -------------------------------------------------------------------------- */
 
-# define print_general(input_code, output_buffer, entry_point, output_size, seed) ({                                 \
-	PD_ARRAY(char,nl,'\n',0);                                                                                    \
-	PD_ARRAY(char,ia,C_YELLOW,'i','n','p','u','t','_','a','d','d','r', C_NONE,':',' ',C_RED,0)                   \
-	PD_ARRAY(char,is,C_YELLOW,'i','n','p','u','t','_','s','i','z','e', C_NONE,':',' ',C_RED,0)                   \
-	PD_ARRAY(char,ba,C_YELLOW,'b','u','f','f','e','r','_','a','d','d','r', C_NONE,':',' ',C_RED,0)               \
-	PD_ARRAY(char,bs,C_YELLOW,'b','u','f','f','e','r','_','s','i','z','e', C_NONE,':',' ',C_RED,0)               \
-	PD_ARRAY(char,ep,C_YELLOW,'e','n','t','r','y','_','p','o','i','n','t', C_NONE,':',' ',C_RED,0)               \
-	PD_ARRAY(char,os,C_YELLOW,'o','u','t','p','u','t','_','s','i','z','e', C_NONE,':',' ',C_RED,0)               \
-	PD_ARRAY(char,sd,C_YELLOW,'s','e','e','d', C_NONE,':',' ',C_RED,0)                                           \
-	putstr("\033[36m\n\n");                                                                                      \
-	putstr("#                                                                              #\n");                \
-	putstr("#                                 General Info                                 #\n");                \
-	putstr("#                                                                              #\n\n");              \
-	REGROUPU64(ia,input_code.ptr,nl);                                                                            \
-	REGROUP32(is,input_code.size,nl);                                                                            \
-	REGROUPU64(ba,output_buffer.ptr,nl);                                                                         \
-	REGROUP32(bs,output_buffer.size,nl);                                                                         \
-	REGROUPU64(ep,entry_point,nl);                                                                               \
-	REGROUP32(os,output_size,nl);                                                                                \
-	REGROUPU64(sd,seed,nl);                                                                                      \
-	putstr("\033[0m\n");                                                                                         \
+# define print_general(input_code, output_buffer, entry_point, virus_func_shift, output_size, seed) ({                       \
+	PD_ARRAY(char,nl,'\n',0);                                                                                            \
+	PD_ARRAY(char,ia,C_YELLOW,'i','n','p','u','t','_','a','d','d','r', C_NONE,':',' ',C_RED,0)                           \
+	PD_ARRAY(char,is,C_YELLOW,'i','n','p','u','t','_','s','i','z','e', C_NONE,':',' ',C_RED,0)                           \
+	PD_ARRAY(char,ba,C_YELLOW,'b','u','f','f','e','r','_','a','d','d','r', C_NONE,':',' ',C_RED,0)                       \
+	PD_ARRAY(char,bs,C_YELLOW,'b','u','f','f','e','r','_','s','i','z','e', C_NONE,':',' ',C_RED,0)                       \
+	PD_ARRAY(char,ep,C_YELLOW,'e','n','t','r','y','_','p','o','i','n','t', C_NONE,':',' ',C_RED,0)                       \
+	PD_ARRAY(char,fc,C_YELLOW,'v','i','r','u','s','_','f','u','n','c','_','s','h','i','f','t', C_NONE,':',' ',C_RED,0)   \
+	PD_ARRAY(char,os,C_YELLOW,'o','u','t','p','u','t','_','s','i','z','e', C_NONE,':',' ',C_RED,0)                       \
+	PD_ARRAY(char,sd,C_YELLOW,'s','e','e','d', C_NONE,':',' ',C_RED,0)                                                   \
+	putstr("\033[36m\n\n");                                                                                              \
+	putstr("#                                                                              #\n");                        \
+	putstr("#                                 General Info                                 #\n");                        \
+	putstr("#                                                                              #\n\n");                      \
+	REGROUPU64(ia,input_code.ptr,nl);                                                                                    \
+	REGROUP32(is,input_code.size,nl);                                                                                    \
+	REGROUPU64(ba,output_buffer.ptr,nl);                                                                                 \
+	REGROUP32(bs,output_buffer.size,nl);                                                                                 \
+	REGROUPU64(ep,entry_point,nl);                                                                                       \
+	REGROUP32(fc,virus_func_shift,nl);                                                                                   \
+	REGROUP32(os,output_size,nl);                                                                                        \
+	REGROUPU64(sd,seed,nl);                                                                                              \
+	putstr("\033[0m\n");                                                                                                 \
 })
 
 # else

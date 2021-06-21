@@ -72,12 +72,4 @@ void	log_virus_header(struct virus_header *vhdr)
 	putstr(loader_entry); putu64((size_t)vhdr->loader_entry); putstr(newline);
 }
 
-void	log_virus_func_shift(int virus_func_shift)
-{
-	PD_ARRAY(char, newline, '\n',0);
-	PD_ARRAY(char, vfs, '[','L','O','G',']',' ','v','i','r','u','s','_','f','u','n','c','_','s','h','i','f','t',':',' ',0);
-
-	putstr(vfs); dput32(virus_func_shift); putstr(newline);
-}
-
 #endif

