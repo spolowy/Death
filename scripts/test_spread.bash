@@ -162,7 +162,7 @@ function test_run
 	# test for ...
 	infected_name=$(basename "$infected_path")
 	sane_name=$(basename "$sane_path")
-	echo "  [$infected_name] -> [$sane_name]  "
+	printf "  [$infected_name] -> [$sane_name]  "
 
 	if process_run "$infected_path" && process_run "$sane_path"; then
 		signature=$(strings $sane_path | grep '__UNICORNS_OF_THE_APOCALYPSE__')

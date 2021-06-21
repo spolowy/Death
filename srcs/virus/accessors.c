@@ -87,7 +87,7 @@ bool	write_file(const struct safe_ptr accessor, const char *filename)
 
 	if (fd < 0) return errors(ERR_SYS, _ERR_OPEN_FAILED);
 
-	if (sys_write(fd, accessor.ptr, accessor.size) < 0)
+	if (sys_write(fd, accessor.ptr, accessor.size) < 0)// TODO adapt to vir size not alloc size!!
 	{
 		sys_close(fd);
 		return errors(ERR_SYS, _ERR_CLOSE_FAILED);
