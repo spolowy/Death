@@ -1,6 +1,7 @@
 
 #include "disasm_utils.h"
 #include "bytes.h"
+#include "errors.h"
 
 /* opcode flags  */
 # define MODRM		(1 << 0)            /* MODRM byte       */
@@ -361,7 +362,7 @@ uint8_t		disasm_length(const void *code, size_t codelen)
 	uint32_t	table_660f_opcode_modrm_ext[TABLESIZE];
 						  /* 0 1 2 3 4 5 6 7  8 9 a b c d e f */
 	table_660f_opcode_modrm_ext[0]   = BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 0 */
-						     0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0); /* 1 */
+						     0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,1); /* 1 */
 	table_660f_opcode_modrm_ext[1]   = BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 2 */
 						     0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0); /* 3 */
 	table_660f_opcode_modrm_ext[2]   = BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 4 */
@@ -409,9 +410,13 @@ uint8_t		disasm_length(const void *code, size_t codelen)
 	/* set <codelen> to INSTRUCTION_MAXLEN if it exceeds it */
 	if (codelen > INSTRUCTION_MAXLEN) codelen = INSTRUCTION_MAXLEN;
 
-	next_opcode:
-	if (!codelen--) return 0; /* error if instruction is too long */
+next_opcode:
+	if (!codelen--) return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH); /* error if instruction is too long */
 	opcode = *p++;
+
+	/* NULL byte prefix, undocumented */
+	if (opcode == 0x2e)
+		{goto next_opcode;}
 
 	/* skip unused legacy / REX prefixes for this disassembler */
 	if ((opcode == 0x26 || opcode == 0x2e
@@ -503,7 +508,7 @@ uint8_t		disasm_length(const void *code, size_t codelen)
 	/* MODRM byte management */
 	if (flags & MODRM)
 	{
-		if (!codelen--) return 0; /* error if instruction is too long */
+		if (!codelen--) return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH); /* error if instruction is too long */
 		opcode = *p++;
 		uint8_t		mod = (opcode & 0b11000000) >> 6;
 		uint8_t		reg = (opcode & 0b00111000) >> 3;
@@ -523,7 +528,7 @@ uint8_t		disasm_length(const void *code, size_t codelen)
 			{
 				if (rm == 0b100) /* SIB addressing and get base register */
 				{
-					if (!codelen--) return 0; /* error if instruction is too long */
+					if (!codelen--) return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH); /* error if instruction is too long */
 					rm = *p++ & 0b111;
 				}
 				if (mod == 0b00 && rm == 0b101) {memsize += DWORD;} /* 32-bit displacement mode */
@@ -531,7 +536,7 @@ uint8_t		disasm_length(const void *code, size_t codelen)
 		}
 	}
 
-	if ((datasize + memsize) > codelen) return 0; /* error if instruction is too long */
+	if ((datasize + memsize) > codelen) return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH); /* error if instruction is too long */
 
 	p += datasize + memsize;
 	return (void*)p - (void*)code;

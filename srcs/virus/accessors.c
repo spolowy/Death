@@ -68,9 +68,9 @@ bool	init_original_safe(struct safe_ptr *accessor, const char *filename)
 
 __warn_unused_result
 bool	init_clone_safe(struct safe_ptr *accessor, size_t original_filesize, \
-			size_t virus_size)
+			size_t extra_size)
 {
-	accessor->size = original_filesize + ALIGN(virus_size * 2, PAGE_ALIGNMENT); // TODO
+	accessor->size = original_filesize + extra_size;
 	accessor->ptr  = sys_mmap(0, accessor->size, \
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 
@@ -87,7 +87,7 @@ bool	write_file(const struct safe_ptr accessor, const char *filename)
 
 	if (fd < 0) return errors(ERR_SYS, _ERR_OPEN_FAILED);
 
-	if (sys_write(fd, accessor.ptr, accessor.size) < 0)// TODO adapt to vir size not alloc size!!
+	if (sys_write(fd, accessor.ptr, accessor.size) < 0)
 	{
 		sys_close(fd);
 		return errors(ERR_SYS, _ERR_CLOSE_FAILED);

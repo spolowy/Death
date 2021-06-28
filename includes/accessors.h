@@ -41,6 +41,6 @@ bool	write_file(struct safe_ptr ref, const char *filename);
 
 bool	init_original_safe(struct safe_ptr *ref, const char *filename);
 bool	init_clone_safe(struct safe_ptr *accessor, size_t original_filesize, \
-		size_t virus_size);
+		size_t extra_size);
 
 #endif

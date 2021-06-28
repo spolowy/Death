@@ -99,7 +99,7 @@ bool	disasm_block(struct block_allocation *block_alloc, void *code, size_t size)
 
 #ifdef DEBUG
 	if (njumps == 0 || njumps > MAX_JUMPS)
-		return errors(ERR_VIRUS, _ERR_DISASM_BLOCK);
+		return errors(ERR_THROW, _ERR_DISASM_BLOCK);
 #endif
 
 	bzero(block_alloc, sizeof(*block_alloc));
