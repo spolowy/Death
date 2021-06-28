@@ -89,7 +89,7 @@ size_t		disasm_jumps(struct control_flow *buf, size_t buflen,
 	while (codelen && buflen)
 	{
 		instruction_length = disasm_length(p_code, codelen);
-		if (instruction_length == 0) return 0;
+		if (instruction_length == 0) return 0; // TODO error
 
 		if (disasm_instruction(&p_buf->value_addr, &p_buf->value, &p_buf->value_length,
 			p_code, codelen))

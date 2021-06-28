@@ -68,7 +68,7 @@ void	log_virus_header(struct virus_header *vhdr)
 	PD_ARRAY(char, loader_entry, '[','L','O','G',']',' ','l','o','a','d','e','r','_','e','n','t','r','y',':',' ',0);
 
 	putstr(seed); putu64(vhdr->seed); putstr(newline);
-	putstr(virus_size); putu64(vhdr->virus_size); putstr(newline);
+	putstr(virus_size); dput32(vhdr->virus_size); putstr(newline);
 	putstr(loader_entry); putu64((size_t)vhdr->loader_entry); putstr(newline);
 }
 

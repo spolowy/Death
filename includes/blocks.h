@@ -13,7 +13,7 @@
 # define NSHUFFLE		1
 # define NDIVISIONS		1
 # define NBLOCKS		POW2(NDIVISIONS)
-# define MAX_JUMPS		4096
+# define MAX_JUMPS		8192
 
 struct				jump
 {

