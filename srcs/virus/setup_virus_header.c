@@ -71,8 +71,7 @@ bool		setup_virus_header(struct safe_ptr ref, size_t end_of_last_section, \
 
 	if (!constants_location) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
 
-	// memcpy(constants_location, &vhdr, sizeof(struct virus_header));
-	memcpy(constants_location, &vhdr, 16);
+	memcpy(constants_location, &vhdr, sizeof(struct virus_header));
 
 	// log_virus_header((struct virus_header*)constants_location);
 

