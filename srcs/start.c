@@ -14,6 +14,8 @@
 #include "virus.h"
 #include "loader.h"
 
+#include "log.h"
+
 /*
 ** _start is the launcher function of the virus
 **   - it is launched instead of the loader for the first run
@@ -30,6 +32,7 @@ void	_start(void)
 		.loader_entry = loader_entry,
 	};
 
+	log_dvalue(vhdr.virus_size);
 	virus(&vhdr);
 
 	sys_exit(0);
