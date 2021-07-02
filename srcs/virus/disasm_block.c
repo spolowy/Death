@@ -91,16 +91,16 @@ static void	assign_jumps(struct jump jumps[MAX_JUMPS], struct code_block *block,
 	block->njumps = njumps;
 }
 
-bool	disasm_block(struct block_allocation *block_alloc, void *code, size_t size)
+bool	disasm_block(struct block_allocation *block_alloc, struct safe_ptr input_code)
 {
 	struct control_flow	jumps_info[MAX_JUMPS];
+	void			*code = input_code.ptr;
+	size_t			size  = input_code.size;
 
 	size_t	njumps = disasm_jumps(jumps_info, MAX_JUMPS, code, size);
 
-#ifdef DEBUG
 	if (njumps == 0 || njumps > MAX_JUMPS)
 		return errors(ERR_THROW, _ERR_DISASM_BLOCK);
-#endif
 
 	bzero(block_alloc, sizeof(*block_alloc));
 	block_alloc->blocks[0].ref.ptr  = code;

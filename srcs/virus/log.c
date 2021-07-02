@@ -88,4 +88,12 @@ void	log_uvalue(size_t value)
 	putstr(d); putu64(value); putstr(newline);
 }
 
+void	log_separator(void)
+{
+	PD_ARRAY(char, newline, '\n',0);
+	PD_ARRAY(char, s, '[','L','O','G',']','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-',0);
+
+	putstr(s); putstr(newline);
+}
+
 #endif

