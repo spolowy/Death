@@ -35,9 +35,13 @@ uint64_t	random_exrange(uint64_t *seed, uint64_t lower, uint64_t upper);
 # ifdef DEBUG
 
 int		putstr(const char *str);
-void   		putu64(uint64_t n);
-void   		dput32(int32_t n);
-int             putchar(char c);
+int		putchar(char c);
+void		putu64(uint64_t n);
+void		dput32(int32_t n);
+
+# else
+
+#  define hexdump_text(...)
 
 # endif
 

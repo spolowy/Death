@@ -111,12 +111,12 @@ uint64_t	hash(const char *buff, size_t buffsize)
 
 int             putchar(char c)
 {
-        return (sys_write(1, &c, 1));
+	return (sys_write(1, &c, 1));
 }
 
 int             putstr(const char *s)
 {
-        return (sys_write(1, s, strlen(s)));
+	return (sys_write(1, s, strlen(s)));
 }
 
 void   		putu64(uint64_t n)
@@ -151,6 +151,31 @@ void   		dput32(int32_t n)
 	else
 	{
 		putchar(letter[n]);
+	}
+}
+
+void		hexdump_text(const uint8_t *text, size_t size, size_t xsize)
+{
+	PD_ARRAY(char,c_cyan,'\033','[','0',';','3','6','m',0);
+	PD_ARRAY(char,c_none,'\033','[','0','m',0);
+	PD_ARRAY(char,nl,'\n',0);
+	PD_ARRAY(char,sp,' ',0);
+
+	for (size_t i = 0; i < xsize; i += 0x10)
+	{
+		for (size_t j = 0; j < 0x10 && i + j < xsize; j++)
+		{
+			if (size)
+			{
+				putstr(c_cyan); putu64(text[i + j]); putstr(c_none);
+				size--;
+			}
+			else
+				putu64(text[i + j]);
+			if (i + j < xsize)
+				putstr(sp);
+		}
+		putstr(nl);
 	}
 }
 

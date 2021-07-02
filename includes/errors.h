@@ -71,6 +71,7 @@
 #  define _ERR_NO_ENTRY_POINT          PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','o','u','l','d','n','\'','t',' ','f','i','n','d',' ','e','n','t','r','y',' ','p','o','i','n','t','\n','\033','[','0','m',0)
 
 #  define _ERR_INSTRUCTION_LENGTH      PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','s','t','r','u','c','t','i','o','n',' ','m','a','x','i','m','u','m',' ','l','e','n','g','t','h',' ','e','x','c','e','e','d','e','d','\n','\033','[','0','m',0)
+#  define _ERR_DISASM_JUMPS            PD_ARRAY(char,_err_text,'\033','[','3','3','m','d','i','s','a','s','m','_','j','u','m','p','s','\n','\033','[','0','m',0)
 
 #  define errors(err_type, err_text)		({ \
 	err_type;                                  \

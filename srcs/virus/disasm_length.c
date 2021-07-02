@@ -2,6 +2,7 @@
 #include "disasm_utils.h"
 #include "bytes.h"
 #include "errors.h"
+#include "utils.h"
 
 /* opcode flags  */
 # define MODRM		(1 << 0)            /* MODRM byte       */
@@ -202,7 +203,11 @@ uint8_t		disasm_length(const void *code, size_t codelen)
 	if (codelen > INSTRUCTION_MAXLEN) codelen = INSTRUCTION_MAXLEN;
 
 next_opcode:
-	if (!codelen--) return 0; /* error if instruction is too long */
+	if (!codelen--) /* error if instruction is too long */
+	{
+		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
+		return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+	}
 	opcode = *p++;
 
 	/* NULL byte prefixes            */
@@ -262,7 +267,11 @@ next_opcode:
 	if (!(flags & MODRM)) {goto end;}
 
 	/* error if instruction is too long */
-	if (!codelen--) return 0;
+	if (!codelen--)
+	{
+		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
+		return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+	}
 
 	opcode = *p++;
 
@@ -286,14 +295,22 @@ next_opcode:
 		/* SIB with no displacement: get value of sib.base */
 		if (rm == 0b100)
 		{
-			if (!codelen--) return 0; /* error if instruction is too long */
+			if (!codelen--) /* error if instruction is too long */
+			{
+				hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
+				return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+			}
 			rm = *p++ & 0b111;
 		}
 		/* displacement only */
 		if (mod == 0b00 && rm == 0b101) {memsize += DWORD;}
 	}
 end:
-	if (datasize + memsize > codelen) return 0; /* error if instruction is too long */
+	if (datasize + memsize > codelen) /* error if instruction is too long */
+	{
+		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
+		return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+	}
 
 	p += datasize + memsize;
 	return (void*)p - (void*)code;

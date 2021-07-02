@@ -11,7 +11,7 @@
 # include "accessors.h"
 
 # define NSHUFFLE		1
-# define NDIVISIONS		1
+# define NDIVISIONS		2
 # define NBLOCKS		POW2(NDIVISIONS)
 # define MAX_JUMPS		4096
 
@@ -51,6 +51,6 @@ struct				block_allocation
 	struct jump		*label_origins[MAX_JUMPS];
 };
 
-bool	disasm_block(struct block_allocation *blocks, void *code, size_t size);
+bool	disasm_block(struct block_allocation *block_alloc, struct safe_ptr input_code);
 
 #endif

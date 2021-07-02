@@ -24,6 +24,7 @@ void	log_virus_header(struct virus_header *vhdr);
 
 void	log_dvalue(int32_t value);
 void	log_uvalue(size_t value);
+void	log_separator(void);
 
 # else
 #  define log_try_infecting(...)
@@ -32,6 +33,7 @@ void	log_uvalue(size_t value);
 #  define log_virus_header(...)
 #  define log_dvalue(...)
 #  define log_uvalue(...)
+#  define log_separator(...)
 # endif
 
 #endif
