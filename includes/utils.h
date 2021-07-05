@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   utils.h                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/06/06 03:51:06 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/06/20 14:53:09 by ichkamo          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #ifndef UTILS_H
 # define UTILS_H
@@ -32,15 +21,26 @@ uint64_t	random(uint64_t *seed);
 uint64_t	random_inrange(uint64_t *seed, uint64_t lower, uint64_t upper);
 uint64_t	random_exrange(uint64_t *seed, uint64_t lower, uint64_t upper);
 
+# define JUMP32_INST_SIZE	5
+# define CALL32_INST_SIZE	5
+
+void		write_jump_arg(void *arg, int32_t value, uint8_t value_size);
+bool		write_jump(void *buffer, int32_t value, uint8_t value_size);
+
 # ifdef DEBUG
 
 int		putstr(const char *str);
 int		putchar(char c);
 void		putu64(uint64_t n);
 void		dput32(int32_t n);
+void		hexdump_text(const uint8_t *text, size_t size, size_t xsize);
 
 # else
 
+#  define putstr(...)
+#  define putchar(...)
+#  define putu64(...)
+#  define dput32(...)
 #  define hexdump_text(...)
 
 # endif

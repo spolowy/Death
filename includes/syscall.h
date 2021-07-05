@@ -1,17 +1,6 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   syscall.h                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jfortin <jfortin@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/06/04 22:36:02 by jfortin           #+#    #+#             */
-/*   Updated: 2019/12/22 21:17:15 by anselme          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
-#ifndef SYSCALL_PRIVATE
-# define SYSCALL_PRIVATE
+#ifndef SYSCALL_H
+# define SYSCALL_H
 
 #include <linux/unistd.h>
 #include <sys/stat.h>

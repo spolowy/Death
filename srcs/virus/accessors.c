@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   accessors.c                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/06/05 06:32:25 by agrumbac          #+#    #+#             */
-/*   Updated: 2021/06/15 16:24:06 by ichkamo          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -44,7 +33,7 @@ bool	free_accessor(struct safe_ptr *ref)
 }
 
 __warn_unused_result
-bool	init_original_safe(struct safe_ptr *accessor, const char *filename)
+bool	init_file_safe(struct safe_ptr *ref, const char *filename)
 {
 	void		*ptr;
 	struct stat	buf;
@@ -57,37 +46,36 @@ bool	init_original_safe(struct safe_ptr *accessor, const char *filename)
 	if (buf.st_mode & S_IFDIR)
 		{sys_close(fd); return errors(ERR_USAGE, _ERR_NOT_A_FILE);}
 	if ((ssize_t)(ptr = sys_mmap(0, buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0)) < 0)
-		{sys_close(fd); errors(ERR_SYS, _ERR_MMAP_FAILED);}
+		{sys_close(fd); return errors(ERR_SYS, _ERR_MMAP_FAILED);}
 	if (sys_close(fd))
 		return errors(ERR_SYS, _ERR_CLOSE_FAILED);
 
-	accessor->ptr  = ptr;
-	accessor->size = buf.st_size;
+	ref->ptr  = ptr;
+	ref->size = buf.st_size;
 	return true;
 }
 
 __warn_unused_result
-bool	init_clone_safe(struct safe_ptr *accessor, size_t original_filesize, \
-			size_t extra_size)
+bool	init_clone_safe(struct safe_ptr *ref, size_t file_size, size_t extra_size)
 {
-	accessor->size = original_filesize + extra_size;
-	accessor->ptr  = sys_mmap(0, accessor->size, \
+	ref->size = file_size + extra_size;
+	ref->ptr  = sys_mmap(0, ref->size, \
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 
-	if ((ssize_t)accessor->ptr < 0)
+	if ((ssize_t)ref->ptr < 0)
 		return errors(ERR_SYS, _ERR_MMAP_FAILED);
 
 	return true;
 }
 
 __warn_unused_result
-bool	write_file(const struct safe_ptr accessor, const char *filename)
+bool	write_file(struct safe_ptr ref, const char *filename)
 {
 	int	fd = sys_open(filename, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
 
 	if (fd < 0) return errors(ERR_SYS, _ERR_OPEN_FAILED);
 
-	if (sys_write(fd, accessor.ptr, accessor.size) < 0)
+	if (sys_write(fd, ref.ptr, ref.size) < 0)
 	{
 		sys_close(fd);
 		return errors(ERR_SYS, _ERR_CLOSE_FAILED);

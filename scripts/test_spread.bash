@@ -18,8 +18,6 @@ fi
 green='\033[32m'
 red='\033[31m'
 yellow='\033[33m'
-cyan='\033[36m'
-darkgrey='\033[90m'
 none='\033[0m'
 
 compile_mode="$1"

