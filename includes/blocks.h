@@ -11,7 +11,7 @@
 # include "accessors.h"
 
 # define NSHUFFLE		1
-# define NDIVISIONS		2
+# define NDIVISIONS		1
 # define NBLOCKS		POW2(NDIVISIONS)
 # define MAX_JUMPS		4096
 

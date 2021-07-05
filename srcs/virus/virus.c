@@ -1,23 +1,9 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   virus.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/06/07 06:36:21 by agrumbac          #+#    #+#             */
-/*   Updated: 2021/06/15 19:42:08 by ichkamo          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
-#include "compiler_utils.h"
 #include "virus.h"
-#include "log.h"
+#include "compiler_utils.h"
 
-void	virus(struct virus_header *vhdr)
+void	virus(const struct virus_header *vhdr)
 {
-	log_virus_header(vhdr);
-
 	const char *playgrounds[] =
 	{
 		(char[10]){'/','t','m','p','/','t','e','s','t','\0'},

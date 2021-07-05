@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   log.c                                              :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: anselme <anselme@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/12/20 23:16:08 by anselme           #+#    #+#             */
-/*   Updated: 2020/12/01 20:13:04 by ichkamo          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #ifdef DEBUG
 
@@ -60,7 +49,7 @@ void	log_all_seeds(const uint64_t father_seed, const uint64_t hdr_hash, const ui
 	putstr(newline);
 }
 
-void	log_virus_header(struct virus_header *vhdr)
+void	log_virus_header(const struct virus_header *vhdr)
 {
 	PD_ARRAY(char, newline, '\n',0);
 	PD_ARRAY(char, seed, '[','L','O','G',']',' ','s','e','e','d',':',' ',0);
@@ -68,32 +57,8 @@ void	log_virus_header(struct virus_header *vhdr)
 	PD_ARRAY(char, loader_entry, '[','L','O','G',']',' ','l','o','a','d','e','r','_','e','n','t','r','y',':',' ',0);
 
 	putstr(seed); putu64(vhdr->seed); putstr(newline);
-	putstr(virus_size); dput32(vhdr->virus_size); putstr(newline);
+	putstr(virus_size); dput32(vhdr->full_virus_size); putstr(newline);
 	putstr(loader_entry); putu64((size_t)vhdr->loader_entry); putstr(newline);
-}
-
-void	log_dvalue(int32_t value)
-{
-	PD_ARRAY(char, newline, '\n',0);
-	PD_ARRAY(char, d, '[','L','O','G',']',' ','v','a','l','u','e',':',' ',0);
-
-	putstr(d); dput32(value); putstr(newline);
-}
-
-void	log_uvalue(size_t value)
-{
-	PD_ARRAY(char, newline, '\n',0);
-	PD_ARRAY(char, d, '[','L','O','G',']',' ','v','a','l','u','e',':',' ',0);
-
-	putstr(d); putu64(value); putstr(newline);
-}
-
-void	log_separator(void)
-{
-	PD_ARRAY(char, newline, '\n',0);
-	PD_ARRAY(char, s, '[','L','O','G',']','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-',0);
-
-	putstr(s); putstr(newline);
 }
 
 #endif

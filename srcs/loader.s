@@ -1,14 +1,3 @@
-; **************************************************************************** ;
-;                                                                              ;
-;                                                         :::      ::::::::    ;
-;    loader.s                                           :+:      :+:    :+:    ;
-;                                                     +:+ +:+         +:+      ;
-;    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         ;
-;                                                 +#+#+#+#+#+   +#+            ;
-;    Created: 2019/02/11 14:08:33 by agrumbac          #+#    #+#              ;
-;    Updated: 2021/06/15 19:40:20 by ichkamo          ###   ########.fr        ;
-;                                                                              ;
-; **************************************************************************** ;
 
 section .text
 	global loader_entry
@@ -80,14 +69,8 @@ jump_back_to_client:
 loader_exit:
 
 virus_header_struct:
-	; db 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55 ; virus seed (placeholder)
-	; db 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66 ; virus size (placeholder)
-	; db 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77 ; loader entry (placeholder)
 	db 0xD5, 0xEE, 0xF5, 0xE1, 0xAD, 0xDB, 0xDE, 0xFA ; virus seed (placeholder)
 	dq loader_entry                                   ; virus size (placeholder)
 	dq loader_entry                                   ; loader entry (placeholder)
 end_virus_header:
 	db "Warning : Copyrighted Virus by __UNICORNS_OF_THE_APOCALYPSE__ <3"
-
-
-; 127905555555555

