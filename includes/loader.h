@@ -20,6 +20,7 @@ struct			virus_header
 	size_t		dist_virus_loader;
 	size_t		dist_vircall_loader;
 	size_t		dist_header_loader;
+	size_t		dist_client_loader;
 }__attribute__((packed));
 
 void		virus_header_struct(void);

@@ -402,12 +402,3 @@ bool		permutate_blocks(struct safe_ptr virus_ref,   \
 #endif
 	return true;
 }
-
-/*
---------------------------------------------------------------------------------
-
-=> 0x42ef19
-=> 0x41da64
-=> 70837
-
-*/
