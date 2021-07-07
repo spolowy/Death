@@ -4,7 +4,7 @@
 
 # ifdef DEBUG
 
-# include "loader.h"
+# include "virus_header.h"
 
 void	log_try_infecting(const char *file);
 void	log_success(void);

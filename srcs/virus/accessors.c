@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 
 #include "accessors.h"
-#include "loader.h"
+#include "virus_header.h"
 #include "syscall.h"
 #include "errors.h"
 #include "compiler_utils.h"
@@ -69,8 +69,12 @@ bool	init_clone_safe(struct safe_ptr *ref, size_t file_size, size_t extra_size)
 }
 
 __warn_unused_result
-bool	write_file(struct safe_ptr ref, const char *filename)
+bool	write_file(struct safe_ptr ref, size_t size, const char *filename)
 {
+	void	*ptr = safe(ref, 0, size);
+
+	if (ptr == NULL) return errors(ERR_THROW, _ERR_T_WRITE_FILE);
+
 	int	fd = sys_open(filename, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
 
 	if (fd < 0) return errors(ERR_SYS, _ERR_OPEN_FAILED);

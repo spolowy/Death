@@ -19,6 +19,8 @@
 #  define _ERR_ADD_TRAILING_JUMP       PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','d','_','t','r','a','i','l','i','n','g','_','j','u','m','p','\n','\033','[','0','m',0)
 #  define _ERR_BAD_TRAILING_JUMP       PD_ARRAY(char,_err_text,'\033','[','3','3','m','t','r','a','i','l','i','n','g',' ','j','u','m','p',' ','v','a','l','u','e',' ','d','o','e','s','n','\'','t',' ','m','a','t','c','h',' ','d','e','s','t','i','n','a','t','i','o','n','\n','\033','[','0','m',0)
 
+#  define _ERR_T_WRITE_FILE            PD_ARRAY(char,_err_text,'\033','[','3','3','m','w','r','i','t','e','_','f','i','l','e','\n','\033','[','0','m',0)
+
 #  define _ERR_CANT_SPLIT_MORE         PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','t','_','s','p','l','i','t','_','m','o','r','e','\n','\033','[','0','m',0)
 #  define _ERR_RECURSIVE_SPLIT_BLOCKS  PD_ARRAY(char,_err_text,'\033','[','3','3','m','r','e','c','u','r','s','i','v','e','_','s','p','l','i','t','_','b','l','o','c','k','s','\n','\033','[','0','m',0)
 #  define _ERR_SHARD_BLOCK             PD_ARRAY(char,_err_text,'\033','[','3','3','m','s','h','a','r','d','_','b','l','o','c','k','\n','\033','[','0','m',0)

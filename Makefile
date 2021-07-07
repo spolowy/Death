@@ -6,7 +6,7 @@
 #    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/04/10 17:19:11 by agrumbac          #+#    #+#              #
-#    Updated: 2020/12/01 13:36:41 by ichkamo          ###   ########.fr        #
+#    Updated: 2021/07/07 23:34:39 by ichkamo          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -62,12 +62,10 @@ override CFLAGS += -Wall -Wextra -MMD\
 	-fno-stack-protector \
 	-nodefaultlibs \
 	-fno-builtin -nostdlib -fpic
-	# -fsanitize=address,undefined
 
 override ASFLAGS += -f elf64
 
 LDFLAGS = -Iincludes/ -nostdlib -fpic
-	# -fsanitize=address,undefined
 
 ############################## COLORS ##########################################
 

