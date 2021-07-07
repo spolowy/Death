@@ -1,7 +1,7 @@
 
 #ifdef DEBUG
 
-#include "loader.h"
+#include "virus_header.h"
 #include "utils.h"
 #include "position_independent.h"
 

