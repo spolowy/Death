@@ -151,9 +151,23 @@ static bool	shard_block(struct code_block *blocks[NBLOCKS], \
 	if (!recursive_split_blocks(blocks_mem, NDIVISIONS, seed))
 		return errors(ERR_THROW, _ERR_SHARD_BLOCK);
 
+	struct code_block	**previous_block_trailing_block = NULL;
+
 	for (size_t i = 0; i < NBLOCKS; i++)
 	{
 		blocks[i] = &blocks_mem[i];
+
+		// skip over empty blocks
+		if (blocks_mem[i].ref.size == 0)
+		{
+			if (previous_block_trailing_block)
+				*previous_block_trailing_block = blocks_mem[i].trailing_block;
+			blocks_mem[i].trailing_block = NULL;
+		}
+		else
+		{
+			previous_block_trailing_block = &blocks_mem[i].trailing_block;
+		}
 	}
 	return true;
 }
