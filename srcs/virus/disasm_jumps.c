@@ -106,6 +106,10 @@ size_t		disasm_jumps(struct control_flow *buf, size_t buflen,
 		p_code  += instruction_length;
 		codelen -= instruction_length;
 	}
+
+	// if bufflen reached 0 but not codelen, MAX_JUMPS is too small
+	if (codelen != 0) return errors(ERR_VIRUS, _ERR_MAX_JUMP_TOO_SMALL);
+
 	/* number of control flow instructions successfully disassembled */
 	return p_buf - buf;
 }

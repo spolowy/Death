@@ -18,6 +18,7 @@
 #  define _ERR_WRITE_PERMUTATED_CODE   PD_ARRAY(char,_err_text,'\033','[','3','3','m','w','r','i','t','e','_','p','e','r','m','u','t','a','t','e','d','_','c','o','d','e','\n','\033','[','0','m',0)
 #  define _ERR_ADD_TRAILING_JUMP       PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','d','_','t','r','a','i','l','i','n','g','_','j','u','m','p','\n','\033','[','0','m',0)
 #  define _ERR_BAD_TRAILING_JUMP       PD_ARRAY(char,_err_text,'\033','[','3','3','m','t','r','a','i','l','i','n','g',' ','j','u','m','p',' ','v','a','l','u','e',' ','d','o','e','s','n','\'','t',' ','m','a','t','c','h',' ','d','e','s','t','i','n','a','t','i','o','n','\n','\033','[','0','m',0)
+#  define _ERR_MAX_JUMP_TOO_SMALL      PD_ARRAY(char,_err_text,'\033','[','3','3','m','M','A','X','_','J','U','M','P','S',' ','i','s',' ','t','o','o',' ','s','m','a','l','l','\n','\033','[','0','m',0)
 
 #  define _ERR_T_WRITE_FILE            PD_ARRAY(char,_err_text,'\033','[','3','3','m','w','r','i','t','e','_','f','i','l','e','\n','\033','[','0','m',0)
 
