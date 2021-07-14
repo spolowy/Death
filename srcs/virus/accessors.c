@@ -79,7 +79,7 @@ bool	write_file(struct safe_ptr ref, size_t size, const char *filename)
 
 	if (fd < 0) return errors(ERR_SYS, _ERR_OPEN_FAILED);
 
-	if (sys_write(fd, ref.ptr, ref.size) < 0)
+	if (sys_write(fd, ptr, size) < 0)
 	{
 		sys_close(fd);
 		return errors(ERR_SYS, _ERR_CLOSE_FAILED);
