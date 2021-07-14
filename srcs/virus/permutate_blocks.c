@@ -74,7 +74,7 @@ static void	split_jumps(struct code_block *origin, struct code_block *half)
 	const void		*half_location = half->ref.ptr;
 	size_t			i = 0;
 
-	while (jumps[i].location < half_location && jumps[i].location)
+	while (jumps[i].location < half_location && i < origin->njumps)
 		i++;
 
 	half->jumps = origin->jumps + i;
@@ -88,7 +88,7 @@ static void	split_labels(struct code_block *origin, struct code_block *half)
 	const void		*half_location = half->ref.ptr;
 	size_t			i = 0;
 
-	while (labels[i].location < half_location && labels[i].location)
+	while (labels[i].location < half_location && i < origin->nlabels)
 		i++;
 
 	half->labels = origin->labels + i;
