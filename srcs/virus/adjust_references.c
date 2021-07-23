@@ -13,7 +13,7 @@ static bool	shift_phdr_position(struct safe_ptr ref, size_t offset, void *data)
 	struct closure_data	*scope = data;
 	Elf64_Phdr		*phdr  = safe(ref, offset, sizeof(Elf64_Phdr));
 
-	if (phdr == NULL) return errors(ERR_FILE, _ERR_BAD_PHDR_OFF);
+	if (phdr == NULL) return errors(ERR_FILE, _ERR_F_BAD_PHDR_OFF);
 
 	Elf64_Off	p_offset = phdr->p_offset;
 
@@ -30,7 +30,7 @@ static bool	shift_shdr_position(struct safe_ptr ref, size_t offset, void *data)
 	struct closure_data 	*scope = data;
 	Elf64_Shdr		*shdr  = safe(ref, offset, sizeof(Elf64_Shdr));
 
-	if (shdr == NULL) return errors(ERR_FILE, _ERR_BAD_SHDR_OFF);
+	if (shdr == NULL) return errors(ERR_FILE, _ERR_F_BAD_SHDR_OFF);
 
 	Elf64_Off	sh_offset = shdr->sh_offset;
 
@@ -79,15 +79,15 @@ bool		adjust_references(struct safe_ptr clone_ref, \
 
 	Elf64_Ehdr	*elf_hdr = safe(clone_ref, 0, sizeof(Elf64_Ehdr));
 #ifdef DEBUG
-	if (elf_hdr == NULL) return errors(ERR_FILE, _ERR_CANT_READ_ELFHDR);
+	if (elf_hdr == NULL) return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
 #endif
 	adjust_phdr_table_offset(elf_hdr, shift_amount, end_of_last_section);
 	adjust_shdr_table_offset(elf_hdr, shift_amount, end_of_last_section);
 
 	if (!foreach_phdr(clone_ref, shift_phdr_position, &scope))
-		return errors(ERR_THROW, _ERR_ADJUST_REFERENCES);
+		return errors(ERR_THROW, _ERR_T_ADJUST_REFERENCES);
 	if (!foreach_shdr(clone_ref, shift_shdr_position, &scope))
-		return errors(ERR_THROW, _ERR_ADJUST_REFERENCES);
+		return errors(ERR_THROW, _ERR_T_ADJUST_REFERENCES);
 
 	return true;
 }

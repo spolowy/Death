@@ -235,7 +235,7 @@ static void	implicit_register(uint8_t *opcode,                            \
 static bool	extended_opcode(uint8_t **p, size_t *codelen, uint32_t matches[NREGISTERS], uint8_t rex_b)
 {
 	/* error if instruction is too long */
-	if (!*codelen--) return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+	if (!*codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
 
 	uint8_t		*modrm = *p++;
 	uint8_t		reg    = (*modrm & 0b00111000) >> 3;
@@ -255,7 +255,7 @@ static bool	modrm(uint8_t **p, size_t *codelen,   \
 			uint8_t rex_r, uint8_t rex_b)
 {
 	/* error if instruction is too long */
-	if (!*codelen--) return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+	if (!*codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
 
 	uint8_t	*modrm  = *p++;
 	uint8_t	mod     = (*modrm & 0b11000000) >> 6;
@@ -280,7 +280,7 @@ indirect_register:
 	if (rm == 0b100) /* SIB */
 	{
 		/* error if instruction is too long */
-		if (!codelen--) return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+		if (!codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
 
 		uint8_t	*sib      = *p++;
 		uint8_t	index     = (*sib & 0b00111000) >> 3;
@@ -313,7 +313,7 @@ indirect_register_displacement:
 
 	if (rm == 0b100) /* SIB with displacement */
 	{
-		if (!codelen--) return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH); /* error if instruction is too long */
+		if (!codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH); /* error if instruction is too long */
 		uint8_t	*sib      = *p++;
 		uint8_t	index     = (*sib & 0b00111000) >> 3;
 		uint8_t	base      =  *sib & 0b00000111;
@@ -351,7 +351,7 @@ static bool	apply_match(void *code, size_t codelen, uint32_t matches[NREGISTERS]
 
 next_opcode:
 	if (!codelen--) /* error if instruction is too long */
-		return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+		return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
 	opcode = p++;
 
 	/* NULL byte prefixes               */
@@ -387,11 +387,11 @@ next_opcode:
 
 	else if (i.status & EXTENDED
 	&& !extended_opcode(&p, &codelen, matches, rex_b))
-		return errors(ERR_THROW, _ERR_EXTENDED_OPCODE);
+		return errors(ERR_THROW, _ERR_T_EXTENDED_OPCODE);
 
 	else if (i.status & MODRM
 	&& !modrm(&p, &codelen, matches, rex_r, rex_b))
-		return errors(ERR_THROW, _ERR_MODRM);
+		return errors(ERR_THROW, _ERR_T_MODRM);
 end:
 	return true;
 }
@@ -408,7 +408,7 @@ static inline bool	apply_matches(struct safe_ptr ref, uint32_t matches[NREGISTER
 		size_t	instruction_length = disasm_length(code, codelen);
 		if (instruction_length == 0
 		|| !apply_match(code, instruction_length, matches))
-			return errors(ERR_THROW, _ERR_PERMUTATE_REGISTERS);
+			return errors(ERR_THROW, _ERR_T_PERMUTATE_REGISTERS);
 
 		code    += instruction_length;
 		codelen -= instruction_length;

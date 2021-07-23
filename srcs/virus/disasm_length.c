@@ -206,7 +206,7 @@ next_opcode:
 	if (!codelen--) /* error if instruction is too long */
 	{
 		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
-		return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+		goto error;
 	}
 	opcode = *p++;
 
@@ -270,7 +270,7 @@ next_opcode:
 	if (!codelen--)
 	{
 		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
-		return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+		goto error;
 	}
 
 	opcode = *p++;
@@ -298,7 +298,7 @@ next_opcode:
 			if (!codelen--) /* error if instruction is too long */
 			{
 				hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
-				return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+				goto error;
 			}
 			rm = *p++ & 0b111;
 		}
@@ -309,9 +309,11 @@ end:
 	if (datasize + memsize > codelen) /* error if instruction is too long */
 	{
 		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
-		return errors(ERR_VIRUS, _ERR_INSTRUCTION_LENGTH);
+		goto error;
 	}
 
 	p += datasize + memsize;
 	return (void*)p - (void*)code;
+error:
+	return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
 }

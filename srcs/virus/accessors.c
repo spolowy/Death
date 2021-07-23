@@ -27,7 +27,7 @@ bool	free_accessor(struct safe_ptr *ref)
 	if (ref->ptr)
 	{
 		if (sys_munmap(ref->ptr, ref->size) != 0)
-			return errors(ERR_SYS, _ERR_MUNMAP_FAILED);
+			return errors(ERR_SYS, _ERR_S_MUNMAP_FAILED);
 	}
 	return true;
 }
@@ -40,15 +40,15 @@ bool	init_file_safe(struct safe_ptr *ref, const char *filename)
 	int		fd = sys_open(filename, O_RDONLY);
 
 	if (fd < 0)
-		return errors(ERR_SYS, _ERR_OPEN_FAILED);
+		return errors(ERR_SYS, _ERR_S_OPEN_FAILED);
 	if (sys_fstat(fd, &buf) < 0)
-		{sys_close(fd); return errors(ERR_SYS, _ERR_FSTAT_FAILED);}
+		{sys_close(fd); return errors(ERR_SYS, _ERR_S_FSTAT_FAILED);}
 	if (buf.st_mode & S_IFDIR)
-		{sys_close(fd); return errors(ERR_USAGE, _ERR_NOT_A_FILE);}
+		{sys_close(fd); return errors(ERR_USAGE, _ERR_U_NOT_A_FILE);}
 	if ((ssize_t)(ptr = sys_mmap(0, buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0)) < 0)
-		{sys_close(fd); return errors(ERR_SYS, _ERR_MMAP_FAILED);}
+		{sys_close(fd); return errors(ERR_SYS, _ERR_S_MMAP_FAILED);}
 	if (sys_close(fd))
-		return errors(ERR_SYS, _ERR_CLOSE_FAILED);
+		return errors(ERR_SYS, _ERR_S_CLOSE_FAILED);
 
 	ref->ptr  = ptr;
 	ref->size = buf.st_size;
@@ -63,7 +63,7 @@ bool	init_clone_safe(struct safe_ptr *ref, size_t file_size, size_t extra_size)
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 
 	if ((ssize_t)ref->ptr < 0)
-		return errors(ERR_SYS, _ERR_MMAP_FAILED);
+		return errors(ERR_SYS, _ERR_S_MMAP_FAILED);
 
 	return true;
 }
@@ -77,12 +77,12 @@ bool	write_file(struct safe_ptr ref, size_t size, const char *filename)
 
 	int	fd = sys_open(filename, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
 
-	if (fd < 0) return errors(ERR_SYS, _ERR_OPEN_FAILED);
+	if (fd < 0) return errors(ERR_SYS, _ERR_S_OPEN_FAILED);
 
 	if (sys_write(fd, ptr, size) < 0)
 	{
 		sys_close(fd);
-		return errors(ERR_SYS, _ERR_CLOSE_FAILED);
+		return errors(ERR_SYS, _ERR_S_CLOSE_FAILED);
 	}
 
 	sys_close(fd);

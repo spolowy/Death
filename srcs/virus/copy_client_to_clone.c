@@ -9,8 +9,8 @@ static bool	copy_until_end_of_last_sect(struct safe_ptr clone_ref, struct safe_p
 	void	*original = safe(file_ref, 0, end_of_last_section);
 	void	*clone    = safe(clone_ref, 0, end_of_last_section);
 
-	if (!original) return errors(ERR_FILE, _ERR_NO_ORIGINAL_FILE_BEGIN);
-	if (!clone) return errors(ERR_FILE, _ERR_NO_CLONE_FILE_BEGIN);
+	if (!original) return errors(ERR_FILE, _ERR_F_NO_ORIGINAL_FILE_BEGIN);
+	if (!clone) return errors(ERR_FILE, _ERR_F_NO_CLONE_FILE_BEGIN);
 
 	memcpy(clone, original, end_of_last_section);
 	return true;
@@ -24,8 +24,8 @@ static bool	copy_after_payload(struct safe_ptr clone_ref, struct safe_ptr file_r
 	void	*original = safe(file_ref, end_of_last_section, size_after_last_sect);
 	void	*clone    = safe(clone_ref, end_of_last_section + shift_amount, size_after_last_sect);
 
-	if (!original) return errors(ERR_FILE, _ERR_NO_ORIGINAL_FILE_END);
-	if (!clone) return errors(ERR_FILE, _ERR_NO_CLONE_FILE_END);
+	if (!original) return errors(ERR_FILE, _ERR_F_NO_ORIGINAL_FILE_END);
+	if (!clone) return errors(ERR_FILE, _ERR_F_NO_CLONE_FILE_END);
 
 	memcpy(clone, original, size_after_last_sect);
 	return true;
@@ -37,7 +37,7 @@ bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr file_ref, 
 	if (!copy_until_end_of_last_sect(clone_ref, file_ref, end_of_last_section)
 	|| !copy_after_payload(clone_ref, file_ref, end_of_last_section, shift_amount))
 	{
-		return errors(ERR_THROW, _ERR_COPY_TO_CLONE);
+		return errors(ERR_THROW, _ERR_T_COPY_CLIENT_TO_CLONE);
 	}
 	return true;
 }

