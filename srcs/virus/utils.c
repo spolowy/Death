@@ -108,7 +108,7 @@ uint64_t	hash(const char *buff, size_t buffsize)
 	return state;
 }
 
-#ifdef DEBUG
+#if defined(LOGS) || defined(ERRORS) || defined(DEBUG)
 
 int             putchar(char c)
 {

@@ -4,9 +4,9 @@
 #include "accessors.h"
 #include "disasm.h"
 #include "utils.h"
-#include "errors.h"
 #include "disasm_utils.h"
 #include "compiler_utils.h"
+#include "errors.h"
 
 # define NSHUFFLE		42
 /*

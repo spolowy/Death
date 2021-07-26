@@ -2,7 +2,7 @@
 #ifndef ERRORS_H
 # define ERRORS_H
 
-# ifdef DEBUG
+# ifdef ERRORS
 
 #  include "utils.h"
 #  include "position_independent.h"

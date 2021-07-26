@@ -2,9 +2,9 @@
 #include "blocks.h"
 #include "accessors.h"
 #include "disasm.h"
-#include "errors.h"
-#include "visual.h"
 #include "utils.h"
+#include "errors.h"
+#include "debug.h"
 
 /*
 ** sort_by_label_addr
@@ -112,10 +112,7 @@ bool	disasm_block(struct block_allocation *block_alloc, struct safe_ptr input_co
 		block_alloc->label_origins[i] = &block_alloc->jumps[i];
 
 	assign_labels(block_alloc->labels, block_alloc->label_origins, &block_alloc->blocks[0], jumps_info, njumps);
-
-#ifdef DEBUG
-	// print_original_block(block_alloc->blocks);
-#endif
+	debug_print_original_block(block_alloc->blocks);
 
 	return true;
 }

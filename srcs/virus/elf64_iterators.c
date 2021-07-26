@@ -1,7 +1,7 @@
 
 #include "accessors.h"
-#include "errors.h"
 #include "virus.h"
+#include "errors.h"
 
 bool	foreach_phdr(struct safe_ptr ref, f_iter_callback callback, void *data)
 {

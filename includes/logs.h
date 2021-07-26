@@ -1,8 +1,8 @@
 
-#ifndef LOG_H
-# define LOG_H
+#ifndef LOGS_H
+# define LOGS_H
 
-# ifdef DEBUG
+# ifdef LOGS
 
 # include "virus_header.h"
 

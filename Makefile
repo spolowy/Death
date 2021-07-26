@@ -34,7 +34,7 @@ SRC =	loader.s                       \
 	virus/generate_seed.c          \
 	virus/infect.c                 \
 	virus/infection_engine.c       \
-	virus/log.c                    \
+	virus/logs.c                   \
 	virus/metamorph_clone.c        \
 	virus/permutate_blocks.c       \
 	virus/permutate_registers.c    \
@@ -114,8 +114,17 @@ ${OBJDIR}/%.o: ${SRCDIR}/%.c
 
 ############################### DEBUG ##########################################
 
+logs: fclean
+	${MAKE} all CFLAGS:="-DLOGS -g" ASFLAGS:="-DLOGS -g"
+
+errors: fclean
+	${MAKE} all CFLAGS:="-DERRORS -g" ASFLAGS:="-DERRORS -g"
+
 debug: fclean
-	${MAKE} all CFLAGS:="-DDEBUG -g" ASFLAGS:="-dDEBUG -g"
+	${MAKE} all CFLAGS:="-DDEBUG -g" ASFLAGS:="-DDEBUG -g"
+
+verbose: fclean
+	${MAKE} all CFLAGS:="-DLOGS -DERRORS -DDEBUG -g" ASFLAGS:="-DLOGS -DERRORS -DDEBUG -g"
 
 test:
 	cd tests/ && bash test.bash

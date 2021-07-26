@@ -7,7 +7,7 @@
 #include "virus_header.h"
 #include "utils.h"
 #include "errors.h"
-#include "log.h"
+#include "logs.h"
 
 static bool	compute_elf_hdr_hash(uint64_t *hdr_hash, struct safe_ptr file_ref)
 {

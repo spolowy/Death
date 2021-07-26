@@ -3,8 +3,7 @@
 #include "virus.h"
 #include "utils.h"
 #include "errors.h"
-#include "log.h"
-#include "compiler_utils.h" // TODO tmp for ALIGN(virus_size)
+#include "logs.h"
 
 static bool	is_elf64(const char *file)
 {

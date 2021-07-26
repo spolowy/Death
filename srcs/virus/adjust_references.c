@@ -78,9 +78,9 @@ bool		adjust_references(struct safe_ptr clone_ref, \
 	scope.end_of_last_section = end_of_last_section;
 
 	Elf64_Ehdr	*elf_hdr = safe(clone_ref, 0, sizeof(Elf64_Ehdr));
-#ifdef DEBUG
+
 	if (elf_hdr == NULL) return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
-#endif
+
 	adjust_phdr_table_offset(elf_hdr, shift_amount, end_of_last_section);
 	adjust_shdr_table_offset(elf_hdr, shift_amount, end_of_last_section);
 

