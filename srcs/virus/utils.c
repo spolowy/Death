@@ -71,19 +71,13 @@ char	*strcpy(char *dst, const char *src)
 	return dst;
 }
 
-void            *memset(void *b, int c, unsigned long len)
+void            *memset(void *s, int c, unsigned long n)
 {
-	unsigned long   m;
-	unsigned char   *r;
+	char	*p = s;
 
-	m = len >> 3;
-	r = b + (m << 3);
-	while (m--)
-		((unsigned long*)b)[m] = c;
-	len &= 7;
-	while (len--)
-		r[len] = c;
-	return (b);
+	for (size_t i = 0; i < n; i++)
+		p[i] = c;
+	return s;
 }
 
 uint64_t	checksum(const char *buff, size_t buffsize)

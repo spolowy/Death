@@ -16,6 +16,7 @@ struct			virus_header
 	size_t		dist_vircall_loader;
 	size_t		dist_header_loader;
 	size_t		dist_client_loader;
+	size_t		dist_nopsled_loader;
 }__attribute__((packed));
 
 #endif
