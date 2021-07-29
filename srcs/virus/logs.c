@@ -1,4 +1,3 @@
-
 #ifdef LOGS
 
 # include "virus_header.h"

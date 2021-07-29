@@ -1,12 +1,10 @@
-
 #include <sys/types.h>
 #include <stdint.h>
 #include <stddef.h>
-
 #include "position_independent.h"
-#include "syscall.h"
+#include "syscalls.h"
 
-void	bzero(void *ptr, size_t size)
+void		bzero(void *ptr, size_t size)
 {
 	char *tmp = ptr;
 
@@ -14,7 +12,7 @@ void	bzero(void *ptr, size_t size)
 		tmp[i] = 0;
 }
 
-int	memcmp(const void *s1, const void *s2, size_t n)
+int		memcmp(const void *s1, const void *s2, size_t n)
 {
 	size_t			i;
 	const unsigned char	*ch_s1;
@@ -32,17 +30,16 @@ int	memcmp(const void *s1, const void *s2, size_t n)
 	return (0);
 }
 
-size_t	strlen(const char *s)
+size_t		strlen(const char *s)
 {
-	char	*p;
+	char	*p = (char*)s;
 
-	p = (char*)s;
-	while (*p)
-		++p;
+	while (*p) {p++;}
+
 	return (p - s);
 }
 
-void	*memcpy(void *dst, void *src, size_t n)
+void		*memcpy(void *dst, void *src, size_t n)
 {
 	unsigned char *dest;
 	unsigned char *source;
@@ -58,7 +55,7 @@ void	*memcpy(void *dst, void *src, size_t n)
 	return dst;
 }
 
-char	*strcpy(char *dst, const char *src)
+char		*strcpy(char *dst, const char *src)
 {
 	int i = 0;
 
@@ -71,7 +68,7 @@ char	*strcpy(char *dst, const char *src)
 	return dst;
 }
 
-void            *memset(void *b, int c, unsigned long len)
+void		*memset(void *b, int c, unsigned long len)
 {
 	unsigned long   m;
 	unsigned char   *r;
@@ -110,7 +107,7 @@ uint64_t	hash(const char *buff, size_t buffsize)
 
 #if defined(LOGS) || defined(ERRORS) || defined(DEBUG)
 
-int             putchar(char c)
+int		putchar(char c)
 {
 	return (sys_write(1, &c, 1));
 }
@@ -120,7 +117,7 @@ int             putstr(const char *s)
 	return (sys_write(1, s, strlen(s)));
 }
 
-void   		putu64(uint64_t n)
+void		putu64(uint64_t n)
 {
 	PD_ARRAY(char, letter, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F');
 
@@ -135,7 +132,7 @@ void   		putu64(uint64_t n)
 	}
 }
 
-void   		dput32(int32_t n)
+void		dput32(int32_t n)
 {
 	PD_ARRAY(char, letter, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
 

@@ -1,14 +1,13 @@
-
 #include "disasm_utils.h"
 #include "utils.h"
 #include "bytes.h"
 #include "errors.h"
 
-/* opcode flags  */
-# define MODRM		(1 << 0)            /* MODRM byte       */
-# define TEST_F6	(1 << 1)            /* <test> exception */
-# define TEST_F7	(1 << 2)            /* <test> exception */
-# define TEST		(TEST_F6 | TEST_F7)
+// opcode flags
+#define MODRM		(1 << 0)            // MODRM byte
+#define TEST_F6		(1 << 1)            // <test> exception
+#define TEST_F7		(1 << 2)            // <test> exception
+#define TEST		(TEST_F6 | TEST_F7)
 
 /*
 ** Disassemble an instruction pointed by <code> for a maximum
@@ -188,52 +187,52 @@ uint8_t		disasm_length(const void *code, size_t codelen)
 	table_0f_opcode_imm16_32[7]      = BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* e */
 						     0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0); /* f */
 
-	size_t		defmem   = DWORD;       /* memory size defined  */
-	size_t		defdata  = DWORD;       /* operand size defined */
-	size_t		memsize  = 0;           /* current memory size  */
-	size_t		datasize = 0;           /* current data size    */
-	int8_t		prefix   = 0;           /* opcode prefix(es)    */
-	int8_t		flags    = 0;           /* flag(s)              */
-	bool		rex      = false;       /* has REX prefix       */
+	size_t		defmem   = DWORD;       // memory size defined
+	size_t		defdata  = DWORD;       // operand size defined
+	size_t		memsize  = 0;           // current memory size
+	size_t		datasize = 0;           // current data size
+	int8_t		prefix   = 0;           // opcode prefix(es)
+	int8_t		flags    = 0;           // flag(s)
+	bool		rex      = false;       // has REX prefix
 
 	uint8_t		*p = (uint8_t*)code;
-	uint8_t		opcode;                 /* current opcode       */
+	uint8_t		opcode;                 // current opcode
 
-	/* set <codelen> to INSTRUCTION_MAXLEN if it exceeds it */
+	// set <codelen> to INSTRUCTION_MAXLEN if it exceeds it
 	if (codelen > INSTRUCTION_MAXLEN) codelen = INSTRUCTION_MAXLEN;
 
 next_opcode:
-	if (!codelen--) /* error if instruction is too long */
+	if (!codelen--) // error if instruction is too long
 	{
 		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
 		goto error;
 	}
 	opcode = *p++;
 
-	/* NULL byte prefixes            */
+	// NULL byte prefixes
 	if ((opcode == 0x26 || opcode == 0x2e
 	||   opcode == 0x36 || opcode == 0x3e
-	/* FS/GS segment override prefix */
+	// FS/GS segment override prefix
 	||   opcode == 0x64 || opcode == 0x65
-	/* REX without W(idth) field     */
+	// REX without W(idth) field
 	||  (opcode >= 0x40 && opcode <= 0x47)
-	/* assert LOCK# signal prefix    */
+	// assert LOCK# signal prefix
 	||   opcode == 0xf0)
 	&&  !(prefix))
 		{goto next_opcode;}
 
-	/* mandatory prefix for two-byte opcode              */
+	// mandatory prefix for two-byte opcode
 	else if (opcode == 0x0f) {prefix |= OP_PREFIX_0F; goto next_opcode;}
-	/* address size overwrite: set memory size to 32-bit */
+	// address size overwrite: set memory size to 32-bit
 	else if (opcode == 0x67) {defmem  = WORD; goto next_opcode;}
-	/* operand size overwrite: set operand size to 16-bit */
+	// operand size overwrite: set operand size to 16-bit
 	else if (opcode == 0x66) {defdata = WORD; goto next_opcode;}
-	/* operand size overwrite: REX.W 64-bit operand size */
+	// operand size overwrite: REX.W 64-bit operand size
 	else if (opcode >= 0x48 && opcode <= 0x4f)
 		{rex = true; goto next_opcode;}
 
-	/* select a table according to mapping */
-	if (prefix == MAP_0F)  /* 0x0f <opcode> */
+	// select a table according to mapping
+	if (prefix == MAP_0F)  // 0x0f <opcode>
 	{
 		if (CHECK_TABLE(table_0f_opcode_modrm, opcode))
 			{flags |= MODRM;}
@@ -242,31 +241,31 @@ next_opcode:
 		if (CHECK_TABLE(table_0f_opcode_imm16_32, opcode))
 			{datasize += defdata;}
 	}
-	else                   /* <opcode> */
+	else                   // <opcode>
 	{
-		/* exception: 64-bit immediates */
+		// exception: 64-bit immediates
 		if (CHECK_TABLE(table_opcode_imm64, opcode) && (rex == true))
 			{defdata = QWORD;}
-		/* possess MODRM byte          */
+		// possess MODRM byte
 		if (CHECK_TABLE(table_opcode_modrm, opcode))
 			{flags |= MODRM;}
-		/* direct memory offset        */
+		// direct memory offset
 		if (CHECK_TABLE(table_opcode_mem16_32, opcode))
 			{memsize += defmem;}
-		/* immediate values            */
+		// immediate values
 		if (CHECK_TABLE(table_opcode_imm8, opcode))
 			{datasize += BYTE;}
 		if (CHECK_TABLE(table_opcode_imm16_32, opcode))
 			{datasize += defdata;}
-		/* exception: <test>            */
+		// exception: <test>
 		if      (opcode == 0xf6) {flags |= TEST_F6;}
 		else if (opcode == 0xf7) {flags |= TEST_F7;}
 	}
 
-	/* end if has no modrm byte */
+	// end if has no modrm byte
 	if (!(flags & MODRM)) {goto end;}
 
-	/* error if instruction is too long */
+	// error if instruction is too long
 	if (!codelen--)
 	{
 		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
@@ -279,34 +278,34 @@ next_opcode:
 	uint8_t		reg = (opcode & 0b00111000) >> 3;
 	uint8_t		rm  = (opcode & 0b00000111);
 
-	/* <test> exception */
+	// <test> exception
 	if ((flags & TEST) && (reg == 0b000 || reg == 0b001))
 		{datasize += flags & TEST_F7 ? defdata : BYTE;}
 
-	if      (mod == 0b11) {goto end;}          /* direct register addressing */
-	else if (mod == 0b10) {memsize += defmem;} /* DWORD signed displacement  */
-	else if (mod == 0b01) {memsize += BYTE;}   /* BYTE signed displacement   */
+	if      (mod == 0b11) {goto end;}          // direct register addressing
+	else if (mod == 0b10) {memsize += defmem;} // DWORD signed displacement
+	else if (mod == 0b01) {memsize += BYTE;}   // BYTE signed displacement
 
-	/* 16-bit mode: (no SIB byte) and displacement */
+	// 16-bit mode: (no SIB byte) and displacement
 	if (defmem == WORD && mod == 0b00 && rm == 0b110) {memsize += WORD;}
-	/* 32-bit mode: (perhaps) SIB byte and displacement only */
+	// 32-bit mode: (perhaps) SIB byte and displacement only
 	else
 	{
 		/* SIB with no displacement: get value of sib.base */
 		if (rm == 0b100)
 		{
-			if (!codelen--) /* error if instruction is too long */
+			if (!codelen--) // error if instruction is too long
 			{
 				hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
 				goto error;
 			}
 			rm = *p++ & 0b111;
 		}
-		/* displacement only */
+		// displacement only
 		if (mod == 0b00 && rm == 0b101) {memsize += DWORD;}
 	}
 end:
-	if (datasize + memsize > codelen) /* error if instruction is too long */
+	if (datasize + memsize > codelen) // error if instruction is too long
 	{
 		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
 		goto error;
