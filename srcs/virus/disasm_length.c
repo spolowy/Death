@@ -10,6 +10,8 @@
 #define TEST		(TEST_F6 | TEST_F7)
 
 /*
+** Took some ideas from https://github.com/greenbender/lend
+**
 ** Disassemble an instruction pointed by <code> for a maximum
 ** length of <codelen> and return the size of said instruction.
 ** Returns a value between 1 and 15 included if successful.
