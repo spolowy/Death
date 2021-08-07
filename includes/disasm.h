@@ -1,4 +1,3 @@
-
 #ifndef DISASM_H
 # define DISASM_H
 
@@ -68,9 +67,7 @@ struct control_flow
 ** disassembly functions
 */
 uint8_t		disasm_length(const void *code, size_t codelen);
-size_t		disasm_operands(const void *code, size_t codelen,
-			struct operands *buf, size_t buflen);
-size_t		disasm_jumps(struct control_flow *buf, size_t buflen,
-			const void *code, size_t codelen);
+// size_t		disasm_operands(const void *code, size_t codelen, struct operands *buf, size_t buflen);
+size_t		disasm_jumps(struct control_flow *buf, size_t buflen, const void *code, size_t codelen);
 
 #endif

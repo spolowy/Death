@@ -1,13 +1,13 @@
-
 #include "accessors.h"
-#include "errors.h"
 #include "virus.h"
+#include "errors.h"
 
 bool	foreach_phdr(struct safe_ptr ref, f_iter_callback callback, void *data)
 {
 	const Elf64_Ehdr	*elf64_hdr = safe(ref, 0, sizeof(Elf64_Ehdr));
 
-	if (elf64_hdr == NULL) return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
+	if (elf64_hdr == NULL)
+		return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
 
 	const Elf64_Off		phoff     = elf64_hdr->e_phoff;
 	const Elf64_Half	phentsize = elf64_hdr->e_phentsize;
@@ -35,7 +35,8 @@ bool	foreach_shdr(struct safe_ptr ref, f_iter_callback callback, void *data)
 {
 	const Elf64_Ehdr	*elf64_hdr = safe(ref, 0, sizeof(Elf64_Ehdr));
 
-	if (elf64_hdr == NULL) return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
+	if (elf64_hdr == NULL)
+		return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
 
 	const Elf64_Off		shoff     = elf64_hdr->e_shoff;
 	const Elf64_Half	shentsize = elf64_hdr->e_shentsize;

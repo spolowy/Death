@@ -1,18 +1,16 @@
-
 #include "blocks.h"
 #include "accessors.h"
 #include "disasm.h"
-#include "errors.h"
-#include "visual.h"
 #include "utils.h"
+#include "errors.h"
+#include "log_print_blocks.h"
 
 /*
 ** sort_by_label_addr
 ** - sorts array inline
 ** - orders sidecar like array as a side effect
 */
-
-static void	sort_by_label_addr(struct jump *sidecar[MAX_JUMPS], \
+static void	sort_by_label_addr(struct jump *sidecar[MAX_JUMPS],
 			struct control_flow array[MAX_JUMPS], size_t len)
 {
 	if (len < 2) return;
@@ -36,7 +34,6 @@ static void	sort_by_label_addr(struct jump *sidecar[MAX_JUMPS], \
 		sidecar[i] = sidecar[j];
 		sidecar[j] = side_temp;
 	}
-
 	sort_by_label_addr(sidecar, array, i);
 	sort_by_label_addr(sidecar + i, array + i, len - i);
 }
@@ -71,7 +68,6 @@ static void	assign_labels(struct label labels[MAX_JUMPS],
 		current_label->jumps      = &label_origins[i];
 		current_label->njumps     = 1;
 	}
-
 	block->labels = labels;
 }
 
@@ -86,12 +82,12 @@ static void	assign_jumps(struct jump jumps[MAX_JUMPS], struct code_block *block,
 		jumps[i].value_size = jumps_info[i].value_length;
 		jumps[i].value = jumps_info[i].value;
 	}
-
 	block->jumps  = jumps;
 	block->njumps = njumps;
 }
 
-bool	disasm_block(struct block_allocation *block_alloc, struct safe_ptr input_code)
+bool		disasm_block(struct block_allocation *block_alloc,
+			struct safe_ptr input_code)
 {
 	struct control_flow	jumps_info[MAX_JUMPS];
 	void			*code = input_code.ptr;
@@ -112,10 +108,7 @@ bool	disasm_block(struct block_allocation *block_alloc, struct safe_ptr input_co
 		block_alloc->label_origins[i] = &block_alloc->jumps[i];
 
 	assign_labels(block_alloc->labels, block_alloc->label_origins, &block_alloc->blocks[0], jumps_info, njumps);
-
-#ifdef DEBUG
-	// print_original_block(block_alloc->blocks);
-#endif
+	debug_print_original_block(block_alloc->blocks);
 
 	return true;
 }

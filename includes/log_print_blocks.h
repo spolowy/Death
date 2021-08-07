@@ -1,11 +1,10 @@
+#ifndef LOG_PRINT_BLOCKS_H
+# define LOG_PRINT_BLOCKS_H
 
-#ifndef VISUAL_H
-# define VISUAL_H
+# ifdef DEBUG
 
 # include "position_independent.h"
 # include "utils.h"
-
-# ifdef DEBUG
 
 /* --------------------------------- Colors --------------------------------- */
 
@@ -141,7 +140,7 @@
 	_print_original_labels(block->labels, block->nlabels);                 \
 })
 
-#  define print_original_block(blocks) ({                                                                \
+#  define debug_print_original_block(blocks) ({                                                          \
 	PD_ARRAY(char,nl,'\n',0);                                                                        \
 	PD_ARRAY(char,c_cyan,C_CYAN,0)                                                                   \
 	PD_ARRAY(char,c_none,C_NONE,0)                                                                   \
@@ -260,20 +259,6 @@
 		REGROUPU64(vcb_trailing_block,block->trailing_block,nl);                                                                                                                                                             \
 })
 
-// #  define _print_split_blocks(blocks, nblocks, input_code, output_buffer) ({                         \
-// 	PD_ARRAY(char,nl,'\n',0);                                                                    \
-// 	PD_ARRAY(char,sp,' ',0);                                                                     \
-// 	struct code_block	*p_blocks = blocks;                                                  \
-// 	for (size_t nb = 0; nb < nblocks && p_blocks; nb++)                                          \
-// 	{                                                                                            \
-// 		_print_head(nb);                                                                     \
-// 		_SPLIT_CODE_BLOCK(p_blocks, input_code, output_buffer);                              \
-// 		_print_split_jumps(p_blocks->jumps, p_blocks->njumps, input_code, output_buffer);    \
-// 		_print_split_labels(p_blocks->labels, p_blocks->nlabels, input_code, output_buffer); \
-// 		p_blocks++;                                                                          \
-// 	}                                                                                            \
-// })
-
 #  define _print_split_blocks(blocks, nblocks, input_code, output_buffer) ({                         \
 	PD_ARRAY(char,nl,'\n',0);                                                                    \
 	PD_ARRAY(char,sp,' ',0);                                                                     \
@@ -282,13 +267,15 @@
 	{                                                                                            \
 		_print_head(nb);                                                                     \
 		_SPLIT_CODE_BLOCK(p_blocks, input_code, output_buffer);                              \
+		_print_split_jumps(p_blocks->jumps, p_blocks->njumps, input_code, output_buffer);    \
+		_print_split_labels(p_blocks->labels, p_blocks->nlabels, input_code, output_buffer); \
 		p_blocks++;                                                                          \
 	}                                                                                            \
 })
 
 /* ------------------------------- Code Block ------------------------------- */
 
-#  define print_split_blocks(blocks, nblocks, input_code, output_buffer) ({                              \
+#  define debug_print_split_blocks(blocks, nblocks, input_code, output_buffer) ({                        \
 	PD_ARRAY(char,nl,'\n',0);                                                                        \
 	PD_ARRAY(char,c_cyan,C_CYAN,0)                                                                   \
 	PD_ARRAY(char,c_none,C_NONE,0)                                                                   \
@@ -303,7 +290,7 @@
 /* --------------------------- Print General Info --------------------------- */
 /* -------------------------------------------------------------------------- */
 
-# define print_general(input_code, output_buffer, entry_point, virus_func_shift, output_size, seed) ({                       \
+# define debug_print_general(input_code, output_buffer, entry_point, virus_func_shift, output_size, seed) ({                 \
 	PD_ARRAY(char,nl,'\n',0);                                                                                            \
 	PD_ARRAY(char,ia,C_YELLOW,'i','n','p','u','t','_','a','d','d','r', C_NONE,':',' ',C_RED,0)                           \
 	PD_ARRAY(char,is,C_YELLOW,'i','n','p','u','t','_','s','i','z','e', C_NONE,':',' ',C_RED,0)                           \
@@ -330,9 +317,9 @@
 })
 
 # else
-#  define print_original_block(...)
-#  define print_split_blocks(...)
-#  define print_general(...)
+#  define debug_print_original_block(...)
+#  define debug_print_split_blocks(...)
+#  define debug_print_general(...)
 # endif
 
 #endif

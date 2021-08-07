@@ -1,16 +1,4 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2018/04/10 17:19:11 by agrumbac          #+#    #+#              #
-#    Updated: 2021/07/07 23:34:39 by ichkamo          ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
-############################## BIN #############################################
+# ----------------------------------- Bin ------------------------------------ #
 
 NAME = death
 
@@ -46,11 +34,9 @@ SRC =	loader.s                       \
 	start.c
 
 CC = clang
-
 AS = nasm
 
 SRCDIR = srcs
-
 OBJDIR = objs
 
 OBJC = $(addprefix ${OBJDIR}/, $(SRC:.c=.o))
@@ -58,16 +44,16 @@ OBJ = $(OBJC:.s=.o)
 
 DEP = $(addprefix ${OBJDIR}/, $(SRC:.c=.d))
 
-override CFLAGS += -Wall -Wextra -MMD\
-	-fno-stack-protector \
-	-nodefaultlibs \
+override CFLAGS += -Wall -Wextra -MMD  \
+	-fno-stack-protector           \
+	-nodefaultlibs                 \
 	-fno-builtin -nostdlib -fpic
 
 override ASFLAGS += -f elf64
 
 LDFLAGS = -Iincludes/ -nostdlib -fpic
 
-############################## COLORS ##########################################
+# ---------------------------------- Colors ---------------------------------- #
 
 BY = "\033[33;1m"
 BR = "\033[31;1m"
@@ -89,7 +75,7 @@ X = "\033[0m"
 UP = "\033[A"
 CUT = "\033[K"
 
-############################## RULES ###########################################
+# ---------------------------------- Rules ----------------------------------- #
 
 all: art ${NAME}
 
@@ -112,18 +98,21 @@ ${OBJDIR}/%.o: ${SRCDIR}/%.c
 	@${CC} ${CFLAGS} ${LDFLAGS} -c -o $@ $<
 	@printf ${UP}${CUT}
 
-############################### DEBUG ##########################################
+# ---------------------------------- Debug ----------------------------------- #
+
+logs: fclean
+	${MAKE} all CFLAGS:="-DLOGS -g" ASFLAGS:="-DLOGS -g"
+
+errors: fclean
+	${MAKE} all CFLAGS:="-DERRORS -g" ASFLAGS:="-DERRORS -g"
 
 debug: fclean
-	${MAKE} all CFLAGS:="-DDEBUG -g" ASFLAGS:="-dDEBUG -g"
+	${MAKE} all CFLAGS:="-DDEBUG -g" ASFLAGS:="-DDEBUG -g"
 
 test:
-	cd tests/ && bash test.bash
+	./scripts/test_spread.bash re 1000 /bin/ls /bin/sh /bin/pwd /bin/uname
 
-testdebug:
-	cd tests/ && bash test.bash debug
-
-############################## GENERAL #########################################
+# --------------------------------- General ---------------------------------- #
 
 clean:
 	@echo ${R}Cleaning"  "[objs]...${X}
@@ -137,7 +126,7 @@ fclean: clean
 
 re: fclean all
 
-############################## DECORATION ######################################
+# -------------------------------- Decoration -------------------------------- #
 
 art:
 	@echo ${BB}
@@ -157,6 +146,6 @@ art:
 	@echo "           '-'._.-._.'-' "
 	@echo ${X}
 
-.PHONY: all clean fclean re art
+.PHONY: all clean fclean re logs errors debug art
 
 -include ${DEP}

