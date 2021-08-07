@@ -121,7 +121,7 @@ static bool	copy_virus_buffer_to_clone(struct safe_ptr clone_ref,
 	return true;
 }
 
-static bool	set_full_virus_size(size_t *full_virus_size, \
+static bool	set_full_virus_size(size_t *full_virus_size,
 			size_t virus_buffer_size, size_t virus_size)
 {
 	*full_virus_size += virus_buffer_size - virus_size;
