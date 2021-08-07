@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   compiler_utils.h                                   :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/03/11 17:20:06 by agrumbac          #+#    #+#             */
-/*   Updated: 2019/12/22 23:20:22 by anselme          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef COMPILER_UTILS_H
 # define COMPILER_UTILS_H
 
@@ -23,5 +11,11 @@
 # define PAGE_ALIGNMENT			4096
 # define ALIGN(x, n)			(((x) + (n)) & ~((n) - 1))
 
+# define BYTE		1
+# define WORD		2
+# define DWORD		4
+# define PWORD		6
+# define QWORD		8
+# define TWORD		10
 
 #endif

@@ -1,36 +1,24 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   syscall.c                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jfortin <jfortin@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/06/04 22:22:08 by jfortin           #+#    #+#             */
-/*   Updated: 2019/06/07 03:50:39 by agrumbac         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "compiler_utils.h"
-#include "syscall.h"
+#include "syscalls.h"
 
-# define SYS_READ       0
-# define SYS_WRITE      1
-# define SYS_OPEN       2
-# define SYS_CLOSE      3
-# define SYS_FSTAT      5
-# define SYS_MMAP       9
-# define SYS_MPROTEC    10
-# define SYS_MUNMAP     11
-# define SYS_EXIT	60
-# define SYS_PTRACE     101
-# define SYS_GETDENTS64 217
-# define SYS_OPENAT     257
+#define SYS_READ       0
+#define SYS_WRITE      1
+#define SYS_OPEN       2
+#define SYS_CLOSE      3
+#define SYS_FSTAT      5
+#define SYS_MMAP       9
+#define SYS_MPROTEC    10
+#define SYS_MUNMAP     11
+#define SYS_EXIT       60
+#define SYS_PTRACE     101
+#define SYS_GETDENTS64 217
+#define SYS_OPENAT     257
 
-# define _u	__unused
+#define _u 	__unused
 
-# define wrap_syscall(x)	wrapper_syscall(x)
+#define wrap_syscall(x)		wrapper_syscall(x)
 
-# define wrapper_syscall(x)	asm volatile (".intel_syntax;\n"        \
+#define wrapper_syscall(x)	asm volatile (".intel_syntax;\n"        \
 						"  mov r10, rcx\n"      \
 						"  mov rax, " #x "\n"   \
 						"  syscall\n"           \

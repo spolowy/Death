@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   accessors.h                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/06/04 04:47:10 by agrumbac          #+#    #+#             */
-/*   Updated: 2019/12/27 00:02:56 by anselme          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef ACCESSORS_H
 # define ACCESSORS_H
 
@@ -33,13 +21,13 @@ struct	safe_ptr
 
 void	*safe(struct safe_ptr ref, size_t offset, size_t size);
 bool	free_accessor(struct safe_ptr *ref);
-bool	write_file(struct safe_ptr ref, const char *filename);
+bool	write_file(struct safe_ptr ref, size_t size, const char *filename);
 
 /*
 ** Original and clone safe_ptr initializer
 */
 
-bool	init_original_safe(struct safe_ptr *ref, const char *filename);
-bool	init_clone_safe(struct safe_ptr *ref, size_t original_filesize);
+bool	init_file_safe(struct safe_ptr *ref, const char *filename);
+bool	init_clone_safe(struct safe_ptr *ref, size_t file_size, size_t extra_size);
 
 #endif

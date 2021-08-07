@@ -1,4 +1,3 @@
-
 #ifndef _DISASM_UTILS_H
 # define _DISASM_UTILS_H
 
@@ -8,20 +7,11 @@
 ** opcode prefixes
 */
 # define OP_PREFIX_0F		(1 << 0)
-# define OP_PREFIX_66		(1 << 1)
-# define OP_PREFIX_F2		(1 << 2)
-# define OP_PREFIX_F3		(1 << 3)
-# define OP_PREFIX_9B		(1 << 4)
-# define OP_PREFIX_REX		(1 << 5)
+# define OP_PREFIX_REX		(1 << 1)
 /*
 ** opcode mappings
 */
 # define MAP_0F			OP_PREFIX_0F
-# define MAP_F3			OP_PREFIX_F3
-# define MAP_9B			OP_PREFIX_9B
-# define MAP_660F		(OP_PREFIX_66 | OP_PREFIX_0F)
-# define MAP_F20F		(OP_PREFIX_F2 | OP_PREFIX_0F)
-# define MAP_F30F		(OP_PREFIX_F3 | OP_PREFIX_0F)
 
 # define TABLESIZE		8
 

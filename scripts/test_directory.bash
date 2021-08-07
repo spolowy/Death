@@ -1,14 +1,23 @@
-
 #!/bin/bash
 
-# checks if argument is passed
+# test_directory.bash
+#
+#     directory: contains binaries to execute and search for virus signature.
+#
+# Loop through each item in <directory> and executes them to detect a potential
+# crash after the virus infection.
+# If a signal is raised, the user is notified and the tests for the current
+# binary ends.
+# A timeout of 5 seconds is set so binaries that waits for input aren't
+# blocking the script.
+# If nothing happens, search for the virus signature.
+
 if [ $# != 1 ]; then
-	echo "./run.bash folder"
+	echo "usage: $0 directory"
 	exit 1
 fi
-# checks if argument is a directory
 if [[ ! -d $1 ]]; then
-	echo "$1 is not a directory."
+	echo "error: $1 is not a directory."
 	exit 1
 fi
 
@@ -18,20 +27,28 @@ yellow="\033[33m"
 cyan="\033[36m"
 none="\033[0m"
 
-let n_item=0
-let n_failed=0
+function define_handler
+{
+	# trap _ko SIGILL SIGABRT SIGBUS SIGFPE SIGSEGV
+	trap 'kill -INT -$pid && exit 1' SIGINT
+}
 
-function _not_infected()
+function summary
+{
+	printf "\n ---------- $red$n_failed$none failed out of $green$n_item$none --------------- \n"
+}
+
+function _not_infected
 {
 	printf "$yellow[NOT INFECTED]$none\n"
 }
 
-function _ok()
+function _ok
 {
 	printf "$green[OK]$none\n"
 }
 
-function _ko()
+function _ko
 {
 	errmsg[1]="SIGHUP"
 	errmsg[2]="SIGINT"
@@ -100,47 +117,52 @@ function _ko()
 	printf "$red[$msg]$none\n"
 }
 
-# trap _ko SIGILL SIGABRT SIGBUS SIGFPE SIGSEGV
-trap 'kill -INT -$pid && exit 1' SIGINT
+function loop_through
+{
+	let timeout=5
+	let exit_status_lower=128
+	let exit_status_upper=193
+	let ret=0
+	directory="$1"
+	content=$(ls $directory)
 
-let timeout=5
-let exit_status_lower=128
-let exit_status_upper=193
-let ret=0
-directory=$1
-content=`ls $directory`
+	# loop through directory
+	for item in $content
+	do
+		# test for ...
+		printf "  [$item]  "
+		file=$directory/$item
+		# run as subprocess and store pid
+		timeout $timeout $file > /dev/null 2>/dev/null &
+		pid=$!
+		wait $pid
 
-# loop through directory
-for item in $content
-do
-	# test for ...
-	printf "  [$item]  "
-	file=$directory/$item
-	# run as subprocess and store pid
-	timeout $timeout $file > /dev/null 2>/dev/null &
-	pid=$!
-	wait $pid
-
-	ret=$?
-	if [[ $ret -gt $exit_status_lower ]] && [[ $ret -lt $exit_status_upper ]];
-	then
-	{
-		((ret-=$exit_status_lower))
-		_ko $ret
-		((n_failed++))
-	}
-	else
-	{
-		signature=`strings $file | grep _UNICORNS_`
-		if [[ $signature ]];
+		ret=$?
+		if [[ $ret -gt $exit_status_lower ]] && [[ $ret -lt $exit_status_upper ]];
 		then
-			_ok
+		{
+			((ret-=$exit_status_lower))
+			_ko $ret
+			((n_failed++))
+		}
 		else
-			_not_infected
+		{
+			signature=$(strings $file | grep '__UNICORNS_OF_THE_APOCALYPSE__')
+			if [[ $signature ]];
+			then
+				_ok
+			else
+				_not_infected
+			fi
+		}
 		fi
-	}
-	fi
-	((n_item++))
-done
+		((n_item++))
+	done
+}
 
-printf "\n ---------- $red$n_failed$none failed out of $green$n_item$none --------------- \n"
+let n_item=0
+let n_failed=0
+
+define_handler
+loop_through "$1"
+summary
