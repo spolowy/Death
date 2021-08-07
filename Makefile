@@ -1,4 +1,3 @@
-
 # ----------------------------------- Bin ------------------------------------ #
 
 NAME = death
@@ -23,7 +22,7 @@ SRC =	loader.s                       \
 	virus/generate_seed.c          \
 	virus/infect.c                 \
 	virus/infection_engine.c       \
-	virus/logs.c                   \
+	virus/log.c                    \
 	virus/metamorph_clone.c        \
 	virus/permutate_blocks.c       \
 	virus/permutate_registers.c    \

@@ -1,4 +1,3 @@
-
 #ifndef COMPILER_UTILS_H
 # define COMPILER_UTILS_H
 
@@ -11,5 +10,12 @@
 
 # define PAGE_ALIGNMENT			4096
 # define ALIGN(x, n)			(((x) + (n)) & ~((n) - 1))
+
+# define BYTE		1
+# define WORD		2
+# define DWORD		4
+# define PWORD		6
+# define QWORD		8
+# define TWORD		10
 
 #endif

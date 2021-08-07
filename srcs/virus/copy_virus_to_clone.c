@@ -1,7 +1,7 @@
 #include "virus.h"
 #include "disasm.h"
 #include "utils.h"
-#include "bytes.h"
+#include "compiler_utils.h"
 #include "errors.h"
 
 bool		copy_virus_to_clone(struct safe_ptr clone_ref,

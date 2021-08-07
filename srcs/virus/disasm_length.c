@@ -1,6 +1,6 @@
 #include "disasm_utils.h"
 #include "utils.h"
-#include "bytes.h"
+#include "compiler_utils.h"
 #include "errors.h"
 
 // opcode flags

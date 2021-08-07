@@ -1,17 +1,16 @@
 #include "blocks.h"
 #include "disasm.h"
-#include "bytes.h"
 #include "compiler_utils.h"
 #include "errors.h"
-#include "debug.h"
+#include "log_print_blocks.h"
 
 /*
 ** permutate_blocks
 ** - permutates the code given by instructions blocks of arbitrary size
 ** - the blocks are permutated deterministically according to the seed
 ** - when needed the blocks are linked together with jumps
-** - when possible jumps are eliminated by using them as separator when
-**   splitting blocks
+** - when possible blocks are sometimes splitted on a jump inst to avoid
+**   creating new jumps
 */
 
 static inline size_t	signed_shift(size_t offset, int32_t shift_amount)

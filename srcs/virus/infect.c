@@ -2,7 +2,7 @@
 #include "syscalls.h"
 #include "utils.h"
 #include "errors.h"
-#include "logs.h"
+#include "log.h"
 
 static bool	is_elf64(const char *file)
 {

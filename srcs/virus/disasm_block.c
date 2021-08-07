@@ -3,7 +3,7 @@
 #include "disasm.h"
 #include "utils.h"
 #include "errors.h"
-#include "debug.h"
+#include "log_print_blocks.h"
 
 /*
 ** sort_by_label_addr

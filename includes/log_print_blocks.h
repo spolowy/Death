@@ -1,6 +1,5 @@
-
-#ifndef PRINT_BLOCKS_H
-# define PRINT_BLOCKS_H
+#ifndef LOG_PRINT_BLOCKS_H
+# define LOG_PRINT_BLOCKS_H
 
 # ifdef DEBUG
 

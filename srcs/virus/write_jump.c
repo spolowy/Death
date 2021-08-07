@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "disasm.h"
-#include "bytes.h"
+#include "compiler_utils.h"
 
 void		write_jump_arg(void *arg, int32_t value, uint8_t value_size)
 {

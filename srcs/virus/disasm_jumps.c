@@ -1,6 +1,6 @@
 #include <unistd.h>
 #include "disasm_utils.h"
-#include "bytes.h"
+#include "compiler_utils.h"
 #include "utils.h"
 #include "errors.h"
 
@@ -13,7 +13,7 @@ Jc(onditionnal)c(ode) notes:
 
 /*
 ** return true if successfully disassembled a control flow instruction
-** return false if failed to disassembled a control flow instruction
+** return false if failed to disassemble a control flow instruction
 */
 static bool	disasm_instruction(void **value_addr,
 			int32_t *value, uint8_t *value_length,
