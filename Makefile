@@ -109,6 +109,9 @@ errors: fclean
 debug: fclean
 	${MAKE} all CFLAGS:="-DDEBUG -g" ASFLAGS:="-DDEBUG -g"
 
+test:
+	./scripts/test_spread.bash re 1000 /bin/ls /bin/sh /bin/pwd /bin/uname
+
 # --------------------------------- General ---------------------------------- #
 
 clean:
