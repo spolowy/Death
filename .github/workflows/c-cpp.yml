@@ -1,0 +1,21 @@
+name: pic C CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: make
+      run: make
+    - name: make debug
+      run: make debug
+    - name: make test
+      run: make test
