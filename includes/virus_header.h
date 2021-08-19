@@ -1,4 +1,3 @@
-
 #ifndef VIRUS_HEADER_H
 # define VIRUS_HEADER_H
 
@@ -6,7 +5,7 @@
 # include <stddef.h>
 # include <sys/types.h>
 
-struct			virus_header
+struct virus_header
 {
 	uint64_t	seed;
 	size_t		full_virus_size;

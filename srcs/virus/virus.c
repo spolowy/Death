@@ -1,4 +1,3 @@
-
 #include "virus.h"
 #include "compiler_utils.h"
 

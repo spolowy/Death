@@ -1,19 +1,19 @@
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <linux/elf.h>
-
 #include "accessors.h"
 #include "virus_header.h"
 #include "utils.h"
 #include "errors.h"
 #include "log.h"
 
-static bool	compute_elf_hdr_hash(uint64_t *hdr_hash, struct safe_ptr file_ref)
+static bool	compute_elf_hdr_hash(uint64_t *hdr_hash,
+			struct safe_ptr file_ref)
 {
 	Elf64_Ehdr	*elf_hdr = safe(file_ref, 0, sizeof(Elf64_Ehdr));
 
-	if (elf_hdr == NULL) return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
+	if (elf_hdr == NULL)
+		return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
 
 	*hdr_hash = hash((void *)elf_hdr, sizeof(Elf64_Ehdr));
 	return true;

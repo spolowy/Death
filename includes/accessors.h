@@ -1,4 +1,3 @@
-
 #ifndef ACCESSORS_H
 # define ACCESSORS_H
 

