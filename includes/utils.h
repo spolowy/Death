@@ -27,7 +27,7 @@ uint64_t	random_exrange(uint64_t *seed, uint64_t lower, uint64_t upper);
 void		write_jump_arg(void *arg, int32_t value, uint8_t value_size);
 bool		write_jump(void *buffer, int32_t value, uint8_t value_size);
 
-#if defined(LOGS) || defined(ERRORS) || defined(DEBUG)
+#if defined(LOGS) || defined(ERRORS) || defined(DEBUG) || defined(DEBUG_OPERANDS)
 
 int		putstr(const char *str);
 int		putchar(char c);
