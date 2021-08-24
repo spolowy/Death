@@ -106,6 +106,9 @@ static bool	get_copy_size(size_t *copy_size, void *code, size_t codelen)
 
 	while (*copy_size < JUMP32_INST_SIZE)
 	{
+		if (!known_instruction(code, codelen))
+			return false;
+
 		size_t	instruction_length = disasm_length(code, codelen);
 
 		if (instruction_length == 0) return false;
