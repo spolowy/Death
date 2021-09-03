@@ -23,11 +23,6 @@ static bool	can_permutate(const struct operand *a, const struct operand *b)
 
 	if (same_dest || a_dst_is_b_src || b_dst_is_a_src)
 	{
-		putchar('\n');
-		putu64(same_dest);
-		putu64(a_dst_is_b_src);
-		putu64(b_dst_is_a_src);
-		putchar('\n');
 		return false;
 	}
 	return true;
@@ -95,9 +90,9 @@ static bool	are_labels(const struct label *labels, size_t nlabels,
 	return false;
 }
 
-static bool	has_rip(struct operand a, struct operand b)
+static bool	has_untouchable_registers(struct operand a, struct operand b)
 {
-	if ((a.src | a.dst | b.src | b.dst) & RIP)
+	if ((a.src | a.dst | b.src | b.dst) & (RIP | RSP))
 	{
 		return true;
 	}
@@ -106,13 +101,32 @@ static bool	has_rip(struct operand a, struct operand b)
 
 /* -------------------------------------------------------------------------- */
 
+size_t		count_instructions(void *code, size_t codelen)
+{
+	size_t	ninsts = 0;
+
+	while (codelen)
+	{
+		size_t	instruction_length = disasm_length(code, codelen);
+
+		if (instruction_length == 0)
+			return 0; // TODO
+
+		codelen -= instruction_length;
+		ninsts  += 1;
+	}
+	return ninsts;
+}
+
 /*
 ** This function never fails : worst case senario, it does nothing
 */
 bool		permutate_instructions(struct safe_ptr ref, uint64_t seed)
 {
+	size_t	ninsts = count_instructions(ref.ptr, ref.size);
+
 	struct block_allocation	block_memory;
-	struct operand		insts[100000];
+	struct operand		insts[ninsts];
 
 	if (!disasm_block(&block_memory, ref))
 		return errors(ERR_THROW, _ERR_T_PERMUTATE_INSTRUCTIONS);
@@ -120,7 +134,7 @@ bool		permutate_instructions(struct safe_ptr ref, uint64_t seed)
 	struct label	*labels = block_memory.blocks[0].labels;
 	size_t		nlabels = block_memory.blocks[0].nlabels;
 
-	size_t	ninsts = disasm_operands(insts, 100000, ref.ptr, ref.size);
+	ninsts = disasm_operands(insts, ninsts, ref.ptr, ref.size);
 
 	debug_print_operands(insts, ninsts);
 
@@ -129,7 +143,7 @@ bool		permutate_instructions(struct safe_ptr ref, uint64_t seed)
 		uint64_t	rand = random_inrange(&seed, 0, ninsts - 2);
 
 		if (are_labels(labels, nlabels, insts[rand], insts[rand + 1])
-		|| has_rip(insts[rand], insts[rand + 1]))
+		|| has_untouchable_registers(insts[rand], insts[rand + 1]))
 		{
 			continue;
 		}

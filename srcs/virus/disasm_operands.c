@@ -91,10 +91,9 @@ static struct x64_set	map_single(uint8_t *p, uint8_t opcode, size_t codelen)
 	instructions[0x5e] = (struct x64_set){FLD_R|IMPLICIT_DST|IMPLICIT_SRC|KEEP_SRC|PROMOTE_DST,RSI|RSP   ,MEMORY|RSP}; /* pop    rSI/r14                        */
 	instructions[0x5f] = (struct x64_set){FLD_R|IMPLICIT_DST|IMPLICIT_SRC|KEEP_SRC|PROMOTE_DST,RDI|RSP   ,MEMORY|RSP}; /* pop    rDI/r15                        */
 	instructions[0x63] = (struct x64_set){MODRM|FLD_D                                         ,         0,         0}; /* movsxd r32/64      r/m32              */
-	// instructions[0x6b] = (struct x64_set){MODRM                                               ,FLAGS     ,         0}; /* imul   r16/32/64   r/m16/32/64   imm8 */
 	instructions[0x80] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
 	instructions[0x81] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
-	// instructions[0x83] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
+	instructions[0x83] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
 	instructions[0x85] = (struct x64_set){MODRM|KEEP_SRC|MOVE_DST                             ,FLAGS     ,         0}; /* test   r/m16/32/64 reg16/32/64        */
 	instructions[0x87] = (struct x64_set){MODRM|KEEP_SRC|KEEP_DST                             ,         0,         0}; /* xchg   reg16/32/64 r/m16/32/64        */
 	instructions[0x88] = (struct x64_set){MODRM|FLD_D                                         ,         0,         0}; /* mov    r/m8        r8                 */
@@ -113,13 +112,13 @@ static struct x64_set	map_single(uint8_t *p, uint8_t opcode, size_t codelen)
 	instructions[0xbd] = (struct x64_set){FLD_R|IMPLICIT_DST|PROMOTE_DST                      ,RBP       ,         0}; /* mov    reBP        imm16/32/64        */
 	instructions[0xbe] = (struct x64_set){FLD_R|IMPLICIT_DST|PROMOTE_DST                      ,RSI       ,         0}; /* mov    RSI         imm16/32/64        */
 	instructions[0xbf] = (struct x64_set){FLD_R|IMPLICIT_DST|PROMOTE_DST                      ,RDI       ,         0}; /* mov    RDI         imm16/32/64        */
-	// instructions[0xc1] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
-	// instructions[0xc3] = (struct x64_set){IMPLICIT_DST|IMPLICIT_SRC|KEEP_SRC                  ,RIP       ,MEMORY|RSP}; /* ret                                   */
-	// instructions[0xc6] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
-	// instructions[0xc7] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
-	// instructions[0xd3] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
-	// instructions[0xf6] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
-	// instructions[0xf7] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
+	instructions[0xc1] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
+	instructions[0xc3] = (struct x64_set){IMPLICIT_DST|IMPLICIT_SRC|KEEP_SRC                  ,RIP       ,MEMORY|RSP}; /* ret                                   */
+	instructions[0xc6] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
+	instructions[0xc7] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
+	instructions[0xd3] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
+	instructions[0xf6] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
+	instructions[0xf7] = (struct x64_set){EXTENSION                                           ,         0,         0}; /*                                       */
 
 	i = instructions[opcode];
 
@@ -151,87 +150,87 @@ static struct x64_set	map_single(uint8_t *p, uint8_t opcode, size_t codelen)
 			extensions[2] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,FLAGS}; /* adc r/m16/32/64 imm16/32 */
 			extensions[3] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,FLAGS}; /* sbb r/m16/32/64 imm16/32 */
 			extensions[4] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* and r/m16/32/64 imm16/32 */
-			// extensions[5] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* sub r/m16/32/64 imm16/32 */
+			extensions[5] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* sub r/m16/32/64 imm16/32 */
 			extensions[6] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* xor r/m16/32/64 imm16/32 */
 			extensions[7] = (struct x64_set){EXTENSION|KEEP_DST|MOVE_DST,FLAGS,    0}; /* cmp r/m16/32/64 imm16/32 */
 		}
-		// else if (opcode == 0x83)
-		// {
-		// 	extensions[0] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* add r/m16/32/64 imm8 */
-		// 	extensions[1] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* or  r/m16/32/64 imm8 */
-		// 	extensions[2] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,FLAGS}; /* adc r/m16/32/64 imm8 */
-		// 	extensions[3] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,FLAGS}; /* sbb r/m16/32/64 imm8 */
-		// 	extensions[4] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* and r/m16/32/64 imm8 */
-		// 	extensions[5] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* sub r/m16/32/64 imm8 */
-		// 	extensions[6] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* xor r/m16/32/64 imm8 */
-		// 	extensions[7] = (struct x64_set){EXTENSION|KEEP_DST|MOVE_DST|MOVE_DST,FLAGS,    0}; /* cmp r/m16/32/64 imm8 */
-		// }
-		// else if (opcode == 0xc1)
-		// {
-		// 	extensions[0] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* rol     r/m16/32/64 imm8 */
-		// 	extensions[1] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* ror     r/m16/32/64 imm8 */
-		// 	extensions[2] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,FLAGS}; /* rcl     r/m16/32/64 imm8 */
-		// 	extensions[3] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,FLAGS}; /* rcr     r/m16/32/64 imm8 */
-		// 	extensions[4] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* shl/sal r/m16/32/64 imm8 */
-		// 	extensions[5] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* shr     r/m16/32/64 imm8 */
-		// 	extensions[6] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* shl/sal r/m16/32/64 imm8 */
-		// 	extensions[7] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* sar     r/m16/32/64 imm8 */
-		// }
-		// else if (opcode == 0xc6)
-		// {
-		// 	extensions[0] = (struct x64_set){EXTENSION,0,0}; /* mov r/m8 imm8 */
-		// 	extensions[1] = (struct x64_set){        0,0,0}; /* undefined     */
-		// 	extensions[2] = (struct x64_set){        0,0,0}; /* undefined     */
-		// 	extensions[3] = (struct x64_set){        0,0,0}; /* undefined     */
-		// 	extensions[4] = (struct x64_set){        0,0,0}; /* undefined     */
-		// 	extensions[5] = (struct x64_set){        0,0,0}; /* undefined     */
-		// 	extensions[6] = (struct x64_set){        0,0,0}; /* undefined     */
-		// 	extensions[7] = (struct x64_set){        0,0,0}; /* undefined     */
-		// }
-		// else if (opcode == 0xc7)
-		// {
-		// 	extensions[0] = (struct x64_set){EXTENSION,0,0}; /* mov r/m16/32/64 imm16/32 */
-		// 	extensions[1] = (struct x64_set){        0,0,0}; /* undefined                */
-		// 	extensions[2] = (struct x64_set){        0,0,0}; /* undefined                */
-		// 	extensions[3] = (struct x64_set){        0,0,0}; /* undefined                */
-		// 	extensions[4] = (struct x64_set){        0,0,0}; /* undefined                */
-		// 	extensions[5] = (struct x64_set){        0,0,0}; /* undefined                */
-		// 	extensions[6] = (struct x64_set){        0,0,0}; /* undefined                */
-		// 	extensions[7] = (struct x64_set){        0,0,0}; /* undefined                */
-		// }
-		// else if (opcode == 0xd3)
-		// {
-		// 	extensions[0] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* rol     r/m16/32/64 cl */
-		// 	extensions[1] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* ror     r/m16/32/64 cl */
-		// 	extensions[2] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,FLAGS|RCX}; /* rcl     r/m16/32/64 cl */
-		// 	extensions[3] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,FLAGS|RCX}; /* rcr     r/m16/32/64 cl */
-		// 	extensions[4] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* shl/sal r/m16/32/64 cl */
-		// 	extensions[5] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* shr     r/m16/32/64 cl */
-		// 	extensions[6] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* sal/shl r/m16/32/64 cl */
-		// 	extensions[7] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* sar     r/m16/32/64 cl */
-		// }
-		// else if (opcode == 0xf6)
-		// {
-		// 	extensions[0] = (struct x64_set){EXTENSION|MOVE_DST                 ,FLAGS    ,  0}; /* test r/m8 imm8           */
-		// 	extensions[1] = (struct x64_set){EXTENSION|MOVE_DST                 ,FLAGS    ,  0}; /* test r/m8 imm8           */
-		// 	extensions[2] = (struct x64_set){EXTENSION                          ,        0,  0}; /* not  r/m8                */
-		// 	extensions[3] = (struct x64_set){EXTENSION                          ,FLAGS    ,  0}; /* neg  r/m8                */
-			// extensions[4] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC,FLAGS|RAX,RAX}; /* mul  ax   al   r/m8      */
-			// extensions[5] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC,FLAGS|RAX,RAX}; /* imul ax   al   r/m8      */
-			// extensions[6] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC,FLAGS|RAX,RAX}; /* div  al   ah   ax   r/m8 */
-			// extensions[7] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC,FLAGS|RAX|RDX,RAX|RDX}; /* idiv al   ah   ax   r/m8 */
-		// }
-		// else if (opcode == 0xf7)
-		// {
-			// extensions[0] = (struct x64_set){EXTENSION                                  ,FLAGS        ,      0}; /* test r/m16/32/64 imm16/32             */
-			// extensions[1] = (struct x64_set){EXTENSION                                  ,FLAGS        ,      0}; /* test r/m16/32/64 imm16/32             */
-			// extensions[2] = (struct x64_set){EXTENSION                                  ,            0,      0}; /* not  r/m16/32/64                      */
-			// extensions[3] = (struct x64_set){EXTENSION                                  ,FLAGS        ,      0}; /* neg  r/m16/32/64                      */
-			// extensions[4] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC        ,FLAGS|RAX|RDX,RAX|RDX}; /* mul  rDX         rAX      r/m16/32/64 */
-			// extensions[5] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC        ,FLAGS|RAX|RDX,RAX|RDX}; /* imul rDX         rAX      r/m16/32/64 */
-			// extensions[6] = (struct x64_set){EXTENSION|IMPLICIT_DST|EXT_SRC|IMPLICIT_SRC,FLAGS|RAX|RDX,RAX|RDX}; /* div  rDX         rAX      r/m16/32/64 */
-			// extensions[7] = (struct x64_set){EXTENSION|IMPLICIT_DST|EXT_SRC             ,FLAGS|RAX|RDX,RAX|RDX}; /* idiv rDX         rAX      r/m16/32/64 */
-		// }
+		else if (opcode == 0x83)
+		{
+			extensions[0] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* add r/m16/32/64 imm8 */
+			extensions[1] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* or  r/m16/32/64 imm8 */
+			extensions[2] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,FLAGS}; /* adc r/m16/32/64 imm8 */
+			extensions[3] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,FLAGS}; /* sbb r/m16/32/64 imm8 */
+			extensions[4] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* and r/m16/32/64 imm8 */
+			extensions[5] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* sub r/m16/32/64 imm8 */
+			extensions[6] = (struct x64_set){EXTENSION|KEEP_DST         ,FLAGS,    0}; /* xor r/m16/32/64 imm8 */
+			extensions[7] = (struct x64_set){EXTENSION|KEEP_DST|MOVE_DST|MOVE_DST,FLAGS,    0}; /* cmp r/m16/32/64 imm8 */
+		}
+		else if (opcode == 0xc1)
+		{
+			extensions[0] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* rol     r/m16/32/64 imm8 */
+			extensions[1] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* ror     r/m16/32/64 imm8 */
+			extensions[2] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,FLAGS}; /* rcl     r/m16/32/64 imm8 */
+			extensions[3] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,FLAGS}; /* rcr     r/m16/32/64 imm8 */
+			extensions[4] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* shl/sal r/m16/32/64 imm8 */
+			extensions[5] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* shr     r/m16/32/64 imm8 */
+			extensions[6] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* shl/sal r/m16/32/64 imm8 */
+			extensions[7] = (struct x64_set){EXTENSION|KEEP_DST,FLAGS,    0}; /* sar     r/m16/32/64 imm8 */
+		}
+		else if (opcode == 0xc6)
+		{
+			extensions[0] = (struct x64_set){EXTENSION,0,0}; /* mov r/m8 imm8 */
+			extensions[1] = (struct x64_set){        0,0,0}; /* undefined     */
+			extensions[2] = (struct x64_set){        0,0,0}; /* undefined     */
+			extensions[3] = (struct x64_set){        0,0,0}; /* undefined     */
+			extensions[4] = (struct x64_set){        0,0,0}; /* undefined     */
+			extensions[5] = (struct x64_set){        0,0,0}; /* undefined     */
+			extensions[6] = (struct x64_set){        0,0,0}; /* undefined     */
+			extensions[7] = (struct x64_set){        0,0,0}; /* undefined     */
+		}
+		else if (opcode == 0xc7)
+		{
+			extensions[0] = (struct x64_set){EXTENSION,0,0}; /* mov r/m16/32/64 imm16/32 */
+			extensions[1] = (struct x64_set){        0,0,0}; /* undefined                */
+			extensions[2] = (struct x64_set){        0,0,0}; /* undefined                */
+			extensions[3] = (struct x64_set){        0,0,0}; /* undefined                */
+			extensions[4] = (struct x64_set){        0,0,0}; /* undefined                */
+			extensions[5] = (struct x64_set){        0,0,0}; /* undefined                */
+			extensions[6] = (struct x64_set){        0,0,0}; /* undefined                */
+			extensions[7] = (struct x64_set){        0,0,0}; /* undefined                */
+		}
+		else if (opcode == 0xd3)
+		{
+			extensions[0] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* rol     r/m16/32/64 cl */
+			extensions[1] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* ror     r/m16/32/64 cl */
+			extensions[2] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,FLAGS|RCX}; /* rcl     r/m16/32/64 cl */
+			extensions[3] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,FLAGS|RCX}; /* rcr     r/m16/32/64 cl */
+			extensions[4] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* shl/sal r/m16/32/64 cl */
+			extensions[5] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* shr     r/m16/32/64 cl */
+			extensions[6] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* sal/shl r/m16/32/64 cl */
+			extensions[7] = (struct x64_set){EXTENSION|IMPLICIT_SRC|KEEP_DST,FLAGS,RCX      }; /* sar     r/m16/32/64 cl */
+		}
+		else if (opcode == 0xf6)
+		{
+			extensions[0] = (struct x64_set){EXTENSION|MOVE_DST                 ,FLAGS    ,  0}; /* test r/m8 imm8           */
+			extensions[1] = (struct x64_set){EXTENSION|MOVE_DST                 ,FLAGS    ,  0}; /* test r/m8 imm8           */
+			extensions[2] = (struct x64_set){EXTENSION                          ,        0,  0}; /* not  r/m8                */
+			extensions[3] = (struct x64_set){EXTENSION                          ,FLAGS    ,  0}; /* neg  r/m8                */
+			extensions[4] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC,FLAGS|RAX,RAX}; /* mul  ax   al   r/m8      */
+			extensions[5] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC,FLAGS|RAX,RAX}; /* imul ax   al   r/m8      */
+			extensions[6] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC,FLAGS|RAX,RAX}; /* div  al   ah   ax   r/m8 */
+			extensions[7] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC,FLAGS|RAX|RDX,RAX|RDX}; /* idiv al   ah   ax   r/m8 */
+		}
+		else if (opcode == 0xf7)
+		{
+			extensions[0] = (struct x64_set){EXTENSION                                  ,FLAGS        ,      0}; /* test r/m16/32/64 imm16/32             */
+			extensions[1] = (struct x64_set){EXTENSION                                  ,FLAGS        ,      0}; /* test r/m16/32/64 imm16/32             */
+			extensions[2] = (struct x64_set){EXTENSION                                  ,            0,      0}; /* not  r/m16/32/64                      */
+			extensions[3] = (struct x64_set){EXTENSION                                  ,FLAGS        ,      0}; /* neg  r/m16/32/64                      */
+			extensions[4] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC        ,FLAGS|RAX|RDX,RAX|RDX}; /* mul  rDX         rAX      r/m16/32/64 */
+			extensions[5] = (struct x64_set){EXTENSION|IMPLICIT_DST|IMPLICIT_SRC        ,FLAGS|RAX|RDX,RAX|RDX}; /* imul rDX         rAX      r/m16/32/64 */
+			extensions[6] = (struct x64_set){EXTENSION|IMPLICIT_DST|EXT_SRC|IMPLICIT_SRC,FLAGS|RAX|RDX,RAX|RDX}; /* div  rDX         rAX      r/m16/32/64 */
+			extensions[7] = (struct x64_set){EXTENSION|IMPLICIT_DST|EXT_SRC             ,FLAGS|RAX|RDX,RAX|RDX}; /* idiv rDX         rAX      r/m16/32/64 */
+		}
 		i = extensions[reg];
 	}
 	return i;
@@ -244,15 +243,15 @@ static struct x64_set	map_0f(uint8_t *p, uint8_t opcode, size_t codelen)
 
 	bzero(instructions, sizeof(instructions));
 
-	// instructions[0x45] = (struct x64_set){MODRM               ,    0,FLAGS}; /* cmovnz/cmovne r16/32/64 r/m16/32/64 */
-	// instructions[0x92] = (struct x64_set){EXTENSION           ,    0,    0}; /*                                     */
-	// instructions[0x94] = (struct x64_set){EXTENSION           ,    0,    0}; /*                                     */
-	// instructions[0x95] = (struct x64_set){EXTENSION           ,    0,    0}; /*                                     */
-	// instructions[0x97] = (struct x64_set){EXTENSION           ,    0,    0}; /*                                     */
-	// instructions[0xaf] = (struct x64_set){MODRM|FLD_D|KEEP_DST,FLAGS,    0}; /* imul          r16/32/64 r/m16/32/64 */
-	// instructions[0xb6] = (struct x64_set){MODRM|FLD_D         ,    0,    0}; /* movzx         r16/32/64 r/m8        */
-	// instructions[0xb7] = (struct x64_set){MODRM|FLD_D         ,    0,    0}; /* movzx         r16/32/64 r/m16       */
-	// instructions[0xbe] = (struct x64_set){MODRM|FLD_D         ,    0,    0}; /* movsx         r16/32/64 r/m8        */
+	instructions[0x45] = (struct x64_set){MODRM               ,    0,FLAGS}; /* cmovnz/cmovne r16/32/64 r/m16/32/64 */
+	instructions[0x92] = (struct x64_set){EXTENSION           ,    0,    0}; /*                                     */
+	instructions[0x94] = (struct x64_set){EXTENSION           ,    0,    0}; /*                                     */
+	instructions[0x95] = (struct x64_set){EXTENSION           ,    0,    0}; /*                                     */
+	instructions[0x97] = (struct x64_set){EXTENSION           ,    0,    0}; /*                                     */
+	instructions[0xaf] = (struct x64_set){MODRM|FLD_D|KEEP_DST,FLAGS,    0}; /* imul          r16/32/64 r/m16/32/64 */
+	instructions[0xb6] = (struct x64_set){MODRM|FLD_D         ,    0,    0}; /* movzx         r16/32/64 r/m8        */
+	instructions[0xb7] = (struct x64_set){MODRM|FLD_D         ,    0,    0}; /* movzx         r16/32/64 r/m16       */
+	instructions[0xbe] = (struct x64_set){MODRM|FLD_D         ,    0,    0}; /* movsx         r16/32/64 r/m8        */
 
 	i = instructions[opcode];
 
@@ -264,50 +263,50 @@ static struct x64_set	map_0f(uint8_t *p, uint8_t opcode, size_t codelen)
 
 		struct x64_set	extensions[8];
 
-		// if (opcode == 0x92)
-		// {
-		// 	extensions[0] = (struct x64_set){EXTENSION                ,0,FLAGS}; /* setb/setnae/setc r/m8 */
-		// 	extensions[1] = (struct x64_set){                          0,0,    0}; /* undefined             */
-		// 	extensions[2] = (struct x64_set){                          0,0,    0}; /* undefined             */
-		// 	extensions[3] = (struct x64_set){                          0,0,    0}; /* undefined             */
-		// 	extensions[4] = (struct x64_set){                          0,0,    0}; /* undefined             */
-		// 	extensions[5] = (struct x64_set){                          0,0,    0}; /* undefined             */
-		// 	extensions[6] = (struct x64_set){                          0,0,    0}; /* undefined             */
-		// 	extensions[7] = (struct x64_set){                          0,0,    0}; /* undefined             */
-		// }
-		// else if (opcode == 0x94)
-		// {
-		// 	extensions[0] = (struct x64_set){EXTENSION                ,0,FLAGS}; /* setz/sete r/m8   */
-		// 	extensions[1] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[2] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[3] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[4] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[5] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[6] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[7] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// }
-		// if (opcode == 0x95)
-		// {
-		// 	extensions[0] = (struct x64_set){EXTENSION                  ,0,FLAGS}; /* setnz/setne r/m8 */
-		// 	extensions[1] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[2] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[3] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[4] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[5] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[6] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[7] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// }
-		// else if (opcode == 0x97)
-		// {
-		// 	extensions[0] = (struct x64_set){EXTENSION                  ,0,FLAGS}; /* setnbe/seta r/m8 */
-		// 	extensions[1] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[2] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[3] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[4] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[5] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[6] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// 	extensions[7] = (struct x64_set){                          0,0,    0}; /* undefined        */
-		// }
+		if (opcode == 0x92)
+		{
+			extensions[0] = (struct x64_set){EXTENSION                ,0,FLAGS}; /* setb/setnae/setc r/m8 */
+			extensions[1] = (struct x64_set){                          0,0,    0}; /* undefined             */
+			extensions[2] = (struct x64_set){                          0,0,    0}; /* undefined             */
+			extensions[3] = (struct x64_set){                          0,0,    0}; /* undefined             */
+			extensions[4] = (struct x64_set){                          0,0,    0}; /* undefined             */
+			extensions[5] = (struct x64_set){                          0,0,    0}; /* undefined             */
+			extensions[6] = (struct x64_set){                          0,0,    0}; /* undefined             */
+			extensions[7] = (struct x64_set){                          0,0,    0}; /* undefined             */
+		}
+		else if (opcode == 0x94)
+		{
+			extensions[0] = (struct x64_set){EXTENSION                ,0,FLAGS}; /* setz/sete r/m8   */
+			extensions[1] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[2] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[3] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[4] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[5] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[6] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[7] = (struct x64_set){                          0,0,    0}; /* undefined        */
+		}
+		if (opcode == 0x95)
+		{
+			extensions[0] = (struct x64_set){EXTENSION                  ,0,FLAGS}; /* setnz/setne r/m8 */
+			extensions[1] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[2] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[3] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[4] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[5] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[6] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[7] = (struct x64_set){                          0,0,    0}; /* undefined        */
+		}
+		else if (opcode == 0x97)
+		{
+			extensions[0] = (struct x64_set){EXTENSION                  ,0,FLAGS}; /* setnbe/seta r/m8 */
+			extensions[1] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[2] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[3] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[4] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[5] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[6] = (struct x64_set){                          0,0,    0}; /* undefined        */
+			extensions[7] = (struct x64_set){                          0,0,    0}; /* undefined        */
+		}
 		i = extensions[reg];
 	}
 	return i;
@@ -557,7 +556,7 @@ size_t		disasm_operands(struct operand *buf, size_t buflen,
 		p_buf   += 1;
 		buflen  -= 1;
 	}
-	// if (codelen != 0)
-	// 	return errors(ERR_VIRUS, _ERR_V_OPERANDS_JUMP_TOO_SMALL);
+	if (codelen != 0)
+		return errors(ERR_VIRUS, _ERR_V_OPERANDS_JUMP_TOO_SMALL);
 	return (p_buf - buf); /* number of instructions successfully disassembled */
 }
