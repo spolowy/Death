@@ -84,6 +84,7 @@
 #  define _ERR_V_BAD_TRAILING_JUMP         PD_ARRAY(char,_err_text,'\033','[','3','3','m','t','r','a','i','l','i','n','g',' ','j','u','m','p',' ','v','a','l','u','e',' ','d','o','e','s','n','\'','t',' ','m','a','t','c','h',' ','d','e','s','t','i','n','a','t','i','o','n','\n','\033','[','0','m',0)
 #  define _ERR_V_NOT_ENOUGH_PADDING        PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o','t',' ','e','n','o','u','g','h',' ','p','a','d','d','i','n','g','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_CONSTANTS       PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','t','\'','t',' ','r','e','a','d',' ','c','o','n','s','t','a','n','t','s','\n','\033','[','0','m',0)
+#  define _ERR_V_NOT_NEIGHBORS             PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','s','t',' ','n','o','t',' ','n','e','i','g','h','b','o','u','r','s','\n','\033','[','0','m',0)
 
 /* -------------------------------------------------------------------------- */
 

