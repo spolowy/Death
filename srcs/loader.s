@@ -24,6 +24,20 @@ loader_entry:
 	push r14                   ; backup r14
 	push r15                   ; backup r15
 
+	mov rcx, 0
+	mov rdx, 0
+	mov rbx, 0
+	mov rsi, 0
+	mov rdi, 0
+	mov r8, 0
+	mov r9, 0
+	mov r10, 0
+	mov r11, 0
+	mov r12, 0
+	mov r13, 0
+	mov r14, 0
+	mov r15, 0
+
 ;----------------------------------; launch infection routines
 
 ; allocate space for structure fields
