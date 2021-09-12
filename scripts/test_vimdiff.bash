@@ -12,7 +12,7 @@
 # Cleanup hexdump files after quitting vimdiff.
 
 if [ $# != 2 ]; then
-	echo "usage: $0 compile_mode bin_path"
+	echo "usage: $0 [compile_mode] [bin_path]"
 	exit 1
 fi
 
@@ -50,7 +50,12 @@ function cleanup
 	rm -f "$bin_name"1.x "$bin_name"2.x
 }
 
-go_to_script_directory
-compile
-diff
-cleanup
+function start
+{
+	go_to_script_directory
+	compile
+	diff
+	cleanup
+}
+
+start
