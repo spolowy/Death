@@ -12,7 +12,7 @@ SRC =	loader.s                       \
 	virus/accessors.c              \
 	virus/adjust_references.c      \
 	virus/change_entry.c           \
-	virus/known_instruction.c      \
+	virus/disasm_step.c            \
 	virus/copy_virus_to_clone.c    \
 	virus/copy_client_to_clone.c   \
 	virus/disasm_block.c           \

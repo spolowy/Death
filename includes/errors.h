@@ -63,6 +63,7 @@
 #  define _ERR_T_WRITE_PERMUTATED_CODE     PD_ARRAY(char,_err_text,'\033','[','3','3','m','w','r','i','t','e','_','p','e','r','m','u','t','a','t','e','d','_','c','o','d','e','\n','\033','[','0','m',0)
 #  define _ERR_T_COPY_CLIENT_TO_CLONE      PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','o','p','y','_','c','l','i','e','n','t','_','t','o','_','c','l','o','n','e','\n','\033','[','0','m',0)
 #  define _ERR_T_ADJUST_REFERENCES         PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','j','u','s','t','_','r','e','f','e','r','e','n','c','e','s','\n','\033','[','0','m',0)
+#  define _ERR_T_CHANGE_CLIENT_JUMP        PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','h','a','n','g','e','_','c','l','i','e','n','t','_','j','u','m','p','\n','\033','[','0','m',0)
 
 /* ------------------------------ errors virus ------------------------------ */
 
@@ -83,8 +84,9 @@
 #  define _ERR_V_ADD_TRAILING_JUMP         PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','d',' ','t','r','a','i','l','i','n','g',' ','j','u','m','p','\n','\033','[','0','m',0)
 #  define _ERR_V_BAD_TRAILING_JUMP         PD_ARRAY(char,_err_text,'\033','[','3','3','m','t','r','a','i','l','i','n','g',' ','j','u','m','p',' ','v','a','l','u','e',' ','d','o','e','s','n','\'','t',' ','m','a','t','c','h',' ','d','e','s','t','i','n','a','t','i','o','n','\n','\033','[','0','m',0)
 #  define _ERR_V_NOT_ENOUGH_PADDING        PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o','t',' ','e','n','o','u','g','h',' ','p','a','d','d','i','n','g','\n','\033','[','0','m',0)
-#  define _ERR_V_CANT_READ_CONSTANTS       PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','t','\'','t',' ','r','e','a','d',' ','c','o','n','s','t','a','n','t','s','\n','\033','[','0','m',0)
+#  define _ERR_V_CANT_READ_CONSTANTS       PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','c','o','n','s','t','a','n','t','s','\n','\033','[','0','m',0)
 #  define _ERR_V_NOT_NEIGHBORS             PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','s','t',' ','n','o','t',' ','n','e','i','g','h','b','o','u','r','s','\n','\033','[','0','m',0)
+#  define _ERR_V_CANT_READ_LOADER_CODE     PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','a','c','c','e','s','s',' ','l','o','a','d','e','r',' ','c','o','d','e','\n','\033','[','0','m',0)
 
 /* -------------------------------------------------------------------------- */
 

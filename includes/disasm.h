@@ -5,6 +5,8 @@
 # include <stdint.h>
 # include <stdbool.h>
 
+# include "accessors.h"
+
 /*
 ** Flags used to specify operand or status.
 ** Although GP registers can have a 8-bit, 16-bit or 32-bit size we consider
@@ -71,5 +73,6 @@ size_t		disasm_operands(struct operand *buf, size_t buflen, const void *code, si
 size_t		disasm_jumps(struct control_flow *buf, size_t buflen, const void *code, size_t codelen);
 
 bool		known_instruction(const void *code, size_t codelen);
+void		*step_instruction(struct safe_ptr ref, void *code, size_t instruction_length);
 
 #endif

