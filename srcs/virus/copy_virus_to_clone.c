@@ -1,6 +1,7 @@
 #include "virus.h"
 #include "disasm.h"
 #include "utils.h"
+#include "jumps.h"
 #include "compiler_utils.h"
 #include "errors.h"
 

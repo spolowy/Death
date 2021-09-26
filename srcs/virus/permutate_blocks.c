@@ -1,5 +1,6 @@
 #include "blocks.h"
 #include "disasm.h"
+#include "jumps.h"
 #include "compiler_utils.h"
 #include "errors.h"
 #include "log_print_blocks.h"

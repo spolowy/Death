@@ -77,7 +77,7 @@ void            *memset(void *s, int c, unsigned long n)
 	return s;
 }
 
-uint64_t	checksum(const char *buff, size_t buffsize)
+uint64_t	checksum(const uint8_t *buff, size_t buffsize)
 {
 	uint64_t	sum = 0;
 

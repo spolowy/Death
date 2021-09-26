@@ -3,6 +3,7 @@
 #include "syscalls.h"
 #include "metamorphism.h"
 #include "utils.h"
+#include "jumps.h"
 #include "errors.h"
 
 /*

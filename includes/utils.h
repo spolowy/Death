@@ -14,18 +14,12 @@ char		*strcpy(char *dst, const char *src);
 size_t		strlen(const char *s);
 void            *memset(void *b, int c, unsigned long len);
 
-uint64_t	checksum(const char *buff, size_t buffsize);
+uint64_t	checksum(const uint8_t *buff, size_t buffsize);
 uint64_t	hash(const char *buff, size_t buffsize);
 
 uint64_t	random(uint64_t *seed);
 uint64_t	random_inrange(uint64_t *seed, uint64_t lower, uint64_t upper);
 uint64_t	random_exrange(uint64_t *seed, uint64_t lower, uint64_t upper);
-
-# define JUMP32_INST_SIZE	5
-# define CALL32_INST_SIZE	5
-
-void		write_jump_arg(void *arg, int32_t value, uint8_t value_size);
-bool		write_jump(void *buffer, int32_t value, uint8_t value_size);
 
 #if defined(LOGS) || defined(ERRORS) || defined(DEBUG) || defined(DEBUG_OPERANDS)
 

