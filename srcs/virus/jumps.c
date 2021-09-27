@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include "disasm.h"
 #include "compiler_utils.h"
-#include "disasm.h"
 #include "errors.h"
 #include "jumps.h"
 

