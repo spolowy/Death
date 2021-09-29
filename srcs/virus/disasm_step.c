@@ -46,9 +46,10 @@ bool	known_instruction(const void *code, size_t codelen)
 
 	uint8_t		*p = (uint8_t*)code;
 	uint8_t		opcode;                 // current opcode
-	int8_t		prefix   = 0;           // opcode prefix(es)
+	int8_t		prefix = 0;             // opcode prefix(es)
 
 next_opcode:
+
 	if (!codelen--) // error if instruction is too long
 	{
 		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
@@ -59,10 +60,10 @@ next_opcode:
 	// NULL byte prefixes
 	if ((opcode == 0x26 || opcode == 0x2e
 	||   opcode == 0x36 || opcode == 0x3e
-	// FS/GS segment override prefix
+	// FS/GS segment override prefixes
 	||   opcode == 0x64 || opcode == 0x65
-	// REX without W(idth) field
-	||  (opcode >= 0x40 && opcode <= 0x47)
+	// REX prefixes
+	||  (opcode >= 0x40 && opcode <= 0x4f)
 	// assert LOCK# signal prefix
 	||   opcode == 0xf0)
 	&&  !(prefix))
@@ -75,43 +76,47 @@ error:
 	return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
 }
 
-void	*step_instruction(struct safe_ptr ref, void *code, size_t instruction_length)
+void	*step_instruction(const void *code, size_t codelen)
 {
+	const size_t	instruction_length = disasm_length(code, codelen);
+
+	if (instruction_length == 0)
+	{
+		errors(ERR_THROW, _ERR_T_STEP_INSTRUCTION);
+		return NULL;
+	}
+
 	void		*rip = NULL;
 	uint8_t		*p = (uint8_t*)code;
-	uint8_t		prefix = 0;
 	uint8_t		opcode;
-	int32_t		jmp_value = 0;
+	uint8_t		prefix = 0;
 
 next_opcode:
+
 	opcode = *p++;
 
 	// check if has prefix
 	if (opcode == 0x0f) {prefix |= OP_PREFIX_0F; goto next_opcode;}
-	// check if has REX
-	if (opcode >= 0x40 && opcode <= 0x4f) {goto next_opcode;}
 
 	// rel8
 	if ((opcode >= 0x70 && opcode <= 0x7f)           // JMPcc
 	|| (opcode >= 0xe0 && opcode <= 0xe3)            // LOOP/LOOPcc/JMPcc
 	|| (opcode == 0xeb))                             // JMP
 	{
-		jmp_value = *((int8_t*)p);
-		rip = (code + instruction_length) + jmp_value;
+		int8_t	jump_value = *((int8_t*)p);
+		rip = ((void*)code + instruction_length) + jump_value;
 	}
 	// rel16/32
 	else if ((opcode == 0xe8)                          // CALL
 	|| (opcode == 0xe9)                                // JMP
 	|| (prefix && (opcode >= 0x80 && opcode <= 0x8f))) // JMPcc
 	{
-		jmp_value = *((int32_t*)p);
-		rip = (code + instruction_length) + jmp_value;
+		int32_t	jump_value = *((int32_t*)p);
+		rip = ((void*)code + instruction_length) + jump_value;
 	}
 	else
 	{
-		rip = code + instruction_length;
+		rip = (void*)code + instruction_length;
 	}
-	if (rip < ref.ptr || rip >= ref.ptr + ref.size)
-		return NULL;
 	return rip;
 }

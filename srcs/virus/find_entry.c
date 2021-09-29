@@ -37,7 +37,6 @@ static bool	find_entry_shdr(struct safe_ptr ref, const size_t offset,
 		stored_entry->safe_last_section_shdr = elf64_sect_hdr;
 		stored_entry->end_of_last_section = end_of_sect;
 	}
-
 	return true;
 }
 
@@ -56,6 +55,7 @@ static bool	find_entry_phdr(struct safe_ptr ref, const size_t offset,
 
 	if (p_vaddr <= closure->e_entry && closure->e_entry < p_vaddr + p_memsz)
 		stored_entry->safe_phdr = elf64_seg_hdr;
+
 	return true;
 }
 

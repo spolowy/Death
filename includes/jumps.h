@@ -4,11 +4,11 @@
 # define JUMP32_INST_SIZE	5
 # define CALL32_INST_SIZE	5
 
-void	write_jump_arg(void *arg, int32_t value, uint8_t value_size);
-void	write_jump(void *buffer, int32_t value, uint8_t value_size);
+# define is_jump32(x)	(x == 0xe9)
 
-bool	is_jump32(const uint8_t *code);
-void	*find_first_jump(struct safe_ptr ref, size_t offset);
-void	*get_jump_destination(void *jump_ptr);
+bool	write_jump32(struct safe_ptr ref, size_t offset, int32_t value);
+bool	write_jump32_value(struct safe_ptr ref, size_t offset, int32_t value);
+void	*find_first_jump32(struct safe_ptr ref, size_t offset);
+void	*get_jump32_destination(struct safe_ptr ref, size_t offset);
 
 #endif

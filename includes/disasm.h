@@ -72,7 +72,7 @@ uint8_t		disasm_length(const void *code, size_t codelen);
 size_t		disasm_operands(struct operand *buf, size_t buflen, const void *code, size_t codelen);
 size_t		disasm_jumps(struct control_flow *buf, size_t buflen, const void *code, size_t codelen);
 
-void		*step_instruction(struct safe_ptr ref, void *code, size_t instruction_length);
 bool		known_instruction(const void *code, size_t codelen);
+void		*step_instruction(const void *code, size_t codelen);
 
 #endif

