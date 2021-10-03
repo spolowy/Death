@@ -32,7 +32,7 @@ static bool	can_permutate(const struct operand *a, const struct operand *b)
 }
 
 static bool	is_label(const struct label *labels, size_t nlabels,
-			struct operand *op)
+			const struct operand *op)
 {
 	size_t	low = 0;
 	size_t	high = nlabels - 1;
@@ -53,7 +53,8 @@ static bool	is_label(const struct label *labels, size_t nlabels,
 	return false;
 }
 
-static bool	uses_reserved_registers(struct operand *a, struct operand *b)
+static bool	uses_reserved_registers(const struct operand *a,
+			const struct operand *b)
 {
 	if ((a->src | a->dst | b->src | b->dst) & (RIP | RSP))
 	{
@@ -92,7 +93,7 @@ static void	permutate_neighbors(struct operand *a, struct operand *b)
 	a->addr = after_b;
 
 	// swap instructions array position
-	struct operand swap;
+	struct operand	swap;
 	swap = *a;
 	*a = *b;
 	*b = swap;
@@ -112,7 +113,8 @@ static void	maybe_permutate(struct operand *a, struct operand *b, uint64_t *seed
 
 /* -------------------------------------------------------------------------- */
 
-size_t		total_insts_size(struct operand insts[INSTRUCTION_PERMUT_WINDOW], size_t ninsts)
+static size_t	total_insts_size(const struct operand insts[INSTRUCTION_PERMUT_WINDOW],
+			size_t ninsts)
 {
 	size_t	size = 0;
 	for (size_t i = 0; i < ninsts; i++)

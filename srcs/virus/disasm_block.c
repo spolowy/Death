@@ -15,8 +15,8 @@ static void	sort_by_label_addr(struct jump *sidecar[MAX_JUMPS],
 {
 	if (len < 2) return;
 
-	void	*pivot = array[len / 2].label_addr;
-	int	i, j;
+	const void	*pivot = array[len / 2].label_addr;
+	int		i, j;
 
 	for (i = 0, j = len - 1; ; i++, j--)
 	{
@@ -60,13 +60,12 @@ static void	assign_labels(struct label labels[MAX_JUMPS],
 			current_label->njumps++;
 			continue;
 		}
-
 		current_label++;
 		block->nlabels++;
 
-		current_label->location   = jumps_info[i].label_addr;
-		current_label->jumps      = &label_origins[i];
-		current_label->njumps     = 1;
+		current_label->location = jumps_info[i].label_addr;
+		current_label->jumps    = &label_origins[i];
+		current_label->njumps   = 1;
 	}
 	block->labels = labels;
 }

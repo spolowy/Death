@@ -52,7 +52,7 @@ next_opcode:
 
 	if (!codelen--) // error if instruction is too long
 	{
-		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
+		hexdump_text(code, INSTRUCTION_MAXLEN, (size_t)p - (size_t)code);
 		goto error;
 	}
 	opcode = *p++;

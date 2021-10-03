@@ -25,15 +25,15 @@
 ** Merged immediate 16/32:
 ** Tables for 16 and 32-bit immediate values are merged for the sake of space
 ** and performance.
-** But technically some opcode take only a WORD such as 0xc3 (<retn>).
+** But technically some opcode take only a WORD such as 0xc2 (<retn>).
 ** In this case if an operand size modifier is present, it would lead to an
 ** incorrect result.
 **
 ** The <test> exception:
 ** 0xf6 (<test> imm8) and 0xf7 (<test> imm16/32) both share their opcode with
 ** other instructions (differentiated by their opcode extension in modrm.reg).
-** The fact that the same primary opcode got so many length variation makes
-** them an exception.
+** The fact that the same primary opcode is shared between instructions of
+** different length makes them an exception.
 ** /!\
 */
 uint8_t		disasm_length(const void *code, size_t codelen)
@@ -189,16 +189,16 @@ uint8_t		disasm_length(const void *code, size_t codelen)
 	table_0f_opcode_imm16_32[7]      = BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* e */
 						     0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0); /* f */
 
-	size_t		defmem   = DWORD;       // memory size defined
-	size_t		defdata  = DWORD;       // operand size defined
-	size_t		memsize  = 0;           // current memory size
-	size_t		datasize = 0;           // current data size
-	int8_t		prefix   = 0;           // opcode prefix(es)
-	int8_t		flags    = 0;           // flag(s)
-	bool		rex      = false;       // has REX prefix
+	size_t	defmem   = DWORD;    // memory size defined (DWORD by default)
+	size_t	defdata  = DWORD;    // operand size defined (DWORD by default)
+	size_t	memsize  = 0;        // current memory size
+	size_t	datasize = 0;        // current data size
+	int8_t	prefix   = 0;        // opcode prefix(es)
+	int8_t	flags    = 0;        // flag(s)
+	bool	rex      = false;    // has REX prefix
 
-	uint8_t		*p = (uint8_t*)code;
-	uint8_t		opcode;                 // current opcode
+	const uint8_t	*p = code;
+	uint8_t		opcode;      // current opcode
 
 	// set <codelen> to INSTRUCTION_MAXLEN if it exceeds it
 	if (codelen > INSTRUCTION_MAXLEN) codelen = INSTRUCTION_MAXLEN;
@@ -206,7 +206,7 @@ uint8_t		disasm_length(const void *code, size_t codelen)
 next_opcode:
 	if (!codelen--) // error if instruction is too long
 	{
-		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
+		hexdump_text(code, INSTRUCTION_MAXLEN, (size_t)p - (size_t)code);
 		goto error;
 	}
 	opcode = *p++;
@@ -270,7 +270,7 @@ next_opcode:
 	// error if instruction is too long
 	if (!codelen--)
 	{
-		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
+		hexdump_text(code, INSTRUCTION_MAXLEN, (size_t)p - (size_t)code);
 		goto error;
 	}
 
@@ -298,7 +298,7 @@ next_opcode:
 		{
 			if (!codelen--) // error if instruction is too long
 			{
-				hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
+				hexdump_text(code, INSTRUCTION_MAXLEN, (size_t)p - (size_t)code);
 				goto error;
 			}
 			rm = *p++ & 0b111;
@@ -309,7 +309,7 @@ next_opcode:
 end:
 	if (datasize + memsize > codelen) // error if instruction is too long
 	{
-		hexdump_text(code, (size_t)p - (size_t)code, INSTRUCTION_MAXLEN);
+		hexdump_text(code, INSTRUCTION_MAXLEN, (size_t)p - (size_t)code);
 		goto error;
 	}
 

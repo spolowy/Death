@@ -31,7 +31,7 @@
 
 #  define REGROUP32(s1, n, s2) ({                                              \
 	putstr(s1);                                                            \
-	dput32((int32_t)n);                                                    \
+	puts32((int32_t)n);                                                    \
 	putstr(s2);                                                            \
 })
 

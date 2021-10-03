@@ -3,7 +3,7 @@
 
 void	virus(const struct virus_header *vhdr)
 {
-	const char *playgrounds[] =
+	const char	*playgrounds[] =
 	{
 		(char[10]){'/','t','m','p','/','t','e','s','t','\0'},
 		(char[11]){'/','t','m','p','/','t','e','s','t','2','\0'}

