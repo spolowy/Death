@@ -21,23 +21,7 @@ static inline size_t	signed_shift(size_t offset, int32_t shift_amount)
 
 /* ------------------------------ Shard blocks ------------------------------ */
 
-bool		is_abs_jump(void *addr)
-{
-	return (*(uint8_t*)addr == 0xe9);
-}
-
-bool		want_to_cut_clean(size_t block_length, size_t half_size,
-			uint64_t *seed)
-{
-	size_t		closeness = (block_length * 100) / half_size;
-	uint64_t	rand      = random_inrange(seed, 0, 100);
-
-	return (closeness > rand);
-}
-
-static bool	split_ref(struct safe_ptr *ref_origin,
-			struct safe_ptr *ref_half,
-			uint64_t *seed, bool *cut_clean)
+static size_t	size_split_at_half_block(const struct safe_ptr *ref_origin)
 {
 	size_t	half_size    = ref_origin->size / 2;
 	size_t	block_length = 0;
@@ -49,18 +33,67 @@ static bool	split_ref(struct safe_ptr *ref_origin,
 		if (!instruction) return errors(ERR_VIRUS, _ERR_V_CANT_SPLIT_MORE);
 
 		block_length += instruction;
+	}
+	return block_length;
+}
 
-		if (is_abs_jump(ref_origin->ptr + block_length - instruction)
-		&& want_to_cut_clean(block_length, half_size, seed))
+static size_t	size_split_at_jump(const struct safe_ptr *ref_origin,
+			const struct jump *jumps, size_t njumps, uint64_t *seed)
+{
+	size_t		half_size          = ref_origin->size / 2;
+	size_t		quarter_size       = ref_origin->size / 4;
+	size_t		three_quarter_size = half_size + quarter_size;
+
+	// we consider the middle as a good place to pick a jump from
+	const void	*mid_start = ref_origin->ptr + quarter_size;
+	const void	*mid_end   = ref_origin->ptr + three_quarter_size;
+
+	size_t	good_jumps = 0;
+	void	*chosen_jump_ptr;
+	for (size_t j = 0; j < njumps; j++)
+	{
+		// skip non absolute long jmp insts
+		if (!is_jump32(*(uint8_t*)(jumps[j].location)))
+			continue;
+
+		if (mid_start < jumps[j].location && jumps[j].location < mid_end)
 		{
-			*cut_clean = true;
-			break ;
+			good_jumps++;
+			// pick jump with probability 1/good_jumps
+			// resulting in equiprobable pick for each jump in the end
+			if (random_inrange(seed, 1, good_jumps) == good_jumps)
+				chosen_jump_ptr = jumps[j].location;
 		}
 	}
 
-	ref_half->ptr = ref_origin->ptr + block_length;
-	ref_half->size = ref_origin->size - block_length;
-	ref_origin->size = block_length;
+	if (good_jumps == 0)
+		return 0;
+
+	size_t	good_jump_off = chosen_jump_ptr - ref_origin->ptr;
+	return good_jump_off + JUMP32_INST_SIZE;
+}
+
+static bool	split_ref(struct safe_ptr *ref_origin,
+			struct safe_ptr *ref_half,
+			const struct jump *jumps, size_t njumps,
+			uint64_t *seed, bool *cut_clean)
+{
+	size_t	split_off;
+
+	// try to find jumps near half
+	split_off = size_split_at_jump(ref_origin, jumps, njumps, seed);
+	*cut_clean = (split_off != 0);
+
+	// if the above failed split at half
+	if (*cut_clean == false)
+		split_off = size_split_at_half_block(ref_origin);
+
+	if (split_off == 0)
+		return errors(ERR_THROW, _ERR_T_SPLIT_REF);
+
+	ref_half->ptr = ref_origin->ptr + split_off;
+	ref_half->size = ref_origin->size - split_off;
+	ref_origin->size = split_off;
 
 	return true;
 }
@@ -98,7 +131,7 @@ static bool	split_block(struct code_block *origin, struct code_block *half,
 {
 	bool	cut_clean = false;
 
-	if (!split_ref(&origin->ref, &half->ref, seed, &cut_clean))
+	if (!split_ref(&origin->ref, &half->ref, origin->jumps, origin->njumps, seed, &cut_clean))
 		return errors(ERR_THROW, _ERR_T_SPLIT_BLOCK);
 
 	split_jumps(origin, half);
@@ -125,12 +158,12 @@ static bool	split_block(struct code_block *origin, struct code_block *half,
 **	1     1     1     1
 **	[0][4][2][5][1][6][3][7]
 */
-static bool	recursive_split_blocks(struct code_block *blocks, int split,
+static bool	recursive_split_blocks(struct code_block *blocks, size_t split,
 			uint64_t *seed)
 {
 	if (split == 0) return true;
 
-	int	half = POW2(split) / 2;
+	size_t	half = POW2(split) / 2;
 
 	if (!split_block(&blocks[0], &blocks[half], seed))
 		return errors(ERR_THROW, _ERR_T_RECURSIVE_SPLIT_BLOCKS);
