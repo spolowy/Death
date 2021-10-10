@@ -31,11 +31,11 @@ bool	free_accessor(struct safe_ptr *ref)
 }
 
 __warn_unused_result
-bool	init_file_safe(struct safe_ptr *ref, const char *filename)
+bool	init_file_safe(struct safe_ptr *ref, const char *file)
 {
 	void		*ptr;
 	struct stat	buf;
-	int		fd = sys_open(filename, O_RDONLY);
+	int		fd = sys_open(file, O_RDONLY);
 
 	if (fd < 0)
 		return errors(ERR_SYS, _ERR_S_OPEN_FAILED);
@@ -67,14 +67,14 @@ bool	init_clone_safe(struct safe_ptr *ref, size_t file_size, size_t extra_size)
 }
 
 __warn_unused_result
-bool	write_file(struct safe_ptr ref, size_t size, const char *filename)
+bool	write_file(struct safe_ptr ref, size_t size, const char *file)
 {
 	void	*ptr = safe(ref, 0, size);
 
 	if (ptr == NULL)
 		return errors(ERR_THROW, _ERR_T_WRITE_FILE);
 
-	int	fd = sys_open(filename, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
+	int	fd = sys_open(file, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
 
 	if (fd < 0)
 		return errors(ERR_SYS, _ERR_S_OPEN_FAILED);

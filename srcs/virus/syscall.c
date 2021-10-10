@@ -26,7 +26,7 @@
 						"  ret\n");
 
 
-inline ssize_t sys_read(_u int fd, _u void *buf, _u size_t count)
+inline ssize_t	sys_read(_u int fd, _u void *buf, _u size_t count)
 {
 	wrap_syscall(SYS_READ);
 	__builtin_unreachable();

@@ -56,8 +56,22 @@ void	log_virus_header(const struct virus_header *vhdr)
 	PD_ARRAY(char, loader_entry, '[','L','O','G',']',' ','l','o','a','d','e','r','_','e','n','t','r','y',':',' ',0);
 
 	putstr(seed); putu64(vhdr->seed); putstr(newline);
-	putstr(virus_size); dput32(vhdr->full_virus_size); putstr(newline);
+	putstr(virus_size); puts32(vhdr->full_virus_size); putstr(newline);
 	putstr(loader_entry); putu64((size_t)vhdr->loader_entry); putstr(newline);
+}
+
+void	log_trying_change_header_entry(void)
+{
+	PD_ARRAY(char, change_header_entry, '[','L','O','G',']',' ','t','r','y','i','n','g',' ','t','o',' ','c','h','a','n','g','e',' ','h','e','a','d','e','r',' ','e','n','t','r','y','.','.','\n',0);
+
+	putstr(change_header_entry);
+}
+
+void	log_trying_change_client_jump(void)
+{
+	PD_ARRAY(char, change_client_jump, '[','L','O','G',']',' ','t','r','y','i','n','g',' ','t','o',' ','c','h','a','n','g','e',' ','c','l','i','e','n','t',' ','j','u','m','p','.','.','\n',0);
+
+	putstr(change_client_jump);
 }
 
 #endif

