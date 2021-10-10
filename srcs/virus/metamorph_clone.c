@@ -70,7 +70,7 @@ static bool	get_clone_virus_address(void **clone_virus_address,
 {
 	size_t		vircall_off = loader_off + dist_vircall_loader;
 
-	*clone_virus_address = get_jump32_destination(clone_ref, vircall_off);
+	*clone_virus_address = get_jmp32_destination(clone_ref, vircall_off);
 
 	if (*clone_virus_address == NULL)
 		return errors(ERR_THROW, _ERR_T_GET_CLONE_VIRUS_ADDRESS);

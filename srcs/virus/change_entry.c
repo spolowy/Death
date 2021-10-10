@@ -30,7 +30,7 @@ static bool	change_client_jump(struct safe_ptr clone_ref,
 	log_trying_change_client_jump();
 
 	// find first client jmp
-	const void	*client_jump = find_first_jump32(clone_ref, entry_offset);
+	const void	*client_jump = find_first_jmp32(clone_ref, entry_offset);
 
 	if (client_jump == NULL)
 		return errors(ERR_THROW, _ERR_T_CHANGE_CLIENT_JUMP);
@@ -45,7 +45,7 @@ static bool	change_client_jump(struct safe_ptr clone_ref,
 
 	// modify jump
 	const size_t	client_jump_offset = client_jump - clone_ref.ptr;
-	const void	*client_jump_dst = get_jump32_destination(clone_ref, client_jump_offset);
+	const void	*client_jump_dst = get_jmp32_destination(clone_ref, client_jump_offset);
 
 	if (client_jump_dst == NULL)
 		return errors(ERR_THROW, _ERR_T_CHANGE_CLIENT_JUMP);
@@ -54,8 +54,8 @@ static bool	change_client_jump(struct safe_ptr clone_ref,
 	const int32_t	loader_jump_value = (int32_t)(client_jump_dst - (loader_jump + JUMP32_INST_SIZE));
 	const int32_t	client_jump_value = (int32_t)(loader_entry_ptr - (client_jump + JUMP32_INST_SIZE));
 
-	if (!write_jump32(clone_ref, loader_jump_offset, loader_jump_value)
-	|| !write_jump32(clone_ref, client_jump_offset, client_jump_value))
+	if (!write_jmp32(clone_ref, loader_jump_offset, loader_jump_value)
+	|| !write_jmp32(clone_ref, client_jump_offset, client_jump_value))
 		return errors(ERR_THROW, _ERR_T_CHANGE_CLIENT_JUMP);
 
 	return true;

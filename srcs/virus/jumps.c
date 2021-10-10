@@ -5,7 +5,7 @@
 #include "errors.h"
 #include "jumps.h"
 
-bool	write_jump32(struct safe_ptr ref, size_t offset, int32_t value)
+bool	write_jmp32(struct safe_ptr ref, size_t offset, int32_t value)
 {
 	uint8_t	*jump_opcode = safe(ref, offset, JUMP32_INST_SIZE);
 	int32_t	*jump_value  = (int32_t*)(jump_opcode + 1);
@@ -19,7 +19,7 @@ bool	write_jump32(struct safe_ptr ref, size_t offset, int32_t value)
 	return true;
 }
 
-bool	write_jump32_value(struct safe_ptr ref, size_t offset, int32_t value)
+bool	write_i32_value(struct safe_ptr ref, size_t offset, int32_t value)
 {
 	void	*jump_value = safe(ref, offset, DWORD);
 
@@ -31,7 +31,7 @@ bool	write_jump32_value(struct safe_ptr ref, size_t offset, int32_t value)
 	return true;
 }
 
-void	*find_first_jump32(struct safe_ptr ref, size_t offset)
+void	*find_first_jmp32(struct safe_ptr ref, size_t offset)
 {
 	uint8_t	*code = safe(ref, offset, INSTRUCTION_MAXLEN);
 
@@ -47,7 +47,7 @@ void	*find_first_jump32(struct safe_ptr ref, size_t offset)
 			errors(ERR_THROW, _ERR_T_FIND_FIRST_JUMP32);
 			goto error;
 		}
-		if (is_jump32(*code))
+		if (is_jmp32(*code))
 			return code;
 
 		code = step_instruction(code, INSTRUCTION_MAXLEN);
@@ -56,7 +56,7 @@ error:
 	return NULL;
 }
 
-void	*get_jump32_destination(struct safe_ptr ref, size_t offset)
+void	*get_jmp32_destination(struct safe_ptr ref, size_t offset)
 {
 	uint8_t	*jump_opcode = safe(ref, offset, JUMP32_INST_SIZE);
 	int32_t	*jump_value  = (int32_t*)(jump_opcode + 1);

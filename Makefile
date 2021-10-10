@@ -91,8 +91,6 @@ ${NAME}: ${OBJ}
 	mkdir -p /tmp/test /tmp/test2
 	cp /bin/ls /tmp/test/
 
-# cp l/a.out /tmp/test
-
 ${OBJDIR}/%.o: ${SRCDIR}/%.s
 	@echo ${Y}Compiling [$@]...${X}
 	@/bin/mkdir -p ${OBJDIR} ${OBJDIR}/virus

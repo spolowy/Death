@@ -31,8 +31,6 @@
 # define NEW_MODRM(reg, rm)	(((reg) << 3) | (rm))
 # define NEW_SIB(index, base)	(((index) << 3) | (base))
 
-#define CAN_SWAP(x)		(x & SWAPPABLE_REGISTERS)
-
 /* structure describing how the instruction should be disassembled */
 struct x86_set
 {
@@ -70,6 +68,11 @@ static void	swap_registers(uint32_t *a, uint32_t *b)
 	*b = tmp;
 }
 
+static inline bool	can_swap(uint32_t reg)
+{
+	return (reg & SWAPPABLE_REGISTERS);
+}
+
 static void	shuffle_matches(uint32_t matches[NREGISTERS], uint64_t seed)
 {
 	uint32_t	a, b;
@@ -80,14 +83,14 @@ static void	shuffle_matches(uint32_t matches[NREGISTERS], uint64_t seed)
 		a = random_inrange(&seed, 0b000, 0b0111);
 		b = random_inrange(&seed, 0b000, 0b0111);
 
-		if (CAN_SWAP(matches[a]) && CAN_SWAP(matches[b]))
+		if (can_swap(matches[a]) && can_swap(matches[b]))
 			swap_registers(&matches[a], &matches[b]);
 
 		// swap extended registers (r8 -> r15)
 		a = random_inrange(&seed, 0b1000, 0b1111);
 		b = random_inrange(&seed, 0b1000, 0b1111);
 
-		if (CAN_SWAP(matches[a]) && CAN_SWAP(matches[b]))
+		if (can_swap(matches[a]) && can_swap(matches[b]))
 			swap_registers(&matches[a], &matches[b]);
 	}
 }

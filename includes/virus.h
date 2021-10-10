@@ -12,7 +12,9 @@
 # include "accessors.h"
 
 /*
-** virus idetifier
+** virus infection detection mechanism
+** hardcoded checksum of the unordered (because permutated) push of
+** all registers and flags at the beginning of the loader code
 */
 
 # define LOADER_PROLOGUE_LEN	22
