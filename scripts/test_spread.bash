@@ -10,19 +10,25 @@
 # infected binary.
 # Continues to do so for <ngen> (n generations).
 
-if [ $# -lt 3 ]; then
-	echo "usage: $0 [compile_mode] [ngen] [target 1] [target 2] .."
-	exit 1
-fi
-
 green='\033[32m'
 red='\033[31m'
 yellow='\033[33m'
 none='\033[0m'
 
-germ="../death"
+argv="$@"
+argc="$#"
+self="$0"
 
-declare -a	target_array
+if [ $argc -lt 3 ]; then
+	printf "${yellow}usage${none}: $self [compile_mode] [ngen] [target 1] [target 2] ..\n"
+	exit 1
+fi
+
+compile_mode="$1"
+ngen="$2"
+germ='../death'
+
+declare -a target_array
 
 # ----------------------------- define handlers ------------------------------ #
 
@@ -33,18 +39,16 @@ function	define_handlers
 }
 
 # ---------------------------------------------------------------------------- #
-
+#
 function	go_to_script_directory
 {
-	local	parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+	local parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
 	cd "$parent_path"
 }
 
 function	compile
 {
-	local	compile_mode="$1"
-
 	rm -rf /tmp/test/* /tmp/test2/*
 	mkdir -p /tmp/test /tmp/test2
 	make "$compile_mode" -C ..
@@ -54,11 +58,12 @@ function	compile
 
 function	fill_target_array
 {
-	let	nbin=$(( $BASH_ARGC-2 ))
+	let nbin=$(( $argc ))
+	targets=( $argv )
 
-	for ((n=0; n<$nbin; n++))
+	for ((n=2; n<$nbin; n++))
 	do
-		target_array+=("${BASH_ARGV[$n]}")
+		target_array+=( "${targets[$n]}" )
 	done
 }
 
@@ -66,9 +71,9 @@ function	fill_target_array
 
 function	summary
 {
-	local	ninfected="$1"
-	local	ngen="$2"
-	local	tag="$3"
+	local ninfected="$1"
+	local ngen="$2"
+	local tag="$3"
 
 	if [[ "$ninfected" != "$ngen" ]]; then
 		printf "\n ---------- ${tag}${ninfected}${none} infected out of ${green}${ngen}${none} --------------- \n"
@@ -80,16 +85,16 @@ function	summary
 
 function	not_infected
 {
-	local	infected_name="$1"
-	local	target_name="$2"
+	local infected_name="$1"
+	local target_name="$2"
 
 	printf "  [${yellow}NOT INFECTED${none}]  [$infected_name] -> [${yellow}${target_name}${none}]\n"
 }
 
 function	ok
 {
-	local	infected_name="$1"
-	local	target_name="$2"
+	local infected_name="$1"
+	local target_name="$2"
 
 	printf "  [${green}OK${none}]  [$infected_name] -> [$target_name]\n"
 }
@@ -129,11 +134,11 @@ function ko
 	errmsg[62]="SIGRTMAX-2"  ; errmsg[63]="SIGRTMAX-1"
 	errmsg[64]="SIGRTMAX"    ;
 
-	local	infected_name="$1"
-	local	ret_infected="$2"
-	local	target_name="$3"
-	local	ret_target="$4"
-	let	signal=0
+	local infected_name="$1"
+	local ret_infected="$2"
+	local target_name="$3"
+	local ret_target="$4"
+	let signal=0
 
 	if [[ $ret_infected != 'ok' ]]
 	then
@@ -145,7 +150,7 @@ function ko
 		target_name="${red}${target_name}${none}"
 	fi
 
-	local	msg="${errmsg[$signal]}"
+	local msg="${errmsg[$signal]}"
 
 	printf "  [${red}${msg}${none}]  [$infected_name] -> [$target_name]\n"
 }
@@ -154,8 +159,8 @@ function	process_run
 {
 	let	timeout=2
 
-	local	name="$1"
-	local	path="$2"
+	local name="$1"
+	local path="$2"
 	if [[ $compile_mode == "debug" ]]; then
 		timeout $timeout "$path" &
 	else
@@ -170,8 +175,8 @@ function	process_run
 
 function	check_signature
 {
-	local	target_path="$1"
-	local	signature=$(strings "$target_path" | grep '__UNICORNS_OF_THE_APOCALYPSE__')
+	local target_path="$1"
+	local signature=$(strings "$target_path" | grep '__UNICORNS_OF_THE_APOCALYPSE__')
 
 	if [[ $signature ]];
 	then
@@ -185,9 +190,9 @@ function	check_signature
 
 function	check_process_return
 {
-	local	ret="$1"
-	let	exit_status_lower=128
-	let	exit_status_upper=193
+	local ret="$1"
+	let exit_status_lower=128
+	let exit_status_upper=193
 
 	if [[ $ret -gt $exit_status_lower ]] && [[ $ret -lt $exit_status_upper ]];
 	then
@@ -200,9 +205,9 @@ function	check_process_return
 
 function	check_return
 {
-	local	ret_infected="$1"
-	local	ret_target="$2"
-	local	target_path="$3"
+	local ret_infected="$1"
+	local ret_target="$2"
+	local target_path="$3"
 
 	if [[ "$ret_infected" == 'ok' ]] && [[ "$ret_target" == 'ok' ]]
 	then
@@ -219,36 +224,32 @@ function	check_return
 
 function	loop_through
 {
-	local	compile_mode="$1"
-	local	ngen="$2"
-	local	array_size="${#target_array[@]}"
-	local	infected_path="$germ"
-	local	tag=''
-	let	ninfected=0
+	local ntarget="${#target_array[@]}"
+	local infected_path="$germ"
+	local tag=''
+	let ninfected=0
 
 	for ((n=0;n<$ngen;n++))
 	do
-		local	index=$(($RANDOM % $array_size))
-		local	selected_path="${target_array[$index]}"
-		local	target_path="/tmp/test/$(basename "$selected_path")$n"
+		local index=$(($RANDOM % $ntarget))
+		local selected_path="${target_array[$index]}"
+		local target_path="/tmp/test/$(basename "$selected_path")$n"
 
-		local	infected_name=$(basename "$infected_path")
-		local	target_name=$(basename "$target_path")
+		local infected_name=$(basename "$infected_path")
+		local target_name=$(basename "$target_path")
 
 		cp "$selected_path" "$target_path"
 
-		# local	ret_infected=$(process_run "$infected_name" "$infected_path")
-		# local	ret_target=$(process_run "$target_name" "$target_path")
-
 		process_run "$infected_name" "$infected_path"
-		local	ret_infected="$?"
+		local ret_infected="$?"
+
 		process_run "$target_name" "$target_path"
-		local	ret_target="$?"
+		local ret_target="$?"
 
 		ret_infected=$(check_process_return "$ret_infected")
 		ret_target=$(check_process_return "$ret_target")
 
-		local	ret=$(check_return "$ret_infected" "$ret_target" "$target_path")
+		local ret=$(check_return "$ret_infected" "$ret_target" "$target_path")
 
 		if [[ "$ret" == 'ok' ]]
 		then
@@ -273,17 +274,13 @@ function	loop_through
 
 function	start
 {
-	local	compile_mode="$1"
-	local	ngen="$2"
-	local	targets="$3"
-
 	define_handlers
 	go_to_script_directory
-	compile "$compile_mode"
 
-	fill_target_array "$targets"
-
-	loop_through "$compile_mode" "$ngen"
+	if ! compile || ! fill_target_array || ! loop_through
+	then
+		printf "${red}error${none}: $self an error has occured.\n"
+	fi
 }
 
-start "$1" "$2" "$3"
+start

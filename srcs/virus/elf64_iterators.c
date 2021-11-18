@@ -59,3 +59,35 @@ bool	foreach_shdr(struct safe_ptr ref, f_iter_callback callback, void *data)
 	}
 	return true;
 }
+
+bool	foreach_shdr_entry(struct safe_ptr ref, size_t offset, f_iter_callback callback, void *data)
+{
+	const Elf64_Ehdr	*ehdr = safe(ref, 0, sizeof(Elf64_Ehdr));
+	const Elf64_Shdr	*shdr = safe(ref, offset, sizeof(Elf64_Shdr));
+
+	if (ehdr == NULL || shdr == NULL)
+		return errors(ERR_FILE, _ERR_F_BAD_SHDR_OFF);
+
+	const Elf64_Off	sh_offset  = shdr->sh_offset;
+	const uint64_t	sh_entsize = shdr->sh_entsize;
+	const uint64_t	sh_size    = shdr->sh_size;
+
+	if (sh_entsize == 0)
+		return true;
+
+	size_t		entnum = sh_size / sh_entsize;
+	uint8_t		(*entries)[entnum][sh_entsize] = safe(ref, sh_offset, sh_size);
+
+	if (sh_size / sh_entsize != entnum || entries == NULL)
+		return false;
+
+	while (entnum--)
+	{
+		size_t	entry_addr   = (size_t)(*entries)[entnum];
+		size_t	entry_offset = entry_addr - (size_t)ehdr;
+
+		if (!callback(ref, entry_offset, data))
+			return false;
+	}
+	return true;
+}
