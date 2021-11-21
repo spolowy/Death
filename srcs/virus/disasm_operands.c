@@ -556,7 +556,5 @@ size_t		disasm_operands(struct operand *buf, size_t buflen,
 		p_buf   += 1;
 		buflen  -= 1;
 	}
-	if (codelen != 0)
-		return errors(ERR_VIRUS, _ERR_V_OPERANDS_JUMP_TOO_SMALL);
 	return (p_buf - buf); /* number of instructions successfully disassembled */
 }
