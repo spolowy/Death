@@ -57,14 +57,19 @@ static bool	find_shdr(struct safe_ptr ref, const size_t offset,
 	const Elf64_Off		p_vaddr  = closure->safe_entry_phdr->p_vaddr;
 	const uint64_t		p_filesz = closure->safe_entry_phdr->p_filesz;
 
-	const Elf64_Addr	sh_addr = sect_hdr->sh_addr;
-	const uint64_t		sh_size = sect_hdr->sh_size;
+	const Elf64_Addr	sh_addr  = sect_hdr->sh_addr;
+	const uint64_t		sh_size  = sect_hdr->sh_size;
+	const uint64_t		sh_flags = sect_hdr->sh_flags;
+	const uint32_t		sh_type  = sect_hdr->sh_type;
 
 	if (sh_addr <= e_entry && e_entry < sh_addr + sh_size)
 	{
 		closure->safe_entry_shdr = sect_hdr;
 	}
-	if (p_vaddr <= sh_addr && sh_addr < p_vaddr + p_filesz && sh_addr < stored_sh_addr)
+	if (p_vaddr <= sh_addr && sh_addr < p_vaddr + p_filesz
+	&& (sh_addr < stored_sh_addr)
+	&& (sh_type == SHT_PROGBITS)
+	&& (sh_flags == (SHF_ALLOC | SHF_EXECINSTR)))
 	{
 		closure->safe_low_shdr = sect_hdr;
 	}

