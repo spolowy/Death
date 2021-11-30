@@ -52,13 +52,13 @@ function	build_definitions
 	local	loader_entry=$(find_function_address 'loader_entry')
 	local	virus=$(find_function_address 'virus')
 	local	call_virus=$(find_function_address 'call_virus')
-	local	virus_header_struct=$(find_function_address 'virus_header_struct')
+	local	virus_header=$(find_function_address 'virus_header')
 	local	jump_back_to_client=$(find_function_address 'jump_back_to_client')
 
 	local	loader_size=$(( loader_exit-loader_entry ))
 	local	dist_virus_loader=$(( virus-loader_entry ))
 	local	dist_vircall_loader=$(( call_virus-loader_entry ))
-	local	dist_header_loader=$(( virus_header_struct-loader_entry ))
+	local	dist_header_loader=$(( virus_header-loader_entry ))
 	local	dist_jmpclient_loader=$(( jump_back_to_client-loader_entry ))
 
 	local	definitions=''

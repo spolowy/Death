@@ -3,8 +3,8 @@
 #include "accessors.h"
 #include "virus_header.h"
 #include "syscalls.h"
-#include "errors.h"
 #include "compiler_utils.h"
+#include "errors.h"
 
 /*
 ** safe()
@@ -57,7 +57,7 @@ __warn_unused_result
 bool	init_clone_safe(struct safe_ptr *ref, size_t file_size, size_t extra_size)
 {
 	ref->size = file_size + extra_size;
-	ref->ptr  = sys_mmap(0, ref->size,
+	ref->ptr = sys_mmap(0, ref->size,
 		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 
 	if ((ssize_t)ref->ptr < 0)

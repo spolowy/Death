@@ -80,8 +80,8 @@ static void	shuffle_matches(uint32_t matches[NREGISTERS], uint64_t seed)
 	for (size_t i = 0; i < NSHUFFLE; i++)
 	{
 		// swap regular registers (rax -> rdi)
-		a = random_inrange(&seed, 0b000, 0b0111);
-		b = random_inrange(&seed, 0b000, 0b0111);
+		a = random_inrange(&seed, 0b0000, 0b0111);
+		b = random_inrange(&seed, 0b0000, 0b0111);
 
 		if (can_swap(matches[a]) && can_swap(matches[b]))
 			swap_registers(&matches[a], &matches[b]);

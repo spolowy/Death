@@ -1,8 +1,8 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stddef.h>
-#include "position_independent.h"
 #include "syscalls.h"
+#include "position_independent.h"
 
 void		bzero(void *ptr, size_t size)
 {
@@ -68,7 +68,6 @@ char		*strcpy(char *dst, const char *src)
 		i++;
 	}
 	pdst[i] = '\0';
-
 	return dst;
 }
 
@@ -93,6 +92,25 @@ uint64_t	hash(const uint8_t *ptr, size_t size)
 		state = (block * state) ^ ((block << 3) + (state >> 2));
 	}
 	return state;
+}
+
+uint64_t	random(uint64_t *seed)
+{
+	uint64_t	rand = *seed;
+
+	rand += 0xf0760a3c4;
+	rand ^= rand << 13;
+	rand ^= rand >> 17;
+	rand -= 0x6fa624c2;
+	rand ^= rand << 5;
+
+	*seed = rand;
+	return rand;
+}
+
+uint64_t	random_inrange(uint64_t *seed, uint64_t lower, uint64_t upper)
+{
+	return (random(seed) % (upper - lower + 1)) + lower;
 }
 
 #if defined(LOGS) || defined(ERRORS) || defined(DEBUG) || defined(DEBUG_OPERANDS)

