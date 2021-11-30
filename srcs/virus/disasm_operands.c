@@ -546,15 +546,18 @@ size_t		disasm_operands(struct operand *buf, size_t buflen,
 	while (codelen && buflen)
 	{
 		instruction_length = disasm_length(p_code, codelen);
-		if (instruction_length == 0) return 0;
+
+		if (instruction_length == 0)
+			return errors(ERR_THROW, _ERR_T_DISASM_OPERANDS);
 
 		dsm_instruction(p_code, codelen, &p_buf->src, &p_buf->dst);
 		p_buf->addr   = p_code;
 		p_buf->length = instruction_length;
 		p_code  += instruction_length;
 		codelen -= instruction_length;
-		p_buf   += 1;
-		buflen  -= 1;
+		p_buf++;
+		buflen--;
 	}
-	return (p_buf - buf); /* number of instructions successfully disassembled */
+	// number of instructions successfully disassembled
+	return (p_buf - buf);
 }

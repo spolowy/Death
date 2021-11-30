@@ -71,6 +71,7 @@
 #  define _ERR_T_GET_CLONE_VIRUS_ADDRESS   PD_ARRAY(char,_err_text,'\033','[','3','3','m','g','e','t','_','c','l','o','n','e','_','v','i','r','u','s','_','a','d','d','r','e','s','s','\n','\033','[','0','m',0)
 #  define _ERR_T_SPLIT_REF                 PD_ARRAY(char,_err_text,'\033','[','3','3','m','s','p','l','i','t','_','r','e','f','\n','\033','[','0','m',0)
 #  define _ERR_T_ADJUST_SHDR_VALUES        PD_ARRAY(char,_err_text,'\033','[','3','3','m','a','d','j','u','s','t','_','s','h','d','r','_','v','a','l','u','e','s','\n','\033','[','0','m',0)
+#  define _ERR_T_DISASM_OPERANDS           PD_ARRAY(char,_err_text,'\033','[','3','3','m','d','i','s','a','s','m','_','o','p','e','r','a','n','d','s','\n','\033','[','0','m',0)
 
 /* ------------------------------ errors virus ------------------------------ */
 
