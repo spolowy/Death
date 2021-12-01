@@ -7,7 +7,7 @@
 #include "syscalls.h"
 #include "errors.h"
 #include "compiler_utils.h"
-#include "log_print_operands.h"
+#include "debug.h"
 
 #define INSTRUCTION_PERMUT_WINDOW	8
 #define PERMUT_PASSES			1

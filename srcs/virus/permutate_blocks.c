@@ -3,7 +3,7 @@
 #include "jumps.h"
 #include "compiler_utils.h"
 #include "errors.h"
-#include "log_print_blocks.h"
+#include "debug.h"
 
 /*
 ** permutate_blocks
@@ -443,7 +443,7 @@ bool		permutate_blocks(struct safe_ptr virus_ref,
 		return errors(ERR_THROW, _ERR_T_PERMUTATE_BLOCKS);
 
 	debug_print_split_blocks(block_memory.blocks, NBLOCKS, virus_ref, virus_buffer_ref);
-	debug_print_general(virus_ref, virus_buffer_ref, (size_t)virus_address_in_ref, *virus_address_shift, *virus_buffer_size, seed);
+	debug_print_general_block(virus_ref, virus_buffer_ref, (size_t)virus_address_in_ref, *virus_address_shift, *virus_buffer_size, seed);
 
 	return true;
 }

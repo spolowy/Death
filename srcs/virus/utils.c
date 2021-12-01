@@ -113,7 +113,7 @@ uint64_t	random_inrange(uint64_t *seed, uint64_t lower, uint64_t upper)
 	return (random(seed) % (upper - lower + 1)) + lower;
 }
 
-#if defined(LOGS) || defined(ERRORS) || defined(DEBUG) || defined(DEBUG_OPERANDS)
+#if defined(LOGS) || defined(ERRORS) || defined(DEBUG_BLOCKS) || defined(DEBUG_OPERANDS)
 
 int		putchar(char chr)
 {
