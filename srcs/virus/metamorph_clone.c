@@ -4,6 +4,7 @@
 #include "metamorphism.h"
 #include "utils.h"
 #include "jumps.h"
+#include "logs.h"
 #include "errors.h"
 
 /*
@@ -156,5 +157,6 @@ bool		metamorph_clone(struct safe_ptr clone_ref, size_t loader_offset,
 		return errors(ERR_THROW, _ERR_T_METAMORPH_CLONE);
 	}
 	free_accessor(&virus_buffer_ref);
+	log_virus_size(*full_virus_size);
 	return true;
 }

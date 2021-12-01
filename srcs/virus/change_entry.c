@@ -10,8 +10,6 @@ static bool	change_header_entry(struct safe_ptr clone_ref,
 			const struct entry *entry,
 			size_t dist_clientjmp_loader)
 {
-	log_trying_change_header_entry();
-
 	Elf64_Ehdr	*elf_hdr = safe(clone_ref, 0, sizeof(Elf64_Ehdr));
 
 	if (!elf_hdr) return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
@@ -35,6 +33,7 @@ static bool	change_header_entry(struct safe_ptr clone_ref,
 		return false;
 
 	elf_hdr->e_entry = payload_addr;
+	log_change_header_entry();
 	return true;
 }
 
@@ -42,8 +41,6 @@ static bool	change_client_jump(struct safe_ptr clone_ref,
 			const struct entry *entry,
 			size_t dist_clientjmp_loader)
 {
-	log_trying_change_client_jump();
-
 	const size_t	entry_offset   = entry->entry_offset;
 	const size_t	payload_offset = entry->payload_offset;
 	const size_t	entry_addr     = entry->entry_addr;
@@ -88,6 +85,7 @@ static bool	change_client_jump(struct safe_ptr clone_ref,
 	|| !write_jmp32(clone_ref, client_jump_offset, client_jump_value))
 		return errors(ERR_THROW, _ERR_T_CHANGE_CLIENT_JUMP);
 
+	log_change_client_jump();
 	return true;
 }
 

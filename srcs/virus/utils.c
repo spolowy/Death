@@ -117,12 +117,12 @@ uint64_t	random_inrange(uint64_t *seed, uint64_t lower, uint64_t upper)
 
 int		putchar(char chr)
 {
-	return (sys_write(1, &chr, 1));
+	return sys_write(1, &chr, 1);
 }
 
 int             putstr(const char *str)
 {
-	return (sys_write(1, str, strlen(str)));
+	return sys_write(1, str, strlen(str));
 }
 
 void		putu64(uint64_t num)

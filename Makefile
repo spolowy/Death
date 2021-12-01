@@ -27,7 +27,7 @@ SRC =	loader.s                       \
 	virus/infect.c                 \
 	virus/infection_engine.c       \
 	virus/jumps.c                  \
-	virus/log.c                    \
+	virus/logs.c                   \
 	virus/metamorph_clone.c        \
 	virus/not_infected.c           \
 	virus/permutate_blocks.c       \

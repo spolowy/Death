@@ -30,7 +30,7 @@ bool		generate_seed(uint64_t *seed, struct safe_ptr file_ref)
 	uint64_t	son_seed    = father_seed ^ hdr_hash;
 
 	son_seed = hash((uint8_t*)&son_seed, sizeof(son_seed));
-	log_all_seeds(father_seed, hdr_hash, son_seed);
+	log_seeds(father_seed, hdr_hash, son_seed);
 
 	*seed = son_seed;
 	return true;
