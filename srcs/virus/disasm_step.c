@@ -73,7 +73,7 @@ next_opcode:
 
 	return CHECK_TABLE(table_opcode, opcode) || CHECK_TABLE(table_opcode_0f, opcode);
 error:
-	return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
+	return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH, _ERR_T_KNOWN_INSTRUCTION);
 }
 
 void	*step_instruction(const void *code, size_t codelen)
@@ -82,7 +82,7 @@ void	*step_instruction(const void *code, size_t codelen)
 
 	if (instruction_length == 0)
 	{
-		errors(ERR_THROW, _ERR_T_STEP_INSTRUCTION);
+		errors(ERR_THROW, _ERR_NO, _ERR_T_STEP_INSTRUCTION);
 		return NULL;
 	}
 

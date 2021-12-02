@@ -43,7 +43,7 @@ bool		infection_engine(struct virus_header *vhdr,
 	|| !adjust_references(clone_ref, clone_entry, *shift_amount)
 	|| !setup_virus_header(clone_ref, *loader_offset, *vhdr)
 	|| !change_entry(clone_ref, &clone_entry, vhdr->dist_jmpclient_loader))
-		return errors(ERR_THROW, _ERR_T_INFECTION_ENGINE);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_INFECTION_ENGINE);
 
 	return true;
 }

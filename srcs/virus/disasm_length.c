@@ -306,5 +306,5 @@ end:
 	return (void*)p - (void*)code;
 error:
 	hexdump_text(code, INSTRUCTION_MAXLEN, (size_t)p - (size_t)code);
-	return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
+	return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH, _ERR_T_DISASM_LENGTH);
 }

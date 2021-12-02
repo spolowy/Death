@@ -95,7 +95,7 @@ bool		disasm_block(struct block_allocation *block_alloc,
 	size_t	njumps = disasm_jumps(jumps_info, MAX_JUMPS, code, size);
 
 	if (njumps == 0 || njumps > MAX_JUMPS)
-		return errors(ERR_THROW, _ERR_T_DISASM_BLOCK);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_DISASM_BLOCK);
 
 	bzero(block_alloc, sizeof(*block_alloc));
 	block_alloc->blocks[0].ref.ptr  = code;

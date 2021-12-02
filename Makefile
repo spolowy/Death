@@ -90,7 +90,7 @@ ${NAME}: ${OBJ}
 	@${CC} ${LDFLAGS} -o $@ ${OBJ}
 	@echo ${G}Success"   "[${NAME}]${X}
 	mkdir -p /tmp/test /tmp/test2
-	rm /tmp/test/* /tmp/test2/*
+	rm -rf /tmp/test/* /tmp/test2/*
 	cp /bin/ls /tmp/test/
 
 ${OBJDIR}/%.o: ${SRCDIR}/%.s

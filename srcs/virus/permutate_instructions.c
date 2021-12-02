@@ -66,7 +66,7 @@ static void	permutate_neighbors(struct operand *a, struct operand *b)
 	}
 	// check if actually neighbours!
 	if (a->addr + a->length != b->addr)
-		return (void)errors(ERR_VIRUS, _ERR_V_NOT_NEIGHBORS);
+		return (void)errors(ERR_VIRUS, _ERR_V_NOT_NEIGHBORS, _ERR_T_PERMUTATE_NEIGHBOURS);
 	# endif
 
 	uint8_t		swap_code[INSTRUCTION_MAXLEN];
@@ -112,7 +112,7 @@ bool		permutate_instructions(struct safe_ptr ref, uint64_t seed)
 	struct block_allocation	block_memory;
 
 	if (!disasm_block(&block_memory, ref))
-		return errors(ERR_THROW, _ERR_T_PERMUTATE_INSTRUCTIONS);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_PERMUTATE_INSTRUCTIONS);
 
 	struct label	*labels = block_memory.blocks[0].labels;
 	size_t		nlabels = block_memory.blocks[0].nlabels;

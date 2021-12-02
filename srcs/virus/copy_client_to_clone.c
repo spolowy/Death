@@ -9,9 +9,9 @@ static bool	copy_before_payload(struct safe_ptr clone_ref,
 	void		*clone    = safe(clone_ref, 0, payload_offset);
 
 	if (original == NULL)
-		return errors(ERR_FILE, _ERR_F_NO_ORIGINAL_FILE_BEGIN);
+		return errors(ERR_FILE, _ERR_F_FILE_START, _ERR_T_COPY_BEFORE_PAYLOAD);
 	if (clone == NULL)
-		return errors(ERR_FILE, _ERR_F_NO_CLONE_FILE_BEGIN);
+		return errors(ERR_FILE, _ERR_F_CLONE_START, _ERR_T_COPY_BEFORE_PAYLOAD);
 
 	memcpy(clone, original, payload_offset);
 	return true;
@@ -27,9 +27,9 @@ static bool	copy_after_payload(struct safe_ptr clone_ref,
 	void		*clone    = safe(clone_ref, payload_offset + shift_amount, remaining_size);
 
 	if (original == NULL)
-		return errors(ERR_FILE, _ERR_F_NO_ORIGINAL_FILE_END);
+		return errors(ERR_FILE, _ERR_F_FILE_END, _ERR_T_COPY_AFTER_PAYLOAD);
 	if (clone == NULL)
-		return errors(ERR_FILE, _ERR_F_NO_CLONE_FILE_END);
+		return errors(ERR_FILE, _ERR_F_CLONE_END, _ERR_T_COPY_AFTER_PAYLOAD);
 
 	memcpy(clone, original, remaining_size);
 	return true;
@@ -41,7 +41,7 @@ bool		copy_client_to_clone(struct safe_ptr clone_ref, struct safe_ptr file_ref,
 	if (!copy_before_payload(clone_ref, file_ref, payload_offset)
 	|| !copy_after_payload(clone_ref, file_ref, payload_offset, shift_amount))
 	{
-		return errors(ERR_THROW, _ERR_T_COPY_CLIENT_TO_CLONE);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_COPY_CLIENT_TO_CLONE);
 	}
 	return true;
 }

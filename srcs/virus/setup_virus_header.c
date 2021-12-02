@@ -10,7 +10,7 @@ bool		setup_virus_header(struct safe_ptr clone_ref,
 	void	*constants_location = safe(clone_ref, header_offset, sizeof(vhdr));
 
 	if (constants_location == NULL)
-		return errors(ERR_VIRUS, _ERR_V_CANT_READ_CONSTANTS);
+		return errors(ERR_FILE, _ERR_F_READ_CONSTANTS, _ERR_T_SETUP_VIRUS_HEADER);
 
 	memcpy(constants_location, &vhdr, sizeof(vhdr));
 	return true;
