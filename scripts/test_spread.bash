@@ -13,6 +13,7 @@
 green='\033[32m'
 red='\033[31m'
 yellow='\033[33m'
+magenta='\033[35m'
 none='\033[0m'
 
 argv="$@"
@@ -39,7 +40,7 @@ function	define_handlers
 }
 
 # ---------------------------------------------------------------------------- #
-#
+
 function	go_to_script_directory
 {
 	local parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
@@ -80,7 +81,6 @@ function	summary
 	else
 		printf "\n ---------- ${green}${ninfected}${none} infected out of ${green}${ngen}${none} --------------- \n"
 	fi
-
 }
 
 function	not_infected
@@ -88,7 +88,7 @@ function	not_infected
 	local infected_name="$1"
 	local target_name="$2"
 
-	printf "  [${yellow}NOT INFECTED${none}]  [$infected_name] -> [${yellow}${target_name}${none}]\n"
+	printf "  [${yellow}NOT INFECTED${none}]  ${infected_name} ${magenta}->${none} ${yellow}${target_name}${none}\n"
 }
 
 function	ok
@@ -96,10 +96,10 @@ function	ok
 	local infected_name="$1"
 	local target_name="$2"
 
-	printf "  [${green}OK${none}]  [$infected_name] -> [$target_name]\n"
+	printf "  [${green}OK${none}]  ${infected_name} ${magenta}->${none} ${target_name}\n"
 }
 
-function ko
+function	ko
 {
 	errmsg[1]="SIGHUP"       ; errmsg[2]="SIGINT"
 	errmsg[3]="SIGQUIT"      ; errmsg[4]="SIGILL"
@@ -152,26 +152,21 @@ function ko
 
 	local msg="${errmsg[$signal]}"
 
-	printf "  [${red}${msg}${none}]  [$infected_name] -> [$target_name]\n"
+	printf "  [${red}${msg}${none}]  ${infected_name} ${magenta}->${none} ${target_name}\n"
 }
+
+# ------------------------------ run infection ------------------------------- #
 
 function	process_run
 {
 	let	timeout=2
 
-	local name="$1"
-	local path="$2"
-	if [[ $compile_mode == "debug" ]]; then
-		timeout $timeout "$path" &
-	else
-		timeout $timeout "$path" > /dev/null 2>/dev/null &
-	fi
+	local path="$1"
 
+	timeout $timeout "$path" > /dev/null 2>/dev/null &
 	wait $!
 	return "$?"
 }
-
-# ------------------------------ run infection ------------------------------- #
 
 function	check_signature
 {
@@ -240,10 +235,10 @@ function	loop_through
 
 		cp "$selected_path" "$target_path"
 
-		process_run "$infected_name" "$infected_path"
+		process_run "$infected_path"
 		local ret_infected="$?"
 
-		process_run "$target_name" "$target_path"
+		process_run "$target_path"
 		local ret_target="$?"
 
 		ret_infected=$(check_process_return "$ret_infected")

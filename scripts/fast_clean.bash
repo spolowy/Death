@@ -4,4 +4,4 @@
 #
 # Cleanup the content of test directories.
 
-rm -f /tmp/test/* /tmp/test2/*
+rm -rf /tmp/test /tmp/test2
