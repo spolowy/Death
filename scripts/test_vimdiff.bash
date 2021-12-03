@@ -43,9 +43,11 @@ function	cleanup
 function	start
 {
 	go_to_script_directory
-	compile
-	diff
-	cleanup
+
+	if ! compile || ! diff || ! cleanup
+	then
+		printf "${red}error${none}: $self an error has occured.\n"
+	fi
 }
 
 start
