@@ -27,7 +27,11 @@ static bool	want_to_permutate(uint64_t *seed)
 */
 static bool	can_permutate(const struct operand *a, const struct operand *b)
 {
-	return !(a->dst & b->dst || a->dst & b->src || b->dst & a->src);
+	bool	same_dest      = a->dst & b->dst;
+	bool	a_dst_is_b_src = a->dst & b->src;
+	bool	b_dst_is_a_src = b->dst & a->src;
+
+	return !(same_dest | a_dst_is_b_src | b_dst_is_a_src);
 }
 
 static bool	uses_reserved_registers(const struct operand *a,
@@ -45,7 +49,7 @@ static bool	is_label(const struct label *labels, size_t nlabels,
 
 	while (left < right)
 	{
-		size_t	index = (left + right) >> 1;
+		size_t	index = (left + right) / 2;
 
 		if (labels[index].location < target)
 			left = index + 1;
