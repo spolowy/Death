@@ -50,6 +50,6 @@ struct block_allocation
 	struct jump		*label_origins[MAX_JUMPS];
 };
 
-bool		disasm_block(struct block_allocation *block_alloc, struct safe_ptr input_code);
+bool	disasm_block(struct block_allocation *block_alloc, struct safe_ptr input_code);
 
 #endif

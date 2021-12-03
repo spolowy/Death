@@ -10,10 +10,11 @@
 # infected binary.
 # Continues to do so for <ngen> (n generations).
 
-green='\033[32m'
 red='\033[31m'
+green='\033[32m'
 yellow='\033[33m'
 magenta='\033[35m'
+grey='\033[1;30m'
 none='\033[0m'
 
 argv="$@"
@@ -88,7 +89,7 @@ function	not_infected
 	local infected_name="$1"
 	local target_name="$2"
 
-	printf "  [${yellow}NOT INFECTED${none}]  ${infected_name} ${magenta}->${none} ${yellow}${target_name}${none}\n"
+	printf "  [${yellow}NOT INFECTED${none}]  ${infected_name} ${grey}->${none} ${yellow}${target_name}${none}\n"
 }
 
 function	ok
@@ -138,6 +139,7 @@ function	ko
 	local ret_infected="$2"
 	local target_name="$3"
 	local ret_target="$4"
+	local tag="$5"
 	let signal=0
 
 	if [[ $ret_infected != 'ok' ]]
@@ -152,7 +154,7 @@ function	ko
 
 	local msg="${errmsg[$signal]}"
 
-	printf "  [${red}${msg}${none}]  ${infected_name} ${magenta}->${none} ${target_name}\n"
+	printf "  [${red}${msg}${none}]  ${infected_name} ${tag}->${none} ${target_name}\n"
 }
 
 # ------------------------------ run infection ------------------------------- #
@@ -253,7 +255,13 @@ function	loop_through
 			(( ninfected++ ))
 		elif [[ "$ret" == 'ko' ]]
 		then
-			ko "$infected_name" "$ret_infected" "$target_name" "$ret_target"
+			if check_signature "$target_path"
+			then
+				tag="${magenta}"
+			else
+				tag="${grey}"
+			fi
+			ko "$infected_name" "$ret_infected" "$target_name" "$ret_target" "$tag"
 			tag="${red}"
 			break
 		elif [[ "$ret" == 'ni' ]]
