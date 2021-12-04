@@ -89,7 +89,7 @@ function	not_infected
 	local infected_name="$1"
 	local target_name="$2"
 
-	printf "  [${yellow}NOT INFECTED${none}]  ${infected_name} ${grey}->${none} ${yellow}${target_name}${none}\n"
+	printf "  ${yellow}%-12s${none}  ${infected_name} ${grey}->${none} ${target_name}\n" "NOT INFECTED"
 }
 
 function	ok
@@ -97,7 +97,7 @@ function	ok
 	local infected_name="$1"
 	local target_name="$2"
 
-	printf "  [${green}OK${none}]  ${infected_name} ${magenta}->${none} ${target_name}\n"
+	printf "  ${green}%-12s${none}  ${infected_name} ${green}->${none} ${target_name}\n" "OK"
 }
 
 function	ko
@@ -154,7 +154,7 @@ function	ko
 
 	local msg="${errmsg[$signal]}"
 
-	printf "  [${red}${msg}${none}]  ${infected_name} ${tag}->${none} ${target_name}\n"
+	printf "  ${red}%-12s${none}  ${infected_name} ${tag}->${none} ${target_name}\n" "${msg}"
 }
 
 # ------------------------------ run infection ------------------------------- #
@@ -257,7 +257,7 @@ function	loop_through
 		then
 			if check_signature "$target_path"
 			then
-				tag="${magenta}"
+				tag="${green}"
 			else
 				tag="${grey}"
 			fi

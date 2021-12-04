@@ -1,21 +1,21 @@
 #!/bin/bash
 
-if [ $# -ne 2 ]; then
-	echo "usage: $0 [compile_mode] [directory]"
-	exit 1
-fi
-if [[ ! -d $2 ]]; then
-	echo "error: $1 is not a directory."
-	exit 1
-fi
-
 red='\033[31m'
 green='\033[32m'
 yellow='\033[33m'
-magenta='\033[35m'
 none='\033[0m'
 
 self="$0"
+
+if [ $# -ne 2 ]; then
+	printf "${yellow}usage${none}: $self [compile_mode] [directory]\n"
+	exit 1
+fi
+if [[ ! -d $2 ]]; then
+	echo "${red}error${none}: $self $1 is not a directory."
+	exit 1
+fi
+
 compile_mode="$1"
 directory="$2"
 germ='../death'

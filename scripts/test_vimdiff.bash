@@ -1,7 +1,14 @@
 #!/bin/bash
 
+red='\033[31m'
+green='\033[32m'
+yellow='\033[33m'
+none='\033[0m'
+
+self="$0"
+
 if [ $# -ne 2 ]; then
-	echo "usage: $0 [compile_mode] [bin_path]"
+	printf "${yellow}usage${none}: $self [compile_mode] [bin_path]\n"
 	exit 1
 fi
 

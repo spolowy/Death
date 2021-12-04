@@ -1,7 +1,12 @@
 #!/bin/bash
 
+yellow='\033[33m'
+none='\033[0m'
+
+self="$0"
+
 if [ $# -ne 1 ]; then
-	echo "usage: $0 [source_directory]"
+	printf "${yellow}usage${none}: $self [directory]\n"
 	exit 1
 fi
 

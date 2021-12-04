@@ -120,7 +120,7 @@ debug_operands: fclean
 	${MAKE} all CFLAGS:="-DDEBUG_OPERANDS -g" ASFLAGS:="-DDEBUG_OPERANDS -g"
 
 test:
-	./scripts/test_spread.bash re 200 /bin/*
+	./scripts/test_spread.bash re 100 /bin/*
 
 # --------------------------------- General ---------------------------------- #
 
@@ -155,6 +155,6 @@ art:
 	@echo "           '-'._.-._.'-' "
 	@echo ${X}
 
-.PHONY: all clean fclean re logs errors debug test art
+.PHONY: all clean fclean re logs errors debug_blocks debug_operands test art
 
 -include ${DEP}
