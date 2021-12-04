@@ -283,6 +283,7 @@ function	start
 	if ! compile || ! fill_target_array || ! loop_through
 	then
 		printf "${red}error${none}: $self an error has occured.\n"
+		exit 1
 	fi
 }
 

@@ -1,17 +1,5 @@
 #!/bin/bash
 
-# test_directory.bash
-#
-#     directory: contains binaries to execute and search for virus signature.
-#
-# Loop through each item in <directory> and executes them to detect a potential
-# crash after the virus infection.
-# If a signal is raised, the user is notified and the tests for the current
-# binary ends.
-# A timeout of 5 seconds is set so binaries that waits for input aren't
-# blocking the script.
-# If nothing happens, search for the virus signature.
-
 if [ $# -ne 2 ]; then
 	echo "usage: $0 [compile_mode] [directory]"
 	exit 1
@@ -142,12 +130,8 @@ function	process_run
 	let	timeout=2
 
 	local path="$1"
-	if [[ $compile_mode == "debug" ]]; then
-		timeout $timeout "$path" &
-	else
-		timeout $timeout "$path" > /dev/null 2>/dev/null &
-	fi
 
+	timeout $timeout "$path" > /dev/null 2>/dev/null &
 	wait $!
 	return "$?"
 }
