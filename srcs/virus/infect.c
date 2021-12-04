@@ -6,14 +6,14 @@
 
 #define DELFMAG		((char[4]){ELFMAG0, ELFMAG1, ELFMAG2, ELFMAG3})
 
-#define is_not_elf(e_ident)           (memcmp(e_ident, DELFMAG, SELFMAG) != 0)
-#define is_not_64bit(e_ident)         (e_ident[EI_CLASS] != ELFCLASS64)
-#define is_not_little_endian(e_ident) (e_ident[EI_DATA] != ELFDATA2LSB)
-#define is_not_executable(e_type)     (e_type != ET_EXEC && e_type != ET_DYN)
-#define is_not_x86_64(e_machine)      (e_machine != EM_X86_64)
-#define has_no_entry(e_entry)         (e_entry == 0)
-#define has_no_phoff(e_phoff)         (e_phoff == 0)
-#define has_no_shoff(e_shoff)         (e_shoff == 0)
+#define is_not_elf(e_ident)           (memcmp((e_ident), DELFMAG, SELFMAG) != 0)
+#define is_not_64bit(e_ident)         ((e_ident)[EI_CLASS] != ELFCLASS64)
+#define is_not_little_endian(e_ident) ((e_ident)[EI_DATA] != ELFDATA2LSB)
+#define is_not_executable(e_type)     ((e_type) != ET_EXEC && (e_type) != ET_DYN)
+#define is_not_x86_64(e_machine)      ((e_machine) != EM_X86_64)
+#define has_no_entry(e_entry)         ((e_entry) == 0)
+#define has_no_phoff(e_phoff)         ((e_phoff) == 0)
+#define has_no_shoff(e_shoff)         ((e_shoff) == 0)
 
 static bool	is_elf64(const char *file)
 {
