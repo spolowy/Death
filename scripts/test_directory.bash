@@ -63,14 +63,14 @@ function	not_infected
 {
 	local path="$1"
 
-	printf "  [${yellow}NOT INFECTED${none}]  $path\n"
+	printf "  ${yellow}%-12s${none}  $path\n" "NOT INFECTED"
 }
 
 function	ok
 {
 	local path="$1"
 
-	printf "  [${green}OK${none}]  $path\n"
+	printf "  ${green}%-12s${none}  $path\n" "OK"
 }
 
 function	ko
@@ -120,7 +120,7 @@ function	ko
 
 	local msg="${errmsg[$signal]}"
 
-	printf "  [${red}${msg}${none}]  $path\n"
+	printf "  ${red}%-12s${none}  $path\n" "${msg}"
 }
 
 # ------------------------------ run infection ------------------------------- #
