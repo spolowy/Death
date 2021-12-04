@@ -1,7 +1,7 @@
 #ifndef JUMPS_H
 # define JUMPS_H
 
-# define JUMP32_INST_SIZE	5
+# define JMP32_INST_SIZE	5
 # define CALL32_INST_SIZE	5
 
 # define is_jmp32(x)	(x == 0xe9)

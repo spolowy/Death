@@ -3,10 +3,9 @@
 #include "compiler_utils.h"
 #include "errors.h"
 
-// opcode flags
-#define MODRM		(1 << 0)            // MODRM byte
-#define TEST_F6		(1 << 1)            // <test> exception
-#define TEST_F7		(1 << 2)            // <test> exception
+#define MODRM		(1 << 0)              // MODRM byte
+#define TEST_F6		(1 << 1)              // <test> exception
+#define TEST_F7		(1 << 2)              // <test> exception
 #define TEST		(TEST_F6 | TEST_F7)
 
 /*
@@ -205,10 +204,8 @@ uint8_t		disasm_length(const void *code, size_t codelen)
 
 next_opcode:
 	if (!codelen--) // error if instruction is too long
-	{
-		hexdump_text(code, INSTRUCTION_MAXLEN, (size_t)p - (size_t)code);
 		goto error;
-	}
+
 	opcode = *p++;
 
 	// NULL byte prefixes
@@ -269,10 +266,7 @@ next_opcode:
 
 	// error if instruction is too long
 	if (!codelen--)
-	{
-		hexdump_text(code, INSTRUCTION_MAXLEN, (size_t)p - (size_t)code);
 		goto error;
-	}
 
 	opcode = *p++;
 
@@ -297,10 +291,8 @@ next_opcode:
 		if (rm == 0b100)
 		{
 			if (!codelen--) // error if instruction is too long
-			{
-				hexdump_text(code, INSTRUCTION_MAXLEN, (size_t)p - (size_t)code);
 				goto error;
-			}
+
 			rm = *p++ & 0b111;
 		}
 		// displacement only
@@ -308,13 +300,11 @@ next_opcode:
 	}
 end:
 	if (datasize + memsize > codelen) // error if instruction is too long
-	{
-		hexdump_text(code, INSTRUCTION_MAXLEN, (size_t)p - (size_t)code);
 		goto error;
-	}
 
 	p += datasize + memsize;
 	return (void*)p - (void*)code;
 error:
-	return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
+	hexdump_text(code, INSTRUCTION_MAXLEN, (size_t)p - (size_t)code);
+	return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH, _ERR_T_DISASM_LENGTH);
 }

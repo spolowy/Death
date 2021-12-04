@@ -18,9 +18,8 @@ uint64_t	hash(const uint8_t *ptr, size_t size);
 
 uint64_t	random(uint64_t *seed);
 uint64_t	random_inrange(uint64_t *seed, uint64_t lower, uint64_t upper);
-uint64_t	random_exrange(uint64_t *seed, uint64_t lower, uint64_t upper);
 
-#if defined(LOGS) || defined(ERRORS) || defined(DEBUG) || defined(DEBUG_OPERANDS)
+# if defined(LOGS) || defined(ERRORS) || defined(DEBUG_BLOCKS) || defined(DEBUG_OPERANDS)
 
 int		putchar(char chr);
 int             putstr(const char *str);
