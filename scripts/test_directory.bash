@@ -12,7 +12,7 @@ if [ $# -ne 2 ]; then
 	exit 1
 fi
 if [[ ! -d $2 ]]; then
-	echo "${red}error${none}: $self $1 is not a directory."
+	printf "${red}error${none}: $self $1 is not a directory.\n"
 	exit 1
 fi
 
@@ -61,16 +61,16 @@ function	summary
 
 function	not_infected
 {
-	local path="$1"
+	local item="$1"
 
-	printf "  ${yellow}%-12s${none}  $path\n" "NOT INFECTED"
+	printf "  ${yellow}%-12s${none}  $item\n" "NOT INFECTED"
 }
 
 function	ok
 {
-	local path="$1"
+	local item="$1"
 
-	printf "  ${green}%-12s${none}  $path\n" "OK"
+	printf "  ${green}%-12s${none}  $item\n" "OK"
 }
 
 function	ko
@@ -186,10 +186,9 @@ function	check_return
 
 function	loop_through
 {
-	let timeout=5
-	let ret=0
-	let n_item=0
-	let n_failed=0
+	let nitem=0
+	let ninfected=0
+	local tag=''
 
 	local dest='/tmp/test'
 	cp "$directory"/* "$dest"
@@ -204,37 +203,38 @@ function	loop_through
 		local path="${dest}/${item}"
 		# run as subprocess and store pid
 		process_run "$path"
-		local ret="$?"
+		local ret_process="$?"
 
-		ret=$(check_process_return "$ret")
-		ret=$(check_return "$ret" "$path")
+		ret_process=$(check_process_return "$ret_process")
+		local ret=$(check_return "$ret_process" "$path")
 
 		if [[ "$ret" == 'ok' ]]
 		then
 			ok "$item"
+			((ninfected++))
 		elif [[ "$ret" == 'ko' ]]
 		then
-			ko "$item" "$ret"
+			ko "$item" "$ret_process"
 			tag="${red}"
-			((n_failed++))
 		elif [[ "$ret" == 'ni' ]]
 		then
 			not_infected "$item"
 			tag="${yellow}"
 		fi
-		((n_item++))
+		((nitem++))
 	done
-	summary
+	summary "$ninfected" "$nitem" "$tag"
 }
 
 function	start
 {
-	define_handler
+	define_handlers
 	go_to_script_directory
 
 	if ! compile || ! loop_through
 	then
 		printf "${red}error${none}: $self an error has occured.\n"
+		exit 1
 	fi
 }
 
