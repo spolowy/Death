@@ -1,30 +1,42 @@
 #!/bin/bash
 
+argv="$@"
+argc="$#"
+self="$0"
+
 if [ $# -lt 2 ]; then
-	echo "usage: $0 [ngen] [target 1] [target 2] .."
+	echo "usage: $self [ngen] [target 1] [target 2] .."
 	exit 1
 fi
 
-germ="../death"
-gdb="/usr/bin/gdb"
+ngen="$1"
+germ='../death'
+gdb='/usr/bin/gdb'
 
-declare -a	target_array=()
-declare -a	byte_array=()
-declare -a	swap_array=()
-let		ratio=4
+red='\033[31m'
+green='\033[32m'
+yellow='\033[33m'
+magenta='\033[35m'
+grey='\033[1;30m'
+none='\033[0m'
+
+declare -a target_array=()
+declare -a byte_array=()
+declare -a swap_array=()
+let ratio=4
 
 # ---------------------------------------------------------------------------- #
 
 function 	go_to_script_directory
 {
-	local	parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+	local parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
 	cd "$parent_path"
 }
 
 function	compile
 {
-	local	compile_mode='debug'
+	local compile_mode='debug_blocks'
 
 	rm -rf /tmp/test/* /tmp/test2/*
 	mkdir -p /tmp/test /tmp/test2
@@ -35,23 +47,24 @@ function	compile
 
 function	dump_byte_array
 {
-	echo -e "\n\n\n\n"
+	printf '\n\n\n\n'
 	for byte in ${byte_array[@]}
 	do
 		echo -n "$byte "
 	done
-	echo -e "\n\n\n\n"
+	printf '\n\n\n\n'
 }
 
 # ----------------------------- target binaries ------------------------------ #
 
 function	fill_target_array
 {
-	let	nbin=$(( $BASH_ARGC-1 ))
+	let nbin=$(( $argc ))
+	targets=( $argv )
 
-	for ((n=0; n<$nbin; n++))
+	for ((n=2; n<$nbin; n++))
 	do
-		target_array+=("${BASH_ARGV[$n]}")
+		target_array+=( "${targets[$n]}" )
 	done
 }
 
@@ -59,16 +72,16 @@ function	fill_target_array
 
 function	fill_byte_array
 {
-	local	gdb_output=$($gdb -ex='p/d _start-loader_entry' -ex='quit' $germ | grep  -A100 '$1 ')
-	local	regex_length='^\$1 = ([0-9]+)'
-	local	germ_size=''
+	local gdb_output=$($gdb -ex='p/d _start-loader_entry' -ex='quit' $germ | grep  -A100 '$1 ')
+	local regex_length='^\$1 = ([0-9]+)'
+	local germ_size=''
 
 	if [[ $gdb_output =~ $regex_length ]]
 	then
 		germ_size="${BASH_REMATCH[1]}"
 	else
-		echo "[error]: couldn't find germ size."
-		return
+		printf "${red}error${none}: $self couldn't find germ size.\n"
+		return 1
 	fi
 
 	germ_size=$(( $germ_size/$ratio ))
@@ -83,7 +96,7 @@ function	fill_byte_array
 
 function	colorize_byte_array
 {
-	local		byte_string=''
+	local byte_string=''
 
 	for byte in ${byte_array[@]}
 	do
@@ -103,15 +116,15 @@ function	colorize_byte_array
 
 function	get_block_info
 {
-	local	infected_output="$1"
-	local	nrow="$2"
-	local	nth="$3"
-	local	regex="$4"
-	local	ret=''
+	local infected_output="$1"
+	local nrow="$2"
+	local nth="$3"
+	local regex="$4"
+	local ret=''
 
-	let	index=$(( $nrow+$nth ))
+	let index=$(( $nrow+$nth ))
 
-	local	item=$(echo "$infected_output" | awk "NR==$index{print}")
+	local item=$(echo "$infected_output" | awk "NR==$index{print}")
 
 	if [[ $item =~ $regex ]]
 	then
@@ -122,12 +135,12 @@ function	get_block_info
 
 function	shift_bytes
 {
-	let	size="$1"
-	let	shift_amount="$2"
-	let	offset="$3"
+	let size="$1"
+	let shift_amount="$2"
+	let offset="$3"
 
-	let	byte_offset=$(( $offset ))
-	let	swap_offset=$(( $offset+$shift_amount ))
+	let byte_offset=$(( $offset ))
+	let swap_offset=$(( $offset+$shift_amount ))
 
 	for ((i=0;i<$size;i++))
 	do
@@ -147,12 +160,12 @@ function	update_byte_array
 
 function	loop_through_blocks
 {
-	local	infected_output="$1"
-	local	regex_stop='#\s*General Info'
-	local	regex_block='\[[-]+ block'
-	local	row=''
-	let	nrow=1
-	let	offset=0
+	local infected_output="$1"
+	local regex_stop='#\s*General Info'
+	local regex_block='\[[-]+ block'
+	local row=''
+	let nrow=1
+	let offset=0
 
 	swap_array=()
 
@@ -178,19 +191,19 @@ function	loop_through_blocks
 
 function 	get_infected_output
 {
-	local	infected_path="$1"
-	local	regex_colors='\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]'
-	local	ret=$($infected_path | sed -r "s/$regex_colors//g")
+	local infected_path="$1"
+	local regex_colors='\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]'
+	local ret=$($infected_path | sed -r "s/$regex_colors//g")
 
 	echo "$ret"
 }
 
 function	run_infection
 {
-	local	infected_path="$1"
-	local	target_path="$2"
+	local infected_path="$1"
+	local target_path="$2"
 
-	local	infected_output=$(get_infected_output "$infected_path")
+	local infected_output=$(get_infected_output "$infected_path")
 
 	loop_through_blocks "$infected_output"
 	dump_byte_array
@@ -200,9 +213,9 @@ function	run_infection
 
 function	loop_through
 {
-	local	ngen="$1"
-	local	array_size=${#target_array[@]}
-	local	infected_path="$germ"
+	local ngen="$1"
+	local array_size=${#target_array[@]}
+	local infected_path="$germ"
 
 	for ((n=0;n<$ngen;n++))
 	do
@@ -227,14 +240,16 @@ function	loop_through
 function	start
 {
 	go_to_script_directory
-	compile
 
-	fill_target_array
-	fill_byte_array
+	if ! compile || ! fill_target_array || ! fill_byte_array
+	then
+		printf "${red}error${none}: $self an error has occured.\n"
+		exit 1
+	fi
+
 	colorize_byte_array
-
 	dump_byte_array
-	loop_through "$1"
+	# loop_through "$1"
 }
 
-start "$1"
+start

