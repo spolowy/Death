@@ -108,7 +108,7 @@ ${OBJDIR}/%.o: ${SRCDIR}/%.c
 # ---------------------------------- Debug ----------------------------------- #
 
 logs: fclean
-	${MAKE} all CFLAGS:="-DLOGS -g" ASFLAGS:="-DLOGS -g"
+	${MAKE} all CFLAGS:="-DLOGS -DERRORS -g" ASFLAGS:="-DLOGS -DERRORS -g"
 
 errors: fclean
 	${MAKE} all CFLAGS:="-DERRORS -g" ASFLAGS:="-DERRORS -g"
